@@ -27,6 +27,7 @@ export default async function handler(
         id: cat.id,
         name: cat.name,
         image_url: cat.imageUrl,
+        icon_name: cat.iconName,
         display_order: cat.displayOrder,
         is_active: cat.isActive,
         created_at: cat.createdAt,

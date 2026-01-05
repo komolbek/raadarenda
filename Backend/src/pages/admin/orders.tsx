@@ -3,6 +3,16 @@ import Head from 'next/head'
 import AdminLayout from '@/components/AdminLayout'
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 
+interface OrderItem {
+  id: string
+  product_id: string
+  product_name: string
+  product_photo: string | null
+  quantity: number
+  daily_price: number
+  total_price: number
+}
+
 interface Order {
   id: string
   order_number: string
@@ -12,6 +22,7 @@ interface Order {
     phone_number: string
     name: string | null
   }
+  items: OrderItem[]
   items_count: number
   total_quantity: number
   total_amount: number
@@ -278,11 +289,66 @@ export default function Orders() {
 
         {/* Order Modal */}
         {selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto py-8">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 p-6">
               <h3 className="text-lg font-semibold mb-4">
                 Заказ #{selectedOrder.order_number}
               </h3>
+
+              {/* Order Items with Images */}
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">Товары в заказе</h4>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {selectedOrder.items.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                      {item.product_photo ? (
+                        <img
+                          src={item.product_photo}
+                          alt={item.product_name}
+                          className="w-14 h-14 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded bg-gray-200 flex items-center justify-center text-gray-400">
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{item.product_name}</div>
+                        <div className="text-xs text-gray-500">
+                          {item.quantity} шт × {formatPrice(item.daily_price)}
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium">
+                        {formatPrice(item.total_price)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg text-sm">
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-600">Доставка:</span>
+                  <span>{selectedOrder.delivery_type === 'DELIVERY' ? 'Доставка' : 'Самовывоз'}</span>
+                </div>
+                {selectedOrder.delivery_address && (
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-600">Адрес:</span>
+                    <span className="text-right max-w-[200px]">{selectedOrder.delivery_address}</span>
+                  </div>
+                )}
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-600">Период:</span>
+                  <span>{formatDate(selectedOrder.rental_start_date)} — {formatDate(selectedOrder.rental_end_date)}</span>
+                </div>
+                <div className="flex justify-between font-semibold pt-2 border-t mt-2">
+                  <span>Итого:</span>
+                  <span>{formatPrice(selectedOrder.total_amount)}</span>
+                </div>
+              </div>
 
               <div className="space-y-4 mb-6">
                 <div>
