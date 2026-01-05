@@ -46,6 +46,14 @@ export const en = {
   removedFromFavorites: 'Removed from favorites',
   alreadyInFavorites: 'Already in favorites',
 
+  // Cards
+  cardAdded: 'Card added',
+  cardDeleted: 'Card deleted',
+  cardSetDefault: 'Card set as default',
+  cardNotFound: 'Card not found',
+  cardRequired: 'Please select a payment card',
+  maxCardsReached: 'Maximum cards reached (5)',
+
   // Order statuses
   statusConfirmed: 'Confirmed',
   statusPreparing: 'Preparing',

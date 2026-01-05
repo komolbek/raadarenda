@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import AdminLayout from '@/components/AdminLayout'
-import { Plus, Edit, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Edit, Trash2, GripVertical, Upload, X, Grid3X3, AlertTriangle } from 'lucide-react'
+import IconPicker, { IconByName, iconCatalog } from '@/components/IconPicker'
 
 interface Category {
   id: string
   name: string
   image_url: string | null
+  icon_name: string | null
   display_order: number
   is_active: boolean
   products_count: number
   created_at: string
+}
+
+interface DeleteConfirmation {
+  category: Category
+  requiresForce: boolean
+  productsCount: number
 }
 
 export default function Categories() {
@@ -18,9 +26,14 @@ export default function Categories() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [showIconPicker, setShowIconPicker] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmation | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [form, setForm] = useState({
     name: '',
     image_url: '',
+    icon_name: '' as string | null,
     is_active: true,
   })
 
@@ -45,7 +58,7 @@ export default function Categories() {
 
   const openCreateModal = () => {
     setEditingCategory(null)
-    setForm({ name: '', image_url: '', is_active: true })
+    setForm({ name: '', image_url: '', icon_name: null, is_active: true })
     setShowModal(true)
   }
 
@@ -54,20 +67,59 @@ export default function Categories() {
     setForm({
       name: category.name,
       image_url: category.image_url || '',
+      icon_name: category.icon_name || null,
       is_active: category.is_active,
     })
     setShowModal(true)
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'raadarenda/categories')
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const json = await res.json()
+
+      if (json.success) {
+        setForm((prev) => ({ ...prev, image_url: json.data.url, icon_name: null }))
+      }
+    } catch (err) {
+      console.error('Failed to upload image:', err)
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
+  }
+
+  const removeImage = () => {
+    setForm((prev) => ({ ...prev, image_url: '' }))
+  }
+
+  const handleIconSelect = (iconName: string | null) => {
+    setForm((prev) => ({ ...prev, icon_name: iconName, image_url: '' }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      const isEditing = !!editingCategory
       const res = await fetch('/api/admin/categories', {
-        method: 'POST',
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...(isEditing && { id: editingCategory.id }),
           name: form.name,
           image_url: form.image_url || null,
+          icon_name: form.icon_name || null,
           is_active: form.is_active,
         }),
       })
@@ -79,6 +131,86 @@ export default function Categories() {
     } catch (err) {
       console.error('Failed to save category:', err)
     }
+  }
+
+  const handleDeleteClick = async (category: Category) => {
+    // First, try to delete without force to check if there are products
+    try {
+      const res = await fetch(`/api/admin/categories?id=${category.id}`, {
+        method: 'DELETE',
+      })
+      const json = await res.json()
+
+      if (json.success) {
+        // Deleted successfully (no products)
+        fetchCategories()
+      } else if (json.requires_confirmation) {
+        // Has products, show confirmation modal
+        setDeleteConfirm({
+          category,
+          requiresForce: true,
+          productsCount: json.products_count,
+        })
+      } else {
+        // Show simple confirmation for categories without products
+        setDeleteConfirm({
+          category,
+          requiresForce: false,
+          productsCount: 0,
+        })
+      }
+    } catch (err) {
+      console.error('Failed to check category:', err)
+    }
+  }
+
+  const handleConfirmDelete = async (force: boolean) => {
+    if (!deleteConfirm) return
+
+    setIsDeleting(true)
+    try {
+      const url = force
+        ? `/api/admin/categories?id=${deleteConfirm.category.id}&force=true`
+        : `/api/admin/categories?id=${deleteConfirm.category.id}`
+
+      const res = await fetch(url, {
+        method: 'DELETE',
+      })
+      const json = await res.json()
+
+      if (json.success) {
+        setDeleteConfirm(null)
+        fetchCategories()
+      }
+    } catch (err) {
+      console.error('Failed to delete category:', err)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const renderCategoryIcon = (category: Category) => {
+    if (category.icon_name && iconCatalog[category.icon_name]) {
+      return (
+        <div className="h-10 w-10 rounded bg-blue-100 mr-3 flex items-center justify-center text-blue-600">
+          <IconByName name={category.icon_name} className="h-6 w-6" />
+        </div>
+      )
+    }
+    if (category.image_url) {
+      return (
+        <img
+          src={category.image_url}
+          alt={category.name}
+          className="h-10 w-10 rounded object-cover mr-3"
+        />
+      )
+    }
+    return (
+      <div className="h-10 w-10 rounded bg-gray-200 mr-3 flex items-center justify-center text-gray-400">
+        ?
+      </div>
+    )
   }
 
   return (
@@ -138,17 +270,7 @@ export default function Categories() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt={category.name}
-                            className="h-10 w-10 rounded object-cover mr-3"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded bg-gray-200 mr-3 flex items-center justify-center text-gray-400">
-                            ?
-                          </div>
-                        )}
+                        {renderCategoryIcon(category)}
                         <span className="font-medium">{category.name}</span>
                       </div>
                     </td>
@@ -174,7 +296,10 @@ export default function Categories() {
                         >
                           <Edit className="h-5 w-5" />
                         </button>
-                        <button className="text-red-600 hover:text-red-800">
+                        <button
+                          onClick={() => handleDeleteClick(category)}
+                          className="text-red-600 hover:text-red-800"
+                        >
                           <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
@@ -209,18 +334,68 @@ export default function Categories() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">
-                    URL изображения
+                  <label className="block text-sm text-gray-600 mb-2">
+                    Иконка или изображение
                   </label>
-                  <input
-                    type="url"
-                    value={form.image_url}
-                    onChange={(e) =>
-                      setForm({ ...form, image_url: e.target.value })
-                    }
-                    placeholder="https://..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  />
+                  <div className="flex items-center gap-3">
+                    {/* Current selection preview */}
+                    {form.icon_name ? (
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-lg border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
+                          <IconByName name={form.icon_name} className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setForm((prev) => ({ ...prev, icon_name: null }))}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : form.image_url ? (
+                      <div className="relative">
+                        <img
+                          src={form.image_url}
+                          alt="Category"
+                          className="w-16 h-16 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : null}
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowIconPicker(true)}
+                        className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        <Grid3X3 className="h-4 w-4" />
+                        Выбрать иконку
+                      </button>
+                      <label className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        {uploadingImage ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                        ) : (
+                          <Upload className="h-4 w-4" />
+                        )}
+                        Загрузить фото
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          disabled={uploadingImage}
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex items-center">
@@ -254,6 +429,92 @@ export default function Categories() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Icon Picker Modal */}
+        {showIconPicker && (
+          <IconPicker
+            value={form.icon_name}
+            onChange={handleIconSelect}
+            onClose={() => setShowIconPicker(false)}
+          />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+              {deleteConfirm.requiresForce ? (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-red-600">
+                        Внимание!
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Категория содержит товары
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <p className="text-gray-700 mb-3">
+                      Вы собираетесь удалить категорию <strong>"{deleteConfirm.category.name}"</strong>, которая содержит{' '}
+                      <strong className="text-red-600">{deleteConfirm.productsCount} товар(ов)</strong>.
+                    </p>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-700">
+                        <strong>Все товары в этой категории будут удалены!</strong>
+                        <br />
+                        Товары с историей заказов будут деактивированы вместо удаления.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setDeleteConfirm(null)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      onClick={() => handleConfirmDelete(true)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {isDeleting ? 'Удаление...' : 'Удалить всё'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">Удалить категорию?</h3>
+                  <p className="text-gray-600 mb-6">
+                    Вы уверены, что хотите удалить категорию <strong>"{deleteConfirm.category.name}"</strong>?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setDeleteConfirm(null)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      onClick={() => handleConfirmDelete(false)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {isDeleting ? 'Удаление...' : 'Удалить'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

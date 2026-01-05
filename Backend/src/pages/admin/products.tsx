@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import AdminLayout from '@/components/AdminLayout'
-import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Upload, X, AlertTriangle } from 'lucide-react'
+
+interface Specification {
+  width: string | null
+  height: string | null
+  depth: string | null
+  weight: string | null
+  color: string | null
+  material: string | null
+}
 
 interface Product {
   id: string
@@ -10,6 +19,7 @@ interface Product {
   category_id: string
   category_name: string
   photos: string[]
+  specifications: Specification
   daily_price: number
   total_stock: number
   is_active: boolean
@@ -31,6 +41,10 @@ export default function Products() {
   const [totalPages, setTotalPages] = useState(1)
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [uploadingImages, setUploadingImages] = useState(false)
+  const [photos, setPhotos] = useState<string[]>([])
 
   // Form state
   const [form, setForm] = useState({
@@ -110,19 +124,90 @@ export default function Products() {
       spec_color: '',
       spec_material: '',
     })
+    setPhotos([])
     setShowModal(true)
+  }
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product)
+    setForm({
+      name: product.name,
+      description: product.description || '',
+      category_id: product.category_id,
+      daily_price: product.daily_price,
+      total_stock: product.total_stock,
+      is_active: product.is_active,
+      spec_width: product.specifications?.width || '',
+      spec_height: product.specifications?.height || '',
+      spec_depth: product.specifications?.depth || '',
+      spec_weight: product.specifications?.weight || '',
+      spec_color: product.specifications?.color || '',
+      spec_material: product.specifications?.material || '',
+    })
+    setPhotos(product.photos || [])
+    setShowModal(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    // Check limit
+    if (photos.length + files.length > 3) {
+      alert('Максимум 3 фото')
+      return
+    }
+
+    setUploadingImages(true)
+    try {
+      const formData = new FormData()
+      for (let i = 0; i < files.length; i++) {
+        formData.append('file', files[i])
+      }
+      formData.append('folder', 'raadarenda/products')
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const json = await res.json()
+
+      if (json.success) {
+        const newPhotos = Array.isArray(json.data)
+          ? json.data.map((d: { url: string }) => d.url)
+          : [json.data.url]
+        setPhotos((prev) => [...prev, ...newPhotos].slice(0, 3))
+      }
+    } catch (err) {
+      console.error('Failed to upload images:', err)
+    } finally {
+      setUploadingImages(false)
+      // Reset input
+      e.target.value = ''
+    }
+  }
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     try {
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
+      const url = editingProduct
+        ? `/api/admin/products/${editingProduct.id}`
+        : '/api/admin/products'
+      const method = editingProduct ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
           description: form.description || null,
           category_id: form.category_id,
+          photos: photos,
           daily_price: form.daily_price,
           total_stock: form.total_stock,
           is_active: form.is_active,
@@ -139,10 +224,46 @@ export default function Products() {
       const json = await res.json()
       if (json.success) {
         setShowModal(false)
+        setEditingProduct(null)
         fetchProducts()
       }
     } catch (err) {
-      console.error('Failed to create product:', err)
+      console.error('Failed to save product:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (productId: string) => {
+    try {
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE',
+      })
+      const json = await res.json()
+      if (json.success) {
+        setDeleteConfirm(null)
+        fetchProducts()
+      }
+    } catch (err) {
+      console.error('Failed to delete product:', err)
+    }
+  }
+
+  const toggleProductStatus = async (product: Product) => {
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          is_active: !product.is_active,
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        fetchProducts()
+      }
+    } catch (err) {
+      console.error('Failed to toggle product status:', err)
     }
   }
 
@@ -255,22 +376,31 @@ export default function Products() {
                           {product.total_stock} шт
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span
+                          <button
+                            onClick={() => toggleProductStatus(product)}
                             className={`px-2 py-1 rounded text-sm ${
                               product.is_active
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                             }`}
                           >
                             {product.is_active ? 'Активен' : 'Неактивен'}
-                          </span>
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex gap-2">
-                            <button className="text-blue-600 hover:text-blue-800">
+                            <button
+                              onClick={() => openEditModal(product)}
+                              className="text-blue-600 hover:text-blue-800"
+                              title="Редактировать"
+                            >
                               <Edit className="h-5 w-5" />
                             </button>
-                            <button className="text-red-600 hover:text-red-800">
+                            <button
+                              onClick={() => setDeleteConfirm(product.id)}
+                              className="text-red-600 hover:text-red-800"
+                              title="Удалить"
+                            >
                               <Trash2 className="h-5 w-5" />
                             </button>
                           </div>
@@ -307,11 +437,13 @@ export default function Products() {
           )}
         </div>
 
-        {/* Create Modal */}
+        {/* Create/Edit Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 my-8 p-6">
-              <h3 className="text-lg font-semibold mb-4">Добавить товар</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {editingProduct ? 'Редактировать товар' : 'Добавить товар'}
+              </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -342,6 +474,51 @@ export default function Products() {
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
+                  </div>
+
+                  {/* Photos Upload */}
+                  <div className="col-span-2">
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Фотографии (макс. 3)
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {photos.map((photo, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={photo}
+                            alt={`Photo ${index + 1}`}
+                            className="w-24 h-24 object-cover rounded-lg border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {photos.length < 3 && (
+                        <label className="w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-gray-50">
+                          {uploadingImages ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+                          ) : (
+                            <>
+                              <Upload className="h-6 w-6 text-gray-400" />
+                              <span className="text-xs text-gray-400 mt-1">Добавить</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={uploadingImages}
+                          />
+                        </label>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -511,22 +688,73 @@ export default function Products() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                      setShowModal(false)
+                      setEditingProduct(null)
+                    }}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    disabled={isSubmitting}
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                   >
-                    Сохранить
+                    {isSubmitting ? 'Сохранение...' : 'Сохранить'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (() => {
+          const product = products.find((p) => p.id === deleteConfirm)
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Удалить товар?</h3>
+                    {product && (
+                      <p className="text-sm text-gray-500">{product.name}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <p className="text-gray-600 mb-3">
+                    Вы уверены, что хотите удалить этот товар?
+                  </p>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-sm text-amber-700">
+                      <strong>Примечание:</strong> Если у товара есть история заказов, он будет деактивирован вместо полного удаления.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeleteConfirm(null)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    onClick={() => handleDelete(deleteConfirm)}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Удалить
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
       </AdminLayout>
     </>
   )
