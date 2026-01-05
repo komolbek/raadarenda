@@ -59,6 +59,7 @@ export default function Categories() {
   const openCreateModal = () => {
     setEditingCategory(null)
     setForm({ name: '', image_url: '', icon_name: null, is_active: true })
+    setError(null)
     setShowModal(true)
   }
 
@@ -70,6 +71,7 @@ export default function Categories() {
       icon_name: category.icon_name || null,
       is_active: category.is_active,
     })
+    setError(null)
     setShowModal(true)
   }
 
@@ -108,8 +110,13 @@ export default function Categories() {
     setForm((prev) => ({ ...prev, icon_name: iconName, image_url: '' }))
   }
 
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
+    setError(null)
     try {
       const isEditing = !!editingCategory
       const res = await fetch('/api/admin/categories', {
@@ -127,9 +134,14 @@ export default function Categories() {
       if (json.success) {
         setShowModal(false)
         fetchCategories()
+      } else {
+        setError(json.message || 'Ошибка при сохранении категории')
       }
     } catch (err) {
       console.error('Failed to save category:', err)
+      setError('Ошибка сети. Проверьте подключение.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -413,19 +425,27 @@ export default function Categories() {
                   </label>
                 </div>
 
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
+
                 <div className="flex gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    disabled={saving}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    disabled={saving}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                   >
-                    Сохранить
+                    {saving ? 'Сохранение...' : 'Сохранить'}
                   </button>
                 </div>
               </form>
