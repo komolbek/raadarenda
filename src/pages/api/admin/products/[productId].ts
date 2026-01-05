@@ -224,7 +224,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         prisma.pricingTier.deleteMany({ where: { productId } }),
         prisma.quantityPricing.deleteMany({ where: { productId } }),
         prisma.favorite.deleteMany({ where: { productId } }),
-        prisma.cartItem.deleteMany({ where: { productId } }),
         prisma.product.delete({ where: { id: productId } }),
       ])
 
