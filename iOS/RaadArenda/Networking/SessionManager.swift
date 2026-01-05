@@ -12,11 +12,19 @@ actor SessionManager {
 
     private var cachedToken: String?
     private var cachedUserId: String?
+    private var isInitialized = false
 
     private init() {
-        // Load from keychain on init
-        cachedToken = loadFromKeychain(key: sessionTokenKey)
-        cachedUserId = loadFromKeychain(key: userIdKey)
+        // Defer keychain loading to avoid actor isolation warnings
+    }
+
+    // MARK: - Private Initialization
+
+    private func ensureInitialized() {
+        guard !isInitialized else { return }
+        cachedToken = loadFromKeychainSync(key: sessionTokenKey)
+        cachedUserId = loadFromKeychainSync(key: userIdKey)
+        isInitialized = true
     }
 
     // MARK: - Public Methods
@@ -29,14 +37,17 @@ actor SessionManager {
     }
 
     func getSessionToken() -> String? {
+        ensureInitialized()
         return cachedToken
     }
 
     func getUserId() -> String? {
+        ensureInitialized()
         return cachedUserId
     }
 
     func hasValidSession() -> Bool {
+        ensureInitialized()
         return cachedToken != nil && cachedUserId != nil
     }
 
@@ -50,7 +61,7 @@ actor SessionManager {
     // MARK: - Keychain Helpers
 
     private func saveToKeychain(key: String, value: String) {
-        let data = value.data(using: .utf8)!
+        guard let data = value.data(using: .utf8) else { return }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -68,7 +79,7 @@ actor SessionManager {
         SecItemAdd(newQuery as CFDictionary, nil)
     }
 
-    private func loadFromKeychain(key: String) -> String? {
+    private nonisolated func loadFromKeychainSync(key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,

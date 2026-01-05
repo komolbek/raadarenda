@@ -33,6 +33,11 @@ final class CartManager: ObservableObject {
         saveCart()
     }
 
+    func updateItem(itemId: String, quantity: Int, startDate: Date, endDate: Date) {
+        cart.updateItem(itemId: itemId, quantity: quantity, startDate: startDate, endDate: endDate)
+        saveCart()
+    }
+
     func removeItem(itemId: String) {
         cart.removeItem(itemId: itemId)
         saveCart()

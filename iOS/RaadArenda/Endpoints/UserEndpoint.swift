@@ -11,6 +11,10 @@ enum UserEndpoint: APIEndpoint {
     case getFavorites
     case addFavorite(productId: String)
     case removeFavorite(productId: String)
+    case getCards
+    case addCard(request: AddCardRequest)
+    case deleteCard(id: String)
+    case setDefaultCard(id: String)
 
     var path: String {
         switch self {
@@ -26,18 +30,24 @@ enum UserEndpoint: APIEndpoint {
             return "/user/favorites"
         case .removeFavorite(let productId):
             return "/user/favorites/\(productId)"
+        case .getCards, .addCard:
+            return "/user/cards"
+        case .deleteCard(let id):
+            return "/user/cards/\(id)"
+        case .setDefaultCard(let id):
+            return "/user/cards/\(id)/default"
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .getProfile, .getAddresses, .getFavorites:
+        case .getProfile, .getAddresses, .getFavorites, .getCards:
             return .get
-        case .updateProfile, .createAddress, .addFavorite, .setDefaultAddress:
+        case .updateProfile, .createAddress, .addFavorite, .setDefaultAddress, .addCard, .setDefaultCard:
             return .post
         case .updateAddress:
             return .put
-        case .deleteAddress, .removeFavorite:
+        case .deleteAddress, .removeFavorite, .deleteCard:
             return .delete
         }
     }
@@ -50,6 +60,8 @@ enum UserEndpoint: APIEndpoint {
             return request
         case .addFavorite(let productId):
             return ["product_id": productId]
+        case .addCard(let request):
+            return request
         default:
             return nil
         }

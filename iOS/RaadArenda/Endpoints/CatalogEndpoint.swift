@@ -11,14 +11,12 @@ enum CatalogEndpoint: APIEndpoint {
         switch self {
         case .getCategories:
             return "/categories"
-        case .getProducts:
+        case .getProducts, .searchProducts:
             return "/products"
         case .getProduct(let id):
             return "/products/\(id)"
         case .checkAvailability(let productId, _, _):
             return "/products/\(productId)/availability"
-        case .searchProducts:
-            return "/products/search"
         }
     }
 
@@ -65,7 +63,7 @@ enum CatalogEndpoint: APIEndpoint {
 
         case .searchProducts(let query, let page, let limit):
             return [
-                "q": query,
+                "search": query,
                 "page": String(page),
                 "limit": String(limit)
             ]

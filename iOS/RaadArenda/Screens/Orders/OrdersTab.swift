@@ -18,13 +18,14 @@ struct OrdersTab: View {
 
 struct OrdersListView: View {
     @ObservedObject var coordinator: MainCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @StateObject private var viewModel = OrdersListViewModel()
 
     var body: some View {
         Group {
             if !viewModel.isAuthenticated {
                 NotAuthenticatedView {
-                    coordinator.appCoordinator?.navigateToAuth()
+                    appCoordinator.navigateToAuth()
                 }
             } else if viewModel.isLoading && viewModel.orders.isEmpty {
                 ProgressView()
@@ -63,6 +64,18 @@ struct OrdersListView: View {
             await viewModel.checkAuth()
             if viewModel.isAuthenticated {
                 await viewModel.loadOrders()
+            }
+        }
+        .onChange(of: appCoordinator.isAuthenticated) { _, newValue in
+            // Reload orders when authentication state changes
+            Task {
+                await viewModel.checkAuth()
+                if newValue == true {
+                    await viewModel.loadOrders()
+                } else {
+                    // Clear orders on logout
+                    viewModel.clearOrders()
+                }
             }
         }
     }
@@ -238,6 +251,13 @@ final class OrdersListViewModel: ObservableObject {
         }
 
         isLoadingMore = false
+    }
+
+    func clearOrders() {
+        orders = []
+        currentPage = 1
+        hasMore = true
+        isAuthenticated = false
     }
 }
 
