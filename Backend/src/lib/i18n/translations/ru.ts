@@ -46,6 +46,14 @@ export const ru = {
   removedFromFavorites: 'Удалено из избранного',
   alreadyInFavorites: 'Уже в избранном',
 
+  // Cards
+  cardAdded: 'Карта добавлена',
+  cardDeleted: 'Карта удалена',
+  cardSetDefault: 'Карта установлена по умолчанию',
+  cardNotFound: 'Карта не найдена',
+  cardRequired: 'Выберите карту для оплаты',
+  maxCardsReached: 'Достигнуто максимальное количество карт (5)',
+
   // Order statuses
   statusConfirmed: 'Подтверждён',
   statusPreparing: 'Подготовка',

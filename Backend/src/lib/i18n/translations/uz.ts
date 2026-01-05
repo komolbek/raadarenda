@@ -46,6 +46,14 @@ export const uz = {
   removedFromFavorites: 'Sevimlilardan o\'chirildi',
   alreadyInFavorites: 'Allaqachon sevimlilarda',
 
+  // Cards
+  cardAdded: 'Karta qo\'shildi',
+  cardDeleted: 'Karta o\'chirildi',
+  cardSetDefault: 'Karta asosiy qilib belgilandi',
+  cardNotFound: 'Karta topilmadi',
+  cardRequired: 'To\'lov kartasini tanlang',
+  maxCardsReached: 'Maksimal kartalar soniga yetildi (5)',
+
   // Order statuses
   statusConfirmed: 'Tasdiqlangan',
   statusPreparing: 'Tayyorlanmoqda',
