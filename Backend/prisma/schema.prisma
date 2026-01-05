@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER & AUTH ====================
+
+model User {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique @map("phone_number")
+  name        String?
+  language    String   @default("ru")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  sessions  Session[]
+  addresses Address[]
+  orders    Order[]
+  favorites Favorite[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  deviceId     String   @map("device_id")
+  deviceInfo   String?  @map("device_info")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model OTP {
+  id          String   @id @default(cuid())
+  phoneNumber String   @map("phone_number")
+  code        String
+  attempts    Int      @default(0)
+  verified    Boolean  @default(false)
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([phoneNumber, code])
+  @@map("otps")
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  title       String
+  fullAddress String   @map("full_address")
+  city        String
+  district    String?
+  street      String?
+  building    String?
+  apartment   String?
+  entrance    String?
+  floor       String?
+  latitude    Decimal? @db.Decimal(10, 8)
+  longitude   Decimal? @db.Decimal(11, 8)
+  isDefault   Boolean  @default(false) @map("is_default")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("addresses")
+}
+
+// ==================== CATALOG ====================
+
+model Category {
+  id           String   @id @default(cuid())
+  name         String
+  imageUrl     String?  @map("image_url")
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  categoryId   String   @map("category_id")
+  photos       String[] @default([])
+  dailyPrice   Int      @map("daily_price") // Price in UZS
+  totalStock   Int      @default(1) @map("total_stock")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Specifications
+  specWidth    String? @map("spec_width")
+  specHeight   String? @map("spec_height")
+  specDepth    String? @map("spec_depth")
+  specWeight   String? @map("spec_weight")
+  specColor    String? @map("spec_color")
+  specMaterial String? @map("spec_material")
+
+  category        Category         @relation(fields: [categoryId], references: [id])
+  pricingTiers    PricingTier[]
+  quantityPricing QuantityPricing[]
+  orderItems      OrderItem[]
+  favorites       Favorite[]
+
+  @@map("products")
+}
+
+model PricingTier {
+  id         String @id @default(cuid())
+  productId  String @map("product_id")
+  days       Int
+  totalPrice Int    @map("total_price")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, days])
+  @@map("pricing_tiers")
+}
+
+model QuantityPricing {
+  id         String @id @default(cuid())
+  productId  String @map("product_id")
+  quantity   Int
+  totalPrice Int    @map("total_price")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, quantity])
+  @@map("quantity_pricing")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+// ==================== ORDERS ====================
+
+enum OrderStatus {
+  CONFIRMED
+  PREPARING
+  DELIVERED
+  RETURNED
+  CANCELLED
+}
+
+enum DeliveryType {
+  DELIVERY
+  SELF_PICKUP
+}
+
+enum PaymentMethod {
+  CASH
+  ONLINE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique @map("order_number")
+  userId          String        @map("user_id")
+  status          OrderStatus   @default(CONFIRMED)
+  deliveryType    DeliveryType  @map("delivery_type")
+  deliveryAddressId String?     @map("delivery_address_id")
+  deliveryFee     Int           @default(0) @map("delivery_fee")
+  subtotal        Int
+  totalAmount     Int           @map("total_amount")
+  totalSavings    Int           @default(0) @map("total_savings")
+  rentalStartDate DateTime      @map("rental_start_date")
+  rentalEndDate   DateTime      @map("rental_end_date")
+  paymentMethod   PaymentMethod @map("payment_method")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  notes           String?
+  adminNotes      String?       @map("admin_notes")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  user            User        @relation(fields: [userId], references: [id])
+  deliveryAddress Address?    @relation(fields: [deliveryAddressId], references: [id])
+  items           OrderItem[]
+  statusHistory   OrderStatusHistory[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([rentalEndDate])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String @map("order_id")
+  productId    String @map("product_id")
+  productName  String @map("product_name")
+  productPhoto String? @map("product_photo")
+  quantity     Int
+  dailyPrice   Int    @map("daily_price")
+  totalPrice   Int    @map("total_price")
+  savings      Int    @default(0)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String      @map("order_id")
+  status    OrderStatus
+  notes     String?
+  createdAt DateTime    @default(now()) @map("created_at")
+  createdBy String?     @map("created_by") // Admin who made the change
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_status_history")
+}
+
+// ==================== DELIVERY ====================
+
+model DeliveryZone {
+  id        String   @id @default(cuid())
+  name      String
+  price     Int      @default(0)
+  isFree    Boolean  @default(false) @map("is_free")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("delivery_zones")
+}
+
+// ==================== BUSINESS SETTINGS ====================
+
+model BusinessSettings {
+  id           String   @id @default("default")
+  name         String   @default("RaadArenda")
+  phone        String   @default("")
+  address      String   @default("")
+  workingHours String   @default("09:00 - 18:00") @map("working_hours")
+  telegramUrl  String?  @map("telegram_url")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("business_settings")
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  title     String
+  body      String
+  type      String   // ORDER_STATUS, RETURN_REMINDER, etc.
+  data      Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
