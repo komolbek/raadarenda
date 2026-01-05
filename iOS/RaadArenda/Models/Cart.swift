@@ -66,6 +66,10 @@ struct Cart: Codable {
     }
 
     var itemCount: Int {
+        items.count
+    }
+
+    var totalQuantity: Int {
         items.reduce(0) { $0 + $1.quantity }
     }
 
@@ -110,6 +114,21 @@ struct Cart: Codable {
             } else {
                 items.remove(at: index)
             }
+        }
+    }
+
+    mutating func updateDates(itemId: String, startDate: Date, endDate: Date) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            items[index].rentalStartDate = startDate
+            items[index].rentalEndDate = endDate
+        }
+    }
+
+    mutating func updateItem(itemId: String, quantity: Int, startDate: Date, endDate: Date) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            items[index].quantity = quantity
+            items[index].rentalStartDate = startDate
+            items[index].rentalEndDate = endDate
         }
     }
 

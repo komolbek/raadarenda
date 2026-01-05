@@ -3,13 +3,13 @@ import SwiftUI
 enum AppRoute: Hashable {
     case splash
     case main
-    case auth
 }
 
 @MainActor
 final class AppCoordinator: ObservableObject {
     @Published var route: AppRoute = .splash
     @Published var isAuthenticated: Bool = false
+    @Published var showAuthSheet: Bool = false
 
     private let sessionManager: SessionManager
 
@@ -22,24 +22,22 @@ final class AppCoordinator: ObservableObject {
         Task {
             if await sessionManager.hasValidSession() {
                 isAuthenticated = true
-                route = .main
-            } else {
-                route = .main // Allow browsing without auth
             }
+            route = .main
         }
     }
 
     func navigateToAuth() {
-        route = .auth
+        showAuthSheet = true
     }
 
     func navigateToMain() {
-        route = .main
+        showAuthSheet = false
     }
 
     func onAuthSuccess() {
         isAuthenticated = true
-        route = .main
+        showAuthSheet = false
     }
 
     func logout() {
@@ -60,9 +58,10 @@ struct AppCoordinatorView: View {
                 SplashView()
             case .main:
                 MainCoordinatorView(appCoordinator: coordinator)
-            case .auth:
-                AuthCoordinatorView(appCoordinator: coordinator)
             }
+        }
+        .fullScreenCover(isPresented: $coordinator.showAuthSheet) {
+            AuthCoordinatorView(appCoordinator: coordinator)
         }
     }
 }

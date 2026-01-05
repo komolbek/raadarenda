@@ -4,6 +4,7 @@ struct Category: Identifiable, Hashable, Codable {
     let id: String
     let name: String
     let imageUrl: String?
+    let iconName: String?
     let displayOrder: Int
     let isActive: Bool
     let createdAt: Date
@@ -12,6 +13,7 @@ struct Category: Identifiable, Hashable, Codable {
         case id
         case name
         case imageUrl = "image_url"
+        case iconName = "icon_name"
         case displayOrder = "display_order"
         case isActive = "is_active"
         case createdAt = "created_at"

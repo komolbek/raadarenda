@@ -224,7 +224,7 @@ final class AddressesViewModel: ObservableObject {
     func setDefault(_ address: Address) async {
         do {
             let updated = try await userService.setDefaultAddress(id: address.id)
-            if let index = addresses.firstIndex(where: { $0.id == updated.id }) {
+            if addresses.contains(where: { $0.id == updated.id }) {
                 // Update all to non-default, then set this one
                 addresses = addresses.map { addr in
                     if addr.id == updated.id {

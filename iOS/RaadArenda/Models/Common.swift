@@ -134,3 +134,61 @@ struct FavoritesResponse: Codable {
     let data: [Product]
     let message: String?
 }
+
+// MARK: - Cards
+
+struct Card: Identifiable, Codable, Hashable {
+    let id: String
+    let cardNumber: String
+    let cardHolder: String
+    let expiryMonth: Int
+    let expiryYear: Int
+    let cardType: String
+    let isDefault: Bool
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case cardNumber = "card_number"
+        case cardHolder = "card_holder"
+        case expiryMonth = "expiry_month"
+        case expiryYear = "expiry_year"
+        case cardType = "card_type"
+        case isDefault = "is_default"
+        case createdAt = "created_at"
+    }
+
+    var expiryString: String {
+        String(format: "%02d/%02d", expiryMonth, expiryYear)
+    }
+
+    var last4Digits: String {
+        String(cardNumber.suffix(4))
+    }
+}
+
+struct CardsResponse: Codable {
+    let success: Bool
+    let data: [Card]
+    let message: String?
+}
+
+struct CardResponse: Codable {
+    let success: Bool
+    let data: Card?
+    let message: String?
+}
+
+struct AddCardRequest: Codable {
+    let cardNumber: String
+    let cardHolder: String
+    let expiryMonth: Int
+    let expiryYear: Int
+
+    enum CodingKeys: String, CodingKey {
+        case cardNumber = "card_number"
+        case cardHolder = "card_holder"
+        case expiryMonth = "expiry_month"
+        case expiryYear = "expiry_year"
+    }
+}

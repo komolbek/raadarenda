@@ -4,6 +4,7 @@ struct OTPVerificationView: View {
     let phoneNumber: String
     @ObservedObject var coordinator: AuthCoordinator
     @StateObject private var viewModel: OTPVerificationViewModel
+    @FocusState private var isTextFieldFocused: Bool
 
     init(phoneNumber: String, coordinator: AuthCoordinator) {
         self.phoneNumber = phoneNumber
@@ -31,22 +32,30 @@ struct OTPVerificationView: View {
             }
 
             // OTP Input
-            HStack(spacing: 12) {
-                ForEach(0..<6, id: \.self) { index in
-                    OTPDigitView(
-                        digit: viewModel.digit(at: index),
-                        isFocused: viewModel.focusedIndex == index
-                    )
-                }
-            }
-            .overlay {
+            ZStack {
+                // Hidden TextField for input
                 TextField("", text: $viewModel.code)
                     .keyboardType(.numberPad)
                     .textContentType(.oneTimeCode)
-                    .opacity(0.01)
+                    .focused($isTextFieldFocused)
+                    .opacity(0.001)
                     .onChange(of: viewModel.code) { _, newValue in
                         viewModel.handleCodeChange(newValue)
                     }
+
+                // Visual OTP boxes
+                HStack(spacing: 12) {
+                    ForEach(0..<6, id: \.self) { index in
+                        OTPDigitView(
+                            digit: viewModel.digit(at: index),
+                            isFocused: isTextFieldFocused && viewModel.focusedIndex == index
+                        )
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isTextFieldFocused = true
+                }
             }
 
             if let error = viewModel.validationError {
@@ -104,6 +113,9 @@ struct OTPVerificationView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
+        }
+        .onAppear {
+            isTextFieldFocused = true
         }
     }
 }

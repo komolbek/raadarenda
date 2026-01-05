@@ -1,66 +1,5 @@
 import Foundation
 
-// MARK: - Network Error
-
-enum NetworkError: LocalizedError {
-    case invalidURL
-    case noData
-    case decodingError(Error)
-    case serverError(Int, String)
-    case unauthorized
-    case networkError(Error)
-    case unknown
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Неверный URL"
-        case .noData:
-            return "Нет данных"
-        case .decodingError(let error):
-            return "Ошибка декодирования: \(error.localizedDescription)"
-        case .serverError(let code, let message):
-            return "Ошибка сервера (\(code)): \(message)"
-        case .unauthorized:
-            return "Необходима авторизация"
-        case .networkError(let error):
-            return "Ошибка сети: \(error.localizedDescription)"
-        case .unknown:
-            return "Неизвестная ошибка"
-        }
-    }
-}
-
-// MARK: - HTTP Method
-
-enum HTTPMethod: String {
-    case get = "GET"
-    case post = "POST"
-    case put = "PUT"
-    case patch = "PATCH"
-    case delete = "DELETE"
-}
-
-// MARK: - API Endpoint Protocol
-
-protocol APIEndpoint {
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var headers: [String: String] { get }
-    var queryParams: [String: String] { get }
-    var body: Encodable? { get }
-    var requiresAuth: Bool { get }
-}
-
-extension APIEndpoint {
-    var headers: [String: String] { [:] }
-    var queryParams: [String: String] { [:] }
-    var body: Encodable? { nil }
-    var requiresAuth: Bool { false }
-}
-
-// MARK: - Network Manager
-
 actor NetworkManager {
     static let shared = NetworkManager()
 
@@ -71,7 +10,7 @@ actor NetworkManager {
 
     private init() {
         #if DEBUG
-        self.baseURL = "http://localhost:3000/api"
+        self.baseURL = "http://192.168.1.111:3000/api"
         #else
         self.baseURL = "https://api.raadarenda.uz/api"
         #endif
@@ -82,34 +21,68 @@ actor NetworkManager {
         self.session = URLSession(configuration: config)
 
         self.decoder = JSONDecoder()
-        self.decoder.dateDecodingStrategy = .iso8601
+        self.decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            // Try ISO8601 with fractional seconds first
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            // Fallback to standard ISO8601
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Cannot decode date: \(dateString)"
+            )
+        }
 
         self.encoder = JSONEncoder()
         self.encoder.dateEncodingStrategy = .iso8601
+
+        NetworkLogger.log(.info, "🚀 NetworkManager initialized with base URL: \(baseURL)")
     }
 
     func request<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
-        let request = try await buildRequest(for: endpoint)
+        let (request, bodyData) = try await buildRequest(for: endpoint)
 
-        #if DEBUG
-        logRequest(request, body: endpoint.body)
-        #endif
+        NetworkLogger.logRequest(request, body: bodyData)
 
-        let (data, response) = try await session.data(for: request)
+        let startTime = Date()
+        let data: Data
+        let response: URLResponse
+
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch let error as NSError where error.code == NSURLErrorCancelled {
+            // Don't log cancellation errors - these are expected during pull-to-refresh
+            throw NetworkError.cancelled
+        } catch {
+            NetworkLogger.logError(error, url: request.url?.absoluteString)
+            throw NetworkError.networkError(error)
+        }
+
+        let duration = Date().timeIntervalSince(startTime)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.unknown
         }
 
-        #if DEBUG
-        logResponse(httpResponse, data: data)
-        #endif
+        NetworkLogger.logResponse(httpResponse, data: data, duration: duration)
 
         switch httpResponse.statusCode {
         case 200...299:
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
+                NetworkLogger.log(.error, "Decoding error: \(error)")
                 throw NetworkError.decodingError(error)
             }
         case 401:
@@ -123,7 +96,7 @@ actor NetworkManager {
         }
     }
 
-    private func buildRequest(for endpoint: APIEndpoint) async throws -> URLRequest {
+    private func buildRequest(for endpoint: APIEndpoint) async throws -> (URLRequest, Data?) {
         var urlString = baseURL + endpoint.path
 
         if !endpoint.queryParams.isEmpty {
@@ -158,44 +131,12 @@ actor NetworkManager {
         }
 
         // Body
+        var bodyData: Data?
         if let body = endpoint.body {
-            request.httpBody = try encoder.encode(AnyEncodable(body))
+            bodyData = try encoder.encode(AnyEncodable(body))
+            request.httpBody = bodyData
         }
 
-        return request
-    }
-
-    // MARK: - Logging
-
-    private func logRequest(_ request: URLRequest, body: Encodable?) {
-        print("🌐 REQUEST: \(request.httpMethod ?? "?") \(request.url?.absoluteString ?? "?")")
-        if let body = body {
-            if let data = try? encoder.encode(AnyEncodable(body)),
-               let json = String(data: data, encoding: .utf8) {
-                print("📤 BODY: \(json)")
-            }
-        }
-    }
-
-    private func logResponse(_ response: HTTPURLResponse, data: Data) {
-        let statusEmoji = (200...299).contains(response.statusCode) ? "✅" : "❌"
-        print("\(statusEmoji) RESPONSE: \(response.statusCode)")
-        if let json = String(data: data, encoding: .utf8) {
-            print("📥 DATA: \(json.prefix(500))")
-        }
-    }
-}
-
-// MARK: - Type Erased Encodable
-
-struct AnyEncodable: Encodable {
-    private let _encode: (Encoder) throws -> Void
-
-    init<T: Encodable>(_ value: T) {
-        _encode = value.encode
-    }
-
-    func encode(to encoder: Encoder) throws {
-        try _encode(encoder)
+        return (request, bodyData)
     }
 }

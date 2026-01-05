@@ -21,6 +21,7 @@ struct CartTab: View {
 struct CartView: View {
     @ObservedObject var coordinator: MainCoordinator
     @EnvironmentObject var cartManager: CartManager
+    @State private var editingItem: CartItem?
 
     var body: some View {
         Group {
@@ -30,7 +31,9 @@ struct CartView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(cartManager.items) { item in
-                            CartItemRow(item: item)
+                            CartItemRow(item: item, onEdit: {
+                                editingItem = item
+                            })
                         }
 
                         Divider()
@@ -114,6 +117,9 @@ struct CartView: View {
                 }
             }
         }
+        .sheet(item: $editingItem) { item in
+            EditCartItemSheet(item: item)
+        }
     }
 
     private func formatPrice(_ price: Int) -> String {
@@ -144,70 +150,84 @@ struct EmptyCartView: View {
 
 struct CartItemRow: View {
     let item: CartItem
+    var onEdit: () -> Void
     @EnvironmentObject var cartManager: CartManager
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Image
-            AsyncImage(url: URL(string: item.product.primaryPhoto ?? "")) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color(.systemGray5))
-            }
-            .frame(width: 80, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.product.name)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .lineLimit(2)
-
-                Text("\(formatDate(item.rentalStartDate)) - \(formatDate(item.rentalEndDate))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                HStack {
-                    Text(formatPrice(item.totalPrice))
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-
-                    if item.savingsPercentage > 0 {
-                        Text("-\(item.savingsPercentage)%")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                // Image
+                AsyncImage(url: URL(string: item.product.primaryPhoto ?? "")) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color(.systemGray5))
                 }
+                .frame(width: 80, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                // Quantity controls
-                HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.product.name)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .lineLimit(2)
+
+                    // Dates - tappable to edit
                     Button {
-                        cartManager.updateQuantity(itemId: item.id, quantity: item.quantity - 1)
+                        onEdit()
                     } label: {
-                        Image(systemName: "minus.circle")
-                            .foregroundColor(.accentColor)
+                        HStack(spacing: 4) {
+                            Image(systemName: "calendar")
+                                .font(.caption2)
+                            Text("\(formatDate(item.rentalStartDate)) - \(formatDate(item.rentalEndDate))")
+                                .font(.caption)
+                            Image(systemName: "pencil")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.accentColor)
                     }
 
-                    Text("\(item.quantity)")
-                        .frame(width: 30)
+                    HStack {
+                        Text(formatPrice(item.totalPrice))
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
 
-                    Button {
-                        cartManager.updateQuantity(itemId: item.id, quantity: item.quantity + 1)
-                    } label: {
-                        Image(systemName: "plus.circle")
-                            .foregroundColor(.accentColor)
+                        if item.savingsPercentage > 0 {
+                            Text("-\(item.savingsPercentage)%")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
                     }
 
-                    Spacer()
+                    // Quantity controls
+                    HStack {
+                        Button {
+                            cartManager.updateQuantity(itemId: item.id, quantity: item.quantity - 1)
+                        } label: {
+                            Image(systemName: "minus.circle")
+                                .foregroundColor(.accentColor)
+                        }
 
-                    Button {
-                        cartManager.removeItem(itemId: item.id)
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
+                        Text("\(item.quantity)")
+                            .frame(width: 30)
+
+                        Button {
+                            cartManager.updateQuantity(itemId: item.id, quantity: item.quantity + 1)
+                        } label: {
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.accentColor)
+                        }
+
+                        Spacer()
+
+                        Button {
+                            cartManager.removeItem(itemId: item.id)
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
                     }
                 }
             }
@@ -230,6 +250,128 @@ struct CartItemRow: View {
         formatter.dateFormat = "d MMM"
         formatter.locale = Locale(identifier: "ru_RU")
         return formatter.string(from: date)
+    }
+}
+
+struct EditCartItemSheet: View {
+    let item: CartItem
+    @EnvironmentObject var cartManager: CartManager
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var quantity: Int
+    @State private var startDate: Date
+    @State private var endDate: Date
+
+    init(item: CartItem) {
+        self.item = item
+        _quantity = State(initialValue: item.quantity)
+        _startDate = State(initialValue: item.rentalStartDate)
+        _endDate = State(initialValue: item.rentalEndDate)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    HStack(spacing: 12) {
+                        AsyncImage(url: URL(string: item.product.primaryPhoto ?? "")) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(Color(.systemGray5))
+                        }
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                        VStack(alignment: .leading) {
+                            Text(item.product.name)
+                                .font(.headline)
+                            Text(formatPrice(item.product.dailyPrice) + "/день")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Section("Количество") {
+                    Stepper(value: $quantity, in: 1...99) {
+                        HStack {
+                            Text("Количество")
+                            Spacer()
+                            Text("\(quantity)")
+                                .fontWeight(.semibold)
+                        }
+                    }
+                }
+
+                Section("Даты аренды") {
+                    DatePicker(
+                        "Начало",
+                        selection: $startDate,
+                        in: Date()...,
+                        displayedComponents: .date
+                    )
+
+                    DatePicker(
+                        "Окончание",
+                        selection: $endDate,
+                        in: startDate...,
+                        displayedComponents: .date
+                    )
+                }
+
+                Section {
+                    HStack {
+                        Text("Итого")
+                            .font(.headline)
+                        Spacer()
+                        Text(formatPrice(calculatePrice()))
+                            .font(.headline)
+                            .foregroundColor(.accentColor)
+                    }
+                }
+            }
+            .navigationTitle("Редактировать")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        cartManager.updateItem(
+                            itemId: item.id,
+                            quantity: quantity,
+                            startDate: startDate,
+                            endDate: endDate
+                        )
+                        dismiss()
+                    }
+                }
+            }
+            .onChange(of: startDate) { _, newValue in
+                if endDate < newValue {
+                    endDate = newValue
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func calculatePrice() -> Int {
+        let days = max(1, Calendar.current.dateComponents([.day], from: startDate, to: endDate).day ?? 1)
+        return item.product.dailyPrice * quantity * days
+    }
+
+    private func formatPrice(_ price: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = " "
+        return "\(formatter.string(from: NSNumber(value: price)) ?? "\(price)") сум"
     }
 }
 

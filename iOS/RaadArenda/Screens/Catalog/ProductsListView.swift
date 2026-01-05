@@ -52,6 +52,12 @@ struct ProductsListView: View {
                 ErrorView(message: error) {
                     Task { await viewModel.loadProducts() }
                 }
+            } else if viewModel.products.isEmpty {
+                EmptyResultsView(
+                    title: "Товары не найдены",
+                    subtitle: "В этой категории пока нет доступных товаров",
+                    systemImage: "shippingbox"
+                )
             } else {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.products) { product in
@@ -76,7 +82,7 @@ struct ProductsListView: View {
         }
         .navigationTitle(category.name)
         .refreshable {
-            await viewModel.loadProducts()
+            await viewModel.refresh()
         }
         .task {
             await viewModel.loadProducts()
@@ -153,18 +159,26 @@ final class ProductsListViewModel: ObservableObject {
     private var sortBy: String?
     private var sortOrder: String?
     private let limit: Int = 20
+    private var hasLoadedOnce = false
 
     init(categoryId: String, catalogService: CatalogServiceProtocol = CatalogService()) {
         self.categoryId = categoryId
         self.catalogService = catalogService
     }
 
-    func loadProducts() async {
+    func loadProducts(force: Bool = false) async {
+        // Skip if already loading
+        guard !isLoading else { return }
+
+        // Skip if already loaded and not forcing refresh
+        if !force && hasLoadedOnce && !products.isEmpty { return }
+
         isLoading = true
         errorMessage = nil
         currentPage = 1
 
         do {
+            try Task.checkCancellation()
             let response = try await catalogService.getProducts(
                 categoryId: categoryId,
                 page: currentPage,
@@ -176,11 +190,20 @@ final class ProductsListViewModel: ObservableObject {
             products = response.data
             hasMore = response.pagination?.hasMore ?? false
             totalCount = response.pagination?.totalCount ?? products.count
+            hasLoadedOnce = true
+        } catch is CancellationError {
+            // Ignore cancellation errors
+        } catch let error as NSError where error.code == NSURLErrorCancelled {
+            // Ignore URL session cancellation
         } catch {
             errorMessage = error.localizedDescription
         }
 
         isLoading = false
+    }
+
+    func refresh() async {
+        await loadProducts(force: true)
     }
 
     func loadMore() async {
@@ -210,7 +233,7 @@ final class ProductsListViewModel: ObservableObject {
     func setSorting(by field: String, order: String) {
         sortBy = field
         sortOrder = order
-        Task { await loadProducts() }
+        Task { await loadProducts(force: true) }
     }
 }
 
@@ -221,6 +244,7 @@ final class ProductsListViewModel: ObservableObject {
                 id: "1",
                 name: "Мебель",
                 imageUrl: nil,
+                iconName: nil,
                 displayOrder: 0,
                 isActive: true,
                 createdAt: Date()

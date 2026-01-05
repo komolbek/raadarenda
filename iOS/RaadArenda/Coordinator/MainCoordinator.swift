@@ -49,6 +49,10 @@ final class MainCoordinator: ObservableObject {
         catalogPath.append(CatalogRoute.product(product))
     }
 
+    func showSearch(query: String) {
+        catalogPath.append(CatalogRoute.search(query: query))
+    }
+
     // MARK: - Cart Navigation
 
     func showCheckout() {
@@ -75,6 +79,10 @@ final class MainCoordinator: ObservableObject {
         profilePath.append(ProfileRoute.favorites)
     }
 
+    func showCards() {
+        profilePath.append(ProfileRoute.cards)
+    }
+
     func requireAuth(for action: @escaping () -> Void) {
         if appCoordinator?.isAuthenticated == true {
             action()
@@ -89,6 +97,7 @@ final class MainCoordinator: ObservableObject {
 enum CatalogRoute: Hashable {
     case category(Category)
     case product(Product)
+    case search(query: String)
 }
 
 enum CartRoute: Hashable {
@@ -104,6 +113,7 @@ enum ProfileRoute: Hashable {
     case addresses
     case favorites
     case editProfile
+    case cards
 }
 
 // MARK: - Main Coordinator View
@@ -111,8 +121,11 @@ enum ProfileRoute: Hashable {
 struct MainCoordinatorView: View {
     @StateObject private var coordinator: MainCoordinator
     @StateObject private var cartManager = CartManager()
+    @StateObject private var favoritesManager = FavoritesManager()
+    private let appCoordinator: AppCoordinator
 
     init(appCoordinator: AppCoordinator) {
+        self.appCoordinator = appCoordinator
         _coordinator = StateObject(wrappedValue: MainCoordinator(appCoordinator: appCoordinator))
     }
 
@@ -145,5 +158,7 @@ struct MainCoordinatorView: View {
         }
         .environmentObject(coordinator)
         .environmentObject(cartManager)
+        .environmentObject(favoritesManager)
+        .environmentObject(appCoordinator)
     }
 }

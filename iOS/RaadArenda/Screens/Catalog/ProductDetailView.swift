@@ -5,6 +5,7 @@ struct ProductDetailView: View {
     @ObservedObject var coordinator: MainCoordinator
     @StateObject private var viewModel: ProductDetailViewModel
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var favoritesManager: FavoritesManager
 
     init(product: Product, coordinator: MainCoordinator) {
         self.product = product
@@ -185,28 +186,55 @@ struct ProductDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) {
-            Button {
-                cartManager.addItem(
-                    product,
-                    quantity: viewModel.quantity,
-                    startDate: viewModel.startDate,
-                    endDate: viewModel.endDate
-                )
-                viewModel.showAddedToCart = true
-            } label: {
-                HStack {
-                    Image(systemName: "cart.badge.plus")
-                    Text("В корзину")
-                        .fontWeight(.semibold)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    Task {
+                        await favoritesManager.toggleFavorite(product)
+                    }
+                } label: {
+                    Image(systemName: favoritesManager.isFavorite(product.id) ? "heart.fill" : "heart")
+                        .foregroundColor(favoritesManager.isFavorite(product.id) ? .red : .primary)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(12)
             }
-            .padding()
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 8) {
+                if viewModel.isProductUnavailable, let message = viewModel.unavailableMessage {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text(message)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal)
+                }
+
+                Button {
+                    cartManager.addItem(
+                        product,
+                        quantity: viewModel.quantity,
+                        startDate: viewModel.startDate,
+                        endDate: viewModel.endDate
+                    )
+                    viewModel.showAddedToCart = true
+                } label: {
+                    HStack {
+                        Image(systemName: viewModel.canAddToCart ? "cart.badge.plus" : "xmark.circle")
+                        Text(viewModel.canAddToCart ? "В корзину" : "Недоступно")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(viewModel.canAddToCart ? Color.accentColor : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(!viewModel.canAddToCart)
+                .padding(.horizontal)
+            }
+            .padding(.vertical)
             .background(.ultraThinMaterial)
         }
         .alert("Добавлено в корзину", isPresented: $viewModel.showAddedToCart) {
@@ -252,6 +280,8 @@ final class ProductDetailViewModel: ObservableObject {
     @Published var availability: ProductAvailability?
     @Published var isCheckingAvailability: Bool = false
     @Published var showAddedToCart: Bool = false
+    @Published var isProductUnavailable: Bool = false
+    @Published var unavailableMessage: String?
 
     private let product: Product
     private let catalogService: CatalogServiceProtocol
@@ -259,6 +289,10 @@ final class ProductDetailViewModel: ObservableObject {
     init(product: Product, catalogService: CatalogServiceProtocol = CatalogService()) {
         self.product = product
         self.catalogService = catalogService
+    }
+
+    var canAddToCart: Bool {
+        !isProductUnavailable && maxQuantity > 0
     }
 
     var rentalDays: Int {
@@ -314,18 +348,38 @@ final class ProductDetailViewModel: ObservableObject {
 
     func checkAvailability() async {
         isCheckingAvailability = true
+        isProductUnavailable = false
+        unavailableMessage = nil
+
         do {
             availability = try await catalogService.checkAvailability(
                 productId: product.id,
                 startDate: startDate,
                 endDate: endDate
             )
-            if quantity > maxQuantity {
-                quantity = maxQuantity
+
+            if let avail = availability, avail.availableQuantity == 0 {
+                isProductUnavailable = true
+                unavailableMessage = "Товар недоступен на выбранные даты"
+            } else if quantity > maxQuantity {
+                quantity = max(1, maxQuantity)
+            }
+        } catch let error as NetworkError {
+            switch error {
+            case .serverError(404, _):
+                isProductUnavailable = true
+                unavailableMessage = "Товар больше недоступен"
+            case .serverError(_, let message):
+                isProductUnavailable = true
+                unavailableMessage = message
+            default:
+                // Use total stock as fallback
+                break
             }
         } catch {
             // Use total stock as fallback
         }
+
         isCheckingAvailability = false
     }
 
@@ -369,5 +423,6 @@ final class ProductDetailViewModel: ObservableObject {
             coordinator: MainCoordinator(appCoordinator: nil)
         )
         .environmentObject(CartManager())
+        .environmentObject(FavoritesManager())
     }
 }

@@ -14,6 +14,8 @@ struct ProfileTab: View {
                         FavoritesView(coordinator: coordinator)
                     case .editProfile:
                         EditProfileView(coordinator: coordinator)
+                    case .cards:
+                        CardsListView(coordinator: coordinator)
                     }
                 }
         }
@@ -22,6 +24,7 @@ struct ProfileTab: View {
 
 struct ProfileView: View {
     @ObservedObject var coordinator: MainCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @StateObject private var viewModel = ProfileViewModel()
 
     var body: some View {
@@ -64,6 +67,12 @@ struct ProfileView: View {
                         coordinator.profilePath.append(ProfileRoute.favorites)
                     } label: {
                         ProfileMenuItem(icon: "heart", title: "Избранное")
+                    }
+
+                    Button {
+                        coordinator.profilePath.append(ProfileRoute.cards)
+                    } label: {
+                        ProfileMenuItem(icon: "creditcard", title: "Мои карты")
                     }
                 }
             } else {
@@ -148,6 +157,12 @@ struct ProfileView: View {
         .navigationTitle("Профиль")
         .task {
             await viewModel.loadProfile()
+        }
+        .onChange(of: appCoordinator.isAuthenticated) { _, _ in
+            // Reload profile when authentication state changes
+            Task {
+                await viewModel.loadProfile()
+            }
         }
     }
 }
