@@ -22,8 +22,26 @@ model User {
   addresses Address[]
   orders    Order[]
   favorites Favorite[]
+  cards     Card[]
 
   @@map("users")
+}
+
+model Card {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  cardNumber   String   @map("card_number") // Masked: **** **** **** 1234
+  cardHolder   String   @map("card_holder")
+  expiryMonth  Int      @map("expiry_month")
+  expiryYear   Int      @map("expiry_year")
+  cardType     String   @default("unknown") @map("card_type") // visa, mastercard, humo, uzcard
+  isDefault    Boolean  @default(false) @map("is_default")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cards")
 }
 
 model Session {
@@ -83,6 +101,7 @@ model Category {
   id           String   @id @default(cuid())
   name         String
   imageUrl     String?  @map("image_url")
+  iconName     String?  @map("icon_name")
   displayOrder Int      @default(0) @map("display_order")
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")

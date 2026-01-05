@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { withAuth } from '@/lib/auth/middleware'
 import { createTranslator } from '@/lib/i18n'
 import { z } from 'zod'
+import { processPayment, verifyCardBalance } from '@/lib/payment/service'
 
 const createOrderSchema = z.object({
   items: z.array(z.object({
@@ -14,6 +15,7 @@ const createOrderSchema = z.object({
   rental_start_date: z.string(),
   rental_end_date: z.string(),
   payment_method: z.enum(['CASH', 'ONLINE']),
+  card_id: z.string().optional().nullable(), // Required for ONLINE payment
   notes: z.string().optional().nullable(),
 })
 
@@ -61,6 +63,28 @@ async function handler(
         return res.status(400).json({
           success: false,
           message: t('addressRequired'),
+        })
+      }
+    }
+
+    // Validate card if payment method is ONLINE
+    let userCard = null
+    if (body.payment_method === 'ONLINE') {
+      if (!body.card_id) {
+        return res.status(400).json({
+          success: false,
+          message: t('cardRequired'),
+        })
+      }
+
+      userCard = await prisma.card.findFirst({
+        where: { id: body.card_id, userId },
+      })
+
+      if (!userCard) {
+        return res.status(400).json({
+          success: false,
+          message: t('cardNotFound'),
         })
       }
     }
