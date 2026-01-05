@@ -197,7 +197,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           await tx.pricingTier.deleteMany({ where: { productId: { in: productIds } } })
           await tx.quantityPricing.deleteMany({ where: { productId: { in: productIds } } })
           await tx.favorite.deleteMany({ where: { productId: { in: productIds } } })
-          await tx.cartItem.deleteMany({ where: { productId: { in: productIds } } })
 
           // Check for products with orders - deactivate instead of delete
           const productsWithOrders = await tx.orderItem.findMany({
