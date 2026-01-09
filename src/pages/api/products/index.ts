@@ -1,14 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '@/lib/db'
 import { createTranslator } from '@/lib/i18n'
+import { logRequest, logResponse } from '@/lib/logger'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const startTime = Date.now()
   const t = createTranslator(req)
 
+  logRequest(req)
+
   if (req.method !== 'GET') {
+    logResponse(req, 405, startTime, 'Method not allowed')
     return res.status(405).json({
       success: false,
       message: t('methodNotAllowed'),
@@ -64,6 +69,7 @@ export default async function handler(
 
     const totalPages = Math.ceil(totalCount / limitNum)
 
+    logResponse(req, 200, startTime)
     return res.status(200).json({
       success: true,
       data: products.map((p) => formatProduct(p)),
@@ -77,6 +83,7 @@ export default async function handler(
     })
   } catch (error) {
     console.error('Get products error:', error)
+    logResponse(req, 500, startTime, error instanceof Error ? error.message : 'Unknown error')
     return res.status(500).json({
       success: false,
       message: t('internalServerError'),
