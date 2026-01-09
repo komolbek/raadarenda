@@ -201,6 +201,11 @@ export default function Categories() {
     }
   }
 
+  // Check if category is complete (has image or icon)
+  const isCategoryComplete = (category: Category) => {
+    return !!(category.icon_name || category.image_url)
+  }
+
   const renderCategoryIcon = (category: Category) => {
     if (category.icon_name && iconCatalog[category.icon_name]) {
       return (
@@ -219,8 +224,8 @@ export default function Categories() {
       )
     }
     return (
-      <div className="h-10 w-10 rounded bg-gray-200 mr-3 flex items-center justify-center text-gray-400">
-        ?
+      <div className="h-10 w-10 rounded bg-amber-100 mr-3 flex items-center justify-center">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
       </div>
     )
   }
@@ -275,15 +280,25 @@ export default function Categories() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {categories.map((category) => (
-                  <tr key={category.id} className="hover:bg-gray-50">
+                {categories.map((category) => {
+                  const incomplete = !isCategoryComplete(category)
+                  return (
+                  <tr key={category.id} className={`hover:bg-gray-50 ${incomplete ? 'bg-amber-50' : ''}`}>
                     <td className="px-2">
                       <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         {renderCategoryIcon(category)}
-                        <span className="font-medium">{category.name}</span>
+                        <div>
+                          <span className="font-medium">{category.name}</span>
+                          {incomplete && (
+                            <div className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
+                              <AlertTriangle className="h-3 w-3" />
+                              Нет изображения
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -317,7 +332,8 @@ export default function Categories() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
+
               </tbody>
             </table>
           )}

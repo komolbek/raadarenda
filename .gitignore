@@ -62,3 +62,6 @@ prisma/migrations/
 *.tmp
 .cache/
 coverage/
+
+# Uploads (local development)
+public/uploads/

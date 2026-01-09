@@ -63,6 +63,7 @@ export const uz = {
 
   // Delivery
   deliveryFree: 'Bepul yetkazib berish',
+  deliveryOnlyTashkent: 'Yetkazib berish faqat Toshkent shahrida mavjud',
 
   // Admin
   adminLoginSuccess: 'Kirish muvaffaqiyatli',

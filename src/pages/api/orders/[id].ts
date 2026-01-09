@@ -9,6 +9,7 @@ async function handler(
   userId: string
 ) {
   const t = createTranslator(req)
+  const { id } = req.query
 
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -17,59 +18,49 @@ async function handler(
     })
   }
 
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({
+      success: false,
+      message: t('badRequest'),
+    })
+  }
+
   try {
-    const {
-      page = '1',
-      limit = '20',
-      status,
-    } = req.query
-
-    const pageNum = parseInt(page as string, 10)
-    const limitNum = Math.min(parseInt(limit as string, 10), 50)
-    const skip = (pageNum - 1) * limitNum
-
-    const where: any = { userId }
-    if (status) {
-      where.status = status
-    }
-
-    const [orders, totalCount] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: {
-          items: {
-            include: {
-              product: {
-                select: {
-                  photos: true,
-                },
+    const order = await prisma.order.findFirst({
+      where: {
+        id,
+        userId, // Ensure user can only access their own orders
+      },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                photos: true,
               },
             },
           },
-          deliveryAddress: true,
         },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limitNum,
-      }),
-      prisma.order.count({ where }),
-    ])
+        deliveryAddress: true,
+        statusHistory: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    })
 
-    const totalPages = Math.ceil(totalCount / limitNum)
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: t('orderNotFound'),
+      })
+    }
 
     return res.status(200).json({
       success: true,
-      data: orders.map(formatOrder),
-      pagination: {
-        current_page: pageNum,
-        limit: limitNum,
-        total_count: totalCount,
-        total_pages: totalPages,
-        has_more: pageNum < totalPages,
-      },
+      data: formatOrder(order),
     })
   } catch (error) {
-    console.error('Get orders error:', error)
+    console.error('Get order error:', error)
     return res.status(500).json({
       success: false,
       message: t('internalServerError'),
@@ -121,6 +112,12 @@ function formatOrder(order: any) {
     payment_method: order.paymentMethod,
     payment_status: order.paymentStatus,
     notes: order.notes,
+    status_history: order.statusHistory?.map((h: any) => ({
+      id: h.id,
+      status: h.status,
+      notes: h.notes,
+      created_at: h.createdAt,
+    })),
     created_at: order.createdAt,
     updated_at: order.updatedAt,
   }

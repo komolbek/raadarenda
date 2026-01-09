@@ -51,6 +51,40 @@ async function handler(
     try {
       const body = addressSchema.parse(req.body)
 
+      // Validate Tashkent-only delivery
+      const cityLower = body.city.toLowerCase().trim()
+      const allowedCities = ['ташкент', 'tashkent', 'toshkent']
+      if (!allowedCities.includes(cityLower)) {
+        return res.status(400).json({
+          success: false,
+          message: t('deliveryOnlyTashkent'),
+        })
+      }
+
+      // Validate coordinates are within Tashkent bounds (if provided)
+      if (body.latitude && body.longitude) {
+        const lat = body.latitude
+        const lon = body.longitude
+        // Tashkent approximate bounds
+        const TASHKENT_BOUNDS = {
+          minLat: 41.2,
+          maxLat: 41.45,
+          minLon: 69.1,
+          maxLon: 69.45,
+        }
+        if (
+          lat < TASHKENT_BOUNDS.minLat ||
+          lat > TASHKENT_BOUNDS.maxLat ||
+          lon < TASHKENT_BOUNDS.minLon ||
+          lon > TASHKENT_BOUNDS.maxLon
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: t('deliveryOnlyTashkent'),
+          })
+        }
+      }
+
       // Check max addresses
       const count = await prisma.address.count({ where: { userId } })
       if (count >= MAX_ADDRESSES) {
