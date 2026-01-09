@@ -63,6 +63,7 @@ export const en = {
 
   // Delivery
   deliveryFree: 'Free delivery',
+  deliveryOnlyTashkent: 'Delivery is available only within Tashkent',
 
   // Admin
   adminLoginSuccess: 'Login successful',

@@ -3,6 +3,23 @@ import prisma from '@/lib/db'
 import { requireAdminAuth } from '@/lib/auth/admin-middleware'
 import { createTranslator } from '@/lib/i18n'
 import { z } from 'zod'
+import { deleteFileFromUploadthing } from '@/lib/upload/uploadthing'
+
+// Helper to check if URL is from Uploadthing
+function isUploadthingUrl(url: string): boolean {
+  return url.includes('uploadthing') || url.includes('utfs.io') || url.includes('ufs.sh')
+}
+
+// Delete images from storage (Uploadthing or local)
+async function deleteImages(urls: string[]): Promise<void> {
+  for (const url of urls) {
+    if (isUploadthingUrl(url)) {
+      await deleteFileFromUploadthing(url)
+    }
+    // Local files in /uploads are not deleted automatically
+    // They would need fs.unlink but that's less critical for dev
+  }
+}
 
 const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
@@ -110,10 +127,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (body.name !== undefined) updateData.name = body.name
       if (body.description !== undefined) updateData.description = body.description
       if (body.category_id !== undefined) updateData.categoryId = body.category_id
-      if (body.photos !== undefined) updateData.photos = body.photos
       if (body.daily_price !== undefined) updateData.dailyPrice = body.daily_price
       if (body.total_stock !== undefined) updateData.totalStock = body.total_stock
       if (body.is_active !== undefined) updateData.isActive = body.is_active
+
+      // Handle photo updates - delete removed images from storage
+      if (body.photos !== undefined) {
+        const oldPhotos = existingProduct.photos as string[]
+        const newPhotos = body.photos
+        const removedPhotos = oldPhotos.filter(url => !newPhotos.includes(url))
+
+        // Delete removed images from Uploadthing (async, don't block response)
+        if (removedPhotos.length > 0) {
+          deleteImages(removedPhotos).catch(err => {
+            console.error('Failed to delete removed images:', err)
+          })
+        }
+
+        updateData.photos = body.photos
+      }
 
       if (body.specifications) {
         if (body.specifications.width !== undefined) updateData.specWidth = body.specifications.width
@@ -219,6 +251,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         })
       }
 
+      // Get photos to delete from storage
+      const photosToDelete = existingProduct.photos as string[]
+
       // Delete product and related data
       await prisma.$transaction([
         prisma.pricingTier.deleteMany({ where: { productId } }),
@@ -226,6 +261,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         prisma.favorite.deleteMany({ where: { productId } }),
         prisma.product.delete({ where: { id: productId } }),
       ])
+
+      // Delete images from Uploadthing (async, don't block response)
+      if (photosToDelete.length > 0) {
+        deleteImages(photosToDelete).catch(err => {
+          console.error('Failed to delete product images:', err)
+        })
+      }
 
       return res.status(200).json({
         success: true,

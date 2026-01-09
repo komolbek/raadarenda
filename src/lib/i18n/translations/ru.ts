@@ -63,6 +63,7 @@ export const ru = {
 
   // Delivery
   deliveryFree: 'Бесплатная доставка',
+  deliveryOnlyTashkent: 'Доставка доступна только в пределах Ташкента',
 
   // Admin
   adminLoginSuccess: 'Вход выполнен',

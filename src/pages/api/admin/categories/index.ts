@@ -3,6 +3,19 @@ import prisma from '@/lib/db'
 import { requireAdminAuth } from '@/lib/auth/admin-middleware'
 import { createTranslator } from '@/lib/i18n'
 import { z } from 'zod'
+import { deleteFileFromUploadthing } from '@/lib/upload/uploadthing'
+
+// Helper to check if URL is from Uploadthing
+function isUploadthingUrl(url: string): boolean {
+  return url.includes('uploadthing') || url.includes('utfs.io') || url.includes('ufs.sh')
+}
+
+// Delete image from storage if it's an Uploadthing URL
+async function deleteImageIfUploadthing(url: string | null): Promise<void> {
+  if (url && isUploadthingUrl(url)) {
+    await deleteFileFromUploadthing(url)
+  }
+}
 
 const categorySchema = z.object({
   id: z.string().optional(), // For updates
@@ -106,6 +119,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         })
       }
 
+      // Get existing category to check for image changes
+      const existingCategory = await prisma.category.findUnique({
+        where: { id: body.id },
+      })
+
+      if (!existingCategory) {
+        return res.status(404).json({
+          success: false,
+          message: 'Категория не найдена',
+        })
+      }
+
+      // Delete old image if it's being replaced
+      if (body.image_url !== undefined && existingCategory.imageUrl !== body.image_url) {
+        deleteImageIfUploadthing(existingCategory.imageUrl).catch(err => {
+          console.error('Failed to delete old category image:', err)
+        })
+      }
+
       const category = await prisma.category.update({
         where: { id: body.id },
         data: {
@@ -184,6 +216,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         // Force delete: delete all products first, then category
+        // Get products with their photos for cleanup
+        const productsWithPhotos = await prisma.product.findMany({
+          where: { categoryId: id },
+          select: { id: true, photos: true },
+        })
+
+        // Collect all photos to delete
+        const allPhotosToDelete: string[] = []
+        for (const p of productsWithPhotos) {
+          allPhotosToDelete.push(...(p.photos as string[]))
+        }
+        // Also delete category image
+        if (category.imageUrl) {
+          allPhotosToDelete.push(category.imageUrl)
+        }
+
         await prisma.$transaction(async (tx) => {
           // Get all products in this category
           const products = await tx.product.findMany({
@@ -226,6 +274,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           await tx.category.delete({ where: { id } })
         })
 
+        // Delete all images from Uploadthing (async, don't block response)
+        if (allPhotosToDelete.length > 0) {
+          Promise.all(
+            allPhotosToDelete
+              .filter(url => isUploadthingUrl(url))
+              .map(url => deleteFileFromUploadthing(url))
+          ).catch(err => {
+            console.error('Failed to delete images during category force delete:', err)
+          })
+        }
+
         return res.status(200).json({
           success: true,
           message: 'Категория и все товары удалены',
@@ -233,6 +292,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // No products, safe to delete
+      // Delete category image from storage
+      deleteImageIfUploadthing(category.imageUrl).catch(err => {
+        console.error('Failed to delete category image:', err)
+      })
+
       await prisma.category.delete({
         where: { id },
       })

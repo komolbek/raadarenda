@@ -1,7 +1,59 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
 import AdminLayout from '@/components/AdminLayout'
-import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Upload, X, AlertTriangle } from 'lucide-react'
+import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Upload, X, AlertTriangle, Star, GripVertical } from 'lucide-react'
+
+// Predefined color options
+const COLOR_OPTIONS = [
+  { value: '', label: 'Выберите цвет' },
+  { value: 'Белый', label: 'Белый' },
+  { value: 'Черный', label: 'Черный' },
+  { value: 'Серый', label: 'Серый' },
+  { value: 'Коричневый', label: 'Коричневый' },
+  { value: 'Бежевый', label: 'Бежевый' },
+  { value: 'Красный', label: 'Красный' },
+  { value: 'Синий', label: 'Синий' },
+  { value: 'Зеленый', label: 'Зеленый' },
+  { value: 'Желтый', label: 'Желтый' },
+  { value: 'Оранжевый', label: 'Оранжевый' },
+  { value: 'Розовый', label: 'Розовый' },
+  { value: 'Фиолетовый', label: 'Фиолетовый' },
+  { value: 'Золотой', label: 'Золотой' },
+  { value: 'Серебряный', label: 'Серебряный' },
+  { value: 'Прозрачный', label: 'Прозрачный' },
+  { value: 'Разноцветный', label: 'Разноцветный' },
+]
+
+// Predefined material options
+const MATERIAL_OPTIONS = [
+  { value: '', label: 'Выберите материал' },
+  { value: 'Дерево', label: 'Дерево' },
+  { value: 'Металл', label: 'Металл' },
+  { value: 'Пластик', label: 'Пластик' },
+  { value: 'Стекло', label: 'Стекло' },
+  { value: 'Ткань', label: 'Ткань' },
+  { value: 'Кожа', label: 'Кожа' },
+  { value: 'Искусственная кожа', label: 'Искусственная кожа' },
+  { value: 'МДФ', label: 'МДФ' },
+  { value: 'ДСП', label: 'ДСП' },
+  { value: 'Фанера', label: 'Фанера' },
+  { value: 'Ротанг', label: 'Ротанг' },
+  { value: 'Бамбук', label: 'Бамбук' },
+  { value: 'Алюминий', label: 'Алюминий' },
+  { value: 'Нержавеющая сталь', label: 'Нержавеющая сталь' },
+  { value: 'Комбинированный', label: 'Комбинированный' },
+]
+
+// Format number with thousands separator (space)
+const formatThousands = (value: string): string => {
+  const num = value.replace(/\D/g, '')
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
+
+// Remove formatting to get raw number
+const unformatThousands = (value: string): string => {
+  return value.replace(/\s/g, '')
+}
 
 interface Specification {
   width: string | null
@@ -45,14 +97,29 @@ export default function Products() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [uploadingImages, setUploadingImages] = useState(false)
   const [photos, setPhotos] = useState<string[]>([])
+  const [draggedPhotoIndex, setDraggedPhotoIndex] = useState<number | null>(null)
 
-  // Form state
+  // Helper to check if product has complete specs (required for new products)
+  const hasCompleteSpecs = (specs: { color?: string; material?: string }) => {
+    return !!(specs.color && specs.material)
+  }
+
+  // Helper to check if product is complete (has photo, specs, etc.)
+  const isProductComplete = (product: Product) => {
+    return (
+      product.photos.length > 0 &&
+      product.specifications?.color &&
+      product.specifications?.material
+    )
+  }
+
+  // Form state - use strings for numeric inputs to allow proper editing
   const [form, setForm] = useState({
     name: '',
     description: '',
     category_id: '',
-    daily_price: 0,
-    total_stock: 1,
+    daily_price: '',
+    total_stock: '',
     is_active: true,
     spec_width: '',
     spec_height: '',
@@ -114,8 +181,8 @@ export default function Products() {
       name: '',
       description: '',
       category_id: categories[0]?.id || '',
-      daily_price: 0,
-      total_stock: 1,
+      daily_price: '',
+      total_stock: '1',
       is_active: true,
       spec_width: '',
       spec_height: '',
@@ -134,8 +201,8 @@ export default function Products() {
       name: product.name,
       description: product.description || '',
       category_id: product.category_id,
-      daily_price: product.daily_price,
-      total_stock: product.total_stock,
+      daily_price: product.daily_price.toString(),
+      total_stock: product.total_stock.toString(),
       is_active: product.is_active,
       spec_width: product.specifications?.width || '',
       spec_height: product.specifications?.height || '',
@@ -160,26 +227,33 @@ export default function Products() {
 
     setUploadingImages(true)
     try {
-      const formData = new FormData()
+      // Upload files one by one to ensure reliability
+      const uploadedUrls: string[] = []
+
       for (let i = 0; i < files.length; i++) {
+        const formData = new FormData()
         formData.append('file', files[i])
+        formData.append('folder', 'raadarenda/products')
+
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        })
+        const json = await res.json()
+
+        if (json.success && json.data?.url) {
+          uploadedUrls.push(json.data.url)
+        } else {
+          console.error('Upload failed for file:', files[i].name, json)
+        }
       }
-      formData.append('folder', 'raadarenda/products')
 
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      const json = await res.json()
-
-      if (json.success) {
-        const newPhotos = Array.isArray(json.data)
-          ? json.data.map((d: { url: string }) => d.url)
-          : [json.data.url]
-        setPhotos((prev) => [...prev, ...newPhotos].slice(0, 3))
+      if (uploadedUrls.length > 0) {
+        setPhotos((prev) => [...prev, ...uploadedUrls].slice(0, 3))
       }
     } catch (err) {
       console.error('Failed to upload images:', err)
+      alert('Ошибка загрузки изображения')
     } finally {
       setUploadingImages(false)
       // Reset input
@@ -191,8 +265,80 @@ export default function Products() {
     setPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
+  // Set photo as main (move to first position)
+  const setMainPhoto = (index: number) => {
+    if (index === 0) return // Already main
+    setPhotos((prev) => {
+      const newPhotos = [...prev]
+      const [photo] = newPhotos.splice(index, 1)
+      newPhotos.unshift(photo)
+      return newPhotos
+    })
+  }
+
+  // Drag and drop handlers for photo reordering
+  const handleDragStart = (index: number) => {
+    setDraggedPhotoIndex(index)
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedPhotoIndex === null || draggedPhotoIndex === index) return
+  }
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault()
+    if (draggedPhotoIndex === null || draggedPhotoIndex === targetIndex) {
+      setDraggedPhotoIndex(null)
+      return
+    }
+
+    setPhotos((prev) => {
+      const newPhotos = [...prev]
+      const [draggedPhoto] = newPhotos.splice(draggedPhotoIndex, 1)
+      newPhotos.splice(targetIndex, 0, draggedPhoto)
+      return newPhotos
+    })
+    setDraggedPhotoIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedPhotoIndex(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate numeric fields
+    const dailyPrice = parseInt(form.daily_price, 10)
+    const totalStock = parseInt(form.total_stock, 10)
+
+    if (isNaN(dailyPrice) || dailyPrice <= 0) {
+      alert('Введите корректную цену')
+      return
+    }
+
+    if (isNaN(totalStock) || totalStock <= 0) {
+      alert('Введите корректное количество')
+      return
+    }
+
+    // For new products, require at least color and material
+    if (!editingProduct) {
+      if (!form.spec_color) {
+        alert('Выберите цвет товара')
+        return
+      }
+      if (!form.spec_material) {
+        alert('Выберите материал товара')
+        return
+      }
+      if (photos.length === 0) {
+        alert('Добавьте хотя бы одно фото товара')
+        return
+      }
+    }
+
     setIsSubmitting(true)
     try {
       const url = editingProduct
@@ -208,8 +354,8 @@ export default function Products() {
           description: form.description || null,
           category_id: form.category_id,
           photos: photos,
-          daily_price: form.daily_price,
-          total_stock: form.total_stock,
+          daily_price: dailyPrice,
+          total_stock: totalStock,
           is_active: form.is_active,
           specifications: {
             width: form.spec_width || null,
@@ -348,21 +494,33 @@ export default function Products() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {products.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50">
+                    {products.map((product) => {
+                      const incomplete = !isProductComplete(product)
+                      return (
+                      <tr key={product.id} className={`hover:bg-gray-50 ${incomplete ? 'bg-amber-50' : ''}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            {product.photos[0] ? (
-                              <img
-                                src={product.photos[0]}
-                                alt={product.name}
-                                className="h-10 w-10 rounded object-cover mr-3"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded bg-gray-200 mr-3" />
-                            )}
-                            <div>
-                              <div className="font-medium">{product.name}</div>
+                            <div className="flex-shrink-0 w-12 h-12 mr-3 relative">
+                              {product.photos[0] ? (
+                                <img
+                                  src={product.photos[0]}
+                                  alt={product.name}
+                                  className="w-12 h-12 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded bg-gray-200 flex items-center justify-center">
+                                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium truncate max-w-[200px]">{product.name}</div>
+                              {incomplete && (
+                                <div className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Неполная информация
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -406,7 +564,8 @@ export default function Products() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )})}
+
                   </tbody>
                 </table>
               </div>
@@ -479,16 +638,51 @@ export default function Products() {
                   {/* Photos Upload */}
                   <div className="col-span-2">
                     <label className="block text-sm text-gray-600 mb-1">
-                      Фотографии (макс. 3)
+                      Фотографии (макс. 3) {!editingProduct && <span className="text-red-500">*</span>}
                     </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Первое фото - главное. Перетащите для изменения порядка или нажмите ⭐ для выбора главного.
+                    </p>
                     <div className="flex flex-wrap gap-3">
                       {photos.map((photo, index) => (
-                        <div key={index} className="relative">
+                        <div
+                          key={index}
+                          className={`relative group cursor-move ${
+                            draggedPhotoIndex === index ? 'opacity-50' : ''
+                          } ${index === 0 ? 'ring-2 ring-yellow-400' : ''}`}
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          onDragEnd={handleDragEnd}
+                        >
                           <img
                             src={photo}
                             alt={`Photo ${index + 1}`}
                             className="w-24 h-24 object-cover rounded-lg border"
                           />
+                          {/* Drag handle indicator */}
+                          <div className="absolute top-1 left-1 bg-black bg-opacity-50 rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <GripVertical className="h-4 w-4 text-white" />
+                          </div>
+                          {/* Main photo indicator */}
+                          {index === 0 && (
+                            <div className="absolute bottom-1 left-1 bg-yellow-400 rounded px-1 py-0.5">
+                              <span className="text-xs font-medium">Главное</span>
+                            </div>
+                          )}
+                          {/* Set as main button */}
+                          {index !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setMainPhoto(index)}
+                              className="absolute bottom-1 left-1 bg-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-yellow-100"
+                              title="Сделать главным"
+                            >
+                              <Star className="h-3 w-3 text-gray-600" />
+                            </button>
+                          )}
+                          {/* Remove button */}
                           <button
                             type="button"
                             onClick={() => removePhoto(index)}
@@ -546,16 +740,16 @@ export default function Products() {
                       Цена за день (сум) *
                     </label>
                     <input
-                      type="number"
-                      value={form.daily_price}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          daily_price: parseInt(e.target.value) || 0,
-                        })
-                      }
+                      type="text"
+                      inputMode="numeric"
+                      value={formatThousands(form.daily_price)}
+                      onChange={(e) => {
+                        // Remove formatting, allow only numeric input
+                        const rawValue = unformatThousands(e.target.value)
+                        setForm({ ...form, daily_price: rawValue })
+                      }}
                       required
-                      min="0"
+                      placeholder="50 000"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -565,16 +759,16 @@ export default function Products() {
                       Количество на складе *
                     </label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={form.total_stock}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          total_stock: parseInt(e.target.value) || 1,
-                        })
-                      }
+                      onChange={(e) => {
+                        // Allow only numeric input
+                        const value = e.target.value.replace(/[^0-9]/g, '')
+                        setForm({ ...form, total_stock: value })
+                      }}
                       required
-                      min="1"
+                      placeholder="1"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -596,91 +790,135 @@ export default function Products() {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium mb-3">Характеристики</h4>
+                  <h4 className="font-medium mb-3">
+                    Характеристики {!editingProduct && <span className="text-red-500 text-sm">(обязательны для новых товаров)</span>}
+                  </h4>
                   <div className="grid grid-cols-3 gap-4">
+                    {/* Width with static unit */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Ширина
                       </label>
-                      <input
-                        type="text"
-                        value={form.spec_width}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_width: e.target.value })
-                        }
-                        placeholder="например: 60 см"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={form.spec_width}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            setForm({ ...form, spec_width: value })
+                          }}
+                          placeholder="60"
+                          className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">см</span>
+                      </div>
                     </div>
+                    {/* Height with static unit */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Высота
                       </label>
-                      <input
-                        type="text"
-                        value={form.spec_height}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_height: e.target.value })
-                        }
-                        placeholder="например: 100 см"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={form.spec_height}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            setForm({ ...form, spec_height: value })
+                          }}
+                          placeholder="100"
+                          className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">см</span>
+                      </div>
                     </div>
+                    {/* Depth with static unit */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Глубина
                       </label>
-                      <input
-                        type="text"
-                        value={form.spec_depth}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_depth: e.target.value })
-                        }
-                        placeholder="например: 50 см"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={form.spec_depth}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            setForm({ ...form, spec_depth: value })
+                          }}
+                          placeholder="50"
+                          className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">см</span>
+                      </div>
                     </div>
+                    {/* Weight with static unit */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Вес
                       </label>
-                      <input
-                        type="text"
-                        value={form.spec_weight}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_weight: e.target.value })
-                        }
-                        placeholder="например: 5 кг"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={form.spec_weight}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            setForm({ ...form, spec_weight: value })
+                          }}
+                          placeholder="5"
+                          className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">кг</span>
+                      </div>
                     </div>
+                    {/* Color dropdown */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
-                        Цвет
+                        Цвет {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={form.spec_color}
                         onChange={(e) =>
                           setForm({ ...form, spec_color: e.target.value })
                         }
-                        placeholder="например: Белый"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          !form.spec_color && !editingProduct
+                            ? 'border-amber-300 bg-amber-50'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        {COLOR_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+                    {/* Material dropdown */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
-                        Материал
+                        Материал {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={form.spec_material}
                         onChange={(e) =>
                           setForm({ ...form, spec_material: e.target.value })
                         }
-                        placeholder="например: Дерево"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          !form.spec_material && !editingProduct
+                            ? 'border-amber-300 bg-amber-50'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        {MATERIAL_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
