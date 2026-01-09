@@ -4,6 +4,25 @@ import crypto from 'crypto'
 const OTP_EXPIRY_MINUTES = 5
 const MAX_ATTEMPTS = 3
 
+// Test phone numbers that always use fixed OTP code (for testing in production)
+// Store without + prefix for consistent comparison
+const TEST_PHONE_NUMBERS = [
+  '998111111111',
+  '998000000000',
+]
+const TEST_OTP_CODE = '123456'
+
+// Normalize phone number by removing + prefix and any spaces/dashes
+function normalizePhoneNumber(phone: string): string {
+  return phone.replace(/^\+/, '').replace(/[\s-]/g, '')
+}
+
+// Check if a phone number is a test number
+function isTestPhoneNumber(phone: string): boolean {
+  const normalized = normalizePhoneNumber(phone)
+  return TEST_PHONE_NUMBERS.includes(normalized)
+}
+
 export async function generateOTP(phoneNumber: string): Promise<string> {
   // Clean up expired OTPs
   await prisma.oTP.deleteMany({
@@ -17,8 +36,10 @@ export async function generateOTP(phoneNumber: string): Promise<string> {
   })
 
   // Generate 6-digit code
-  const code = process.env.NODE_ENV === 'development'
-    ? '123456' // Use fixed code in development
+  // Use fixed code for test phone numbers or in development
+  const isTestPhone = isTestPhoneNumber(phoneNumber)
+  const code = (process.env.NODE_ENV === 'development' || isTestPhone)
+    ? TEST_OTP_CODE
     : crypto.randomInt(100000, 999999).toString()
 
   const expiresAt = new Date()
