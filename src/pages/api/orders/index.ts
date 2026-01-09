@@ -3,7 +3,6 @@ import prisma from '@/lib/db'
 import { withAuth } from '@/lib/auth/middleware'
 import { createTranslator } from '@/lib/i18n'
 import { z } from 'zod'
-import { processPayment, verifyCardBalance } from '@/lib/payment/service'
 
 const createOrderSchema = z.object({
   items: z.array(z.object({
@@ -14,8 +13,8 @@ const createOrderSchema = z.object({
   delivery_address_id: z.string().optional().nullable(),
   rental_start_date: z.string(),
   rental_end_date: z.string(),
-  payment_method: z.enum(['CASH', 'ONLINE']),
-  card_id: z.string().optional().nullable(), // Required for ONLINE payment
+  payment_method: z.enum(['PAYME', 'CLICK', 'UZUM']),
+  card_id: z.string().optional().nullable(), // For future use with saved cards
   notes: z.string().optional().nullable(),
 })
 
@@ -67,26 +66,14 @@ async function handler(
       }
     }
 
-    // Validate card if payment method is ONLINE
+    // For now, online payments (Payme, Click, Uzum) are mock
+    // In production, this would redirect to payment provider or process via API
+    // Card validation is optional for future saved cards feature
     let userCard = null
-    if (body.payment_method === 'ONLINE') {
-      if (!body.card_id) {
-        return res.status(400).json({
-          success: false,
-          message: t('cardRequired'),
-        })
-      }
-
+    if (body.card_id) {
       userCard = await prisma.card.findFirst({
         where: { id: body.card_id, userId },
       })
-
-      if (!userCard) {
-        return res.status(400).json({
-          success: false,
-          message: t('cardNotFound'),
-        })
-      }
     }
 
     // Get products and validate availability
@@ -194,7 +181,7 @@ async function handler(
         rentalStartDate: startDate,
         rentalEndDate: endDate,
         paymentMethod: body.payment_method,
-        paymentStatus: body.payment_method === 'CASH' ? 'PENDING' : 'PENDING',
+        paymentStatus: 'PENDING', // Will be updated when payment is completed
         notes: body.notes,
         items: {
           create: orderItems,

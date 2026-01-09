@@ -194,8 +194,9 @@ enum DeliveryType {
 }
 
 enum PaymentMethod {
-  CASH
-  ONLINE
+  PAYME
+  CLICK
+  UZUM
 }
 
 enum PaymentStatus {
