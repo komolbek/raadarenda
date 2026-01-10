@@ -3,6 +3,9 @@ import Head from 'next/head'
 import AdminLayout from '@/components/AdminLayout'
 import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Upload, X, AlertTriangle, Star, GripVertical } from 'lucide-react'
 
+// Special value for custom input
+const CUSTOM_VALUE = '__custom__'
+
 // Predefined color options
 const COLOR_OPTIONS = [
   { value: '', label: 'Выберите цвет' },
@@ -22,6 +25,7 @@ const COLOR_OPTIONS = [
   { value: 'Серебряный', label: 'Серебряный' },
   { value: 'Прозрачный', label: 'Прозрачный' },
   { value: 'Разноцветный', label: 'Разноцветный' },
+  { value: CUSTOM_VALUE, label: '+ Другой цвет...' },
 ]
 
 // Predefined material options
@@ -42,7 +46,12 @@ const MATERIAL_OPTIONS = [
   { value: 'Алюминий', label: 'Алюминий' },
   { value: 'Нержавеющая сталь', label: 'Нержавеющая сталь' },
   { value: 'Комбинированный', label: 'Комбинированный' },
+  { value: CUSTOM_VALUE, label: '+ Другой материал...' },
 ]
+
+// Helper to check if a value is a predefined option
+const isPredefinedColor = (value: string) => COLOR_OPTIONS.some(opt => opt.value === value && opt.value !== CUSTOM_VALUE)
+const isPredefinedMaterial = (value: string) => MATERIAL_OPTIONS.some(opt => opt.value === value && opt.value !== CUSTOM_VALUE)
 
 // Format number with thousands separator (space)
 const formatThousands = (value: string): string => {
@@ -98,6 +107,8 @@ export default function Products() {
   const [uploadingImages, setUploadingImages] = useState(false)
   const [photos, setPhotos] = useState<string[]>([])
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState<number | null>(null)
+  const [useCustomColor, setUseCustomColor] = useState(false)
+  const [useCustomMaterial, setUseCustomMaterial] = useState(false)
 
   // Helper to check if product has complete specs (required for new products)
   const hasCompleteSpecs = (specs: { color?: string; material?: string }) => {
@@ -192,11 +203,18 @@ export default function Products() {
       spec_material: '',
     })
     setPhotos([])
+    setUseCustomColor(false)
+    setUseCustomMaterial(false)
     setShowModal(true)
   }
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product)
+    const colorValue = product.specifications?.color || ''
+    const materialValue = product.specifications?.material || ''
+    const isCustomColor = colorValue && !isPredefinedColor(colorValue)
+    const isCustomMaterial = materialValue && !isPredefinedMaterial(materialValue)
+
     setForm({
       name: product.name,
       description: product.description || '',
@@ -208,10 +226,12 @@ export default function Products() {
       spec_height: product.specifications?.height || '',
       spec_depth: product.specifications?.depth || '',
       spec_weight: product.specifications?.weight || '',
-      spec_color: product.specifications?.color || '',
-      spec_material: product.specifications?.material || '',
+      spec_color: colorValue,
+      spec_material: materialValue,
     })
     setPhotos(product.photos || [])
+    setUseCustomColor(isCustomColor)
+    setUseCustomMaterial(isCustomMaterial)
     setShowModal(true)
   }
 
@@ -874,51 +894,119 @@ export default function Products() {
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">кг</span>
                       </div>
                     </div>
-                    {/* Color dropdown */}
+                    {/* Color dropdown with custom input */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Цвет {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
-                      <select
-                        value={form.spec_color}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_color: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          !form.spec_color && !editingProduct
-                            ? 'border-amber-300 bg-amber-50'
-                            : 'border-gray-300'
-                        }`}
-                      >
-                        {COLOR_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      {useCustomColor ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={form.spec_color}
+                            onChange={(e) =>
+                              setForm({ ...form, spec_color: e.target.value })
+                            }
+                            placeholder="Введите цвет"
+                            className={`flex-1 px-4 py-2 border rounded-lg ${
+                              !form.spec_color && !editingProduct
+                                ? 'border-amber-300 bg-amber-50'
+                                : 'border-gray-300'
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUseCustomColor(false)
+                              setForm({ ...form, spec_color: '' })
+                            }}
+                            className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
+                            title="Выбрать из списка"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <select
+                          value={isPredefinedColor(form.spec_color) ? form.spec_color : ''}
+                          onChange={(e) => {
+                            if (e.target.value === CUSTOM_VALUE) {
+                              setUseCustomColor(true)
+                              setForm({ ...form, spec_color: '' })
+                            } else {
+                              setForm({ ...form, spec_color: e.target.value })
+                            }
+                          }}
+                          className={`w-full px-4 py-2 border rounded-lg ${
+                            !form.spec_color && !editingProduct
+                              ? 'border-amber-300 bg-amber-50'
+                              : 'border-gray-300'
+                          }`}
+                        >
+                          {COLOR_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
-                    {/* Material dropdown */}
+                    {/* Material dropdown with custom input */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
                         Материал {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
-                      <select
-                        value={form.spec_material}
-                        onChange={(e) =>
-                          setForm({ ...form, spec_material: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          !form.spec_material && !editingProduct
-                            ? 'border-amber-300 bg-amber-50'
-                            : 'border-gray-300'
-                        }`}
-                      >
-                        {MATERIAL_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      {useCustomMaterial ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={form.spec_material}
+                            onChange={(e) =>
+                              setForm({ ...form, spec_material: e.target.value })
+                            }
+                            placeholder="Введите материал"
+                            className={`flex-1 px-4 py-2 border rounded-lg ${
+                              !form.spec_material && !editingProduct
+                                ? 'border-amber-300 bg-amber-50'
+                                : 'border-gray-300'
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUseCustomMaterial(false)
+                              setForm({ ...form, spec_material: '' })
+                            }}
+                            className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
+                            title="Выбрать из списка"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <select
+                          value={isPredefinedMaterial(form.spec_material) ? form.spec_material : ''}
+                          onChange={(e) => {
+                            if (e.target.value === CUSTOM_VALUE) {
+                              setUseCustomMaterial(true)
+                              setForm({ ...form, spec_material: '' })
+                            } else {
+                              setForm({ ...form, spec_material: e.target.value })
+                            }
+                          }}
+                          className={`w-full px-4 py-2 border rounded-lg ${
+                            !form.spec_material && !editingProduct
+                              ? 'border-amber-300 bg-amber-50'
+                              : 'border-gray-300'
+                          }`}
+                        >
+                          {MATERIAL_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   </div>
                 </div>
