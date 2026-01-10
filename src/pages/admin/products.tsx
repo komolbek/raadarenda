@@ -813,7 +813,7 @@ export default function Products() {
                   <h4 className="font-medium mb-3">
                     Характеристики {!editingProduct && <span className="text-red-500 text-sm">(обязательны для новых товаров)</span>}
                   </h4>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {/* Width with static unit */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">
@@ -895,7 +895,7 @@ export default function Products() {
                       </div>
                     </div>
                     {/* Color dropdown with custom input */}
-                    <div>
+                    <div className="col-span-2">
                       <label className="block text-sm text-gray-600 mb-1">
                         Цвет {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
@@ -908,7 +908,7 @@ export default function Products() {
                               setForm({ ...form, spec_color: e.target.value })
                             }
                             placeholder="Введите цвет"
-                            className={`flex-1 px-4 py-2 border rounded-lg ${
+                            className={`flex-1 min-w-0 px-3 py-2 border rounded-lg ${
                               !form.spec_color && !editingProduct
                                 ? 'border-amber-300 bg-amber-50'
                                 : 'border-gray-300'
@@ -920,7 +920,7 @@ export default function Products() {
                               setUseCustomColor(false)
                               setForm({ ...form, spec_color: '' })
                             }}
-                            className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
+                            className="flex-shrink-0 px-2 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
                             title="Выбрать из списка"
                           >
                             <X className="h-4 w-4" />
@@ -937,7 +937,7 @@ export default function Products() {
                               setForm({ ...form, spec_color: e.target.value })
                             }
                           }}
-                          className={`w-full px-4 py-2 border rounded-lg ${
+                          className={`w-full px-3 py-2 border rounded-lg ${
                             !form.spec_color && !editingProduct
                               ? 'border-amber-300 bg-amber-50'
                               : 'border-gray-300'
@@ -952,7 +952,7 @@ export default function Products() {
                       )}
                     </div>
                     {/* Material dropdown with custom input */}
-                    <div>
+                    <div className="col-span-2">
                       <label className="block text-sm text-gray-600 mb-1">
                         Материал {!editingProduct && <span className="text-red-500">*</span>}
                       </label>
@@ -965,7 +965,7 @@ export default function Products() {
                               setForm({ ...form, spec_material: e.target.value })
                             }
                             placeholder="Введите материал"
-                            className={`flex-1 px-4 py-2 border rounded-lg ${
+                            className={`flex-1 min-w-0 px-3 py-2 border rounded-lg ${
                               !form.spec_material && !editingProduct
                                 ? 'border-amber-300 bg-amber-50'
                                 : 'border-gray-300'
@@ -977,7 +977,7 @@ export default function Products() {
                               setUseCustomMaterial(false)
                               setForm({ ...form, spec_material: '' })
                             }}
-                            className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
+                            className="flex-shrink-0 px-2 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
                             title="Выбрать из списка"
                           >
                             <X className="h-4 w-4" />
@@ -994,7 +994,7 @@ export default function Products() {
                               setForm({ ...form, spec_material: e.target.value })
                             }
                           }}
-                          className={`w-full px-4 py-2 border rounded-lg ${
+                          className={`w-full px-3 py-2 border rounded-lg ${
                             !form.spec_material && !editingProduct
                               ? 'border-amber-300 bg-amber-50'
                               : 'border-gray-300'

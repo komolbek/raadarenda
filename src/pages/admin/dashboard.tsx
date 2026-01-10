@@ -101,7 +101,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <AdminLayout title="Дашборд">
+      <AdminLayout title="Главная">
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
@@ -112,9 +112,9 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Дашборд - RaadArenda Admin</title>
+        <title>Главная - RaadArenda Admin</title>
       </Head>
-      <AdminLayout title="Дашборд">
+      <AdminLayout title="Главная">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard

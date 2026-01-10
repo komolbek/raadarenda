@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import {
-  LayoutDashboard,
+  Home,
   ShoppingCart,
   Package,
   FolderOpen,
@@ -19,7 +19,7 @@ interface AdminLayoutProps {
 }
 
 const navItems = [
-  { href: '/admin/dashboard', label: 'Дашборд', icon: LayoutDashboard },
+  { href: '/admin/dashboard', label: 'Главная', icon: Home },
   { href: '/admin/orders', label: 'Заказы', icon: ShoppingCart },
   { href: '/admin/products', label: 'Товары', icon: Package },
   { href: '/admin/categories', label: 'Категории', icon: FolderOpen },
