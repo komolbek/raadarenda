@@ -212,8 +212,8 @@ export default function Products() {
     setEditingProduct(product)
     const colorValue = product.specifications?.color || ''
     const materialValue = product.specifications?.material || ''
-    const isCustomColor = colorValue && !isPredefinedColor(colorValue)
-    const isCustomMaterial = materialValue && !isPredefinedMaterial(materialValue)
+    const isCustomColor = Boolean(colorValue && !isPredefinedColor(colorValue))
+    const isCustomMaterial = Boolean(materialValue && !isPredefinedMaterial(materialValue))
 
     setForm({
       name: product.name,
