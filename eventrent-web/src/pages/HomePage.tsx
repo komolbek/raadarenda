@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Sparkles, Truck, Shield, Clock } from 'lucide-react';
-import { categoriesApi, productsApi } from '@/lib/api';
-import { Button, Card, CategoryCardSkeleton, ProductCardSkeleton } from '@/components/ui';
-import { ProductCard } from '@/components/catalog/ProductCard';
-import { CategoryCard } from '@/components/catalog/CategoryCard';
+import { ArrowRight, Sparkles, Truck, Shield, Clock, Phone } from 'lucide-react';
+import { Button, Card } from '@/components/ui';
+import { settingsApi } from '@/lib/api';
 
 const features = [
   {
@@ -46,15 +44,12 @@ const itemVariants = {
 };
 
 export function HomePage() {
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: categoriesApi.getAll,
+  const { data: settings } = useQuery({
+    queryKey: ['businessSettings'],
+    queryFn: settingsApi.getBusinessSettings,
   });
 
-  const { data: popularProducts, isLoading: productsLoading } = useQuery({
-    queryKey: ['products', 'popular'],
-    queryFn: () => productsApi.getAll({ limit: 8, sort: 'popular' }),
-  });
+  const phoneNumber = settings?.phone || '+998901234567';
 
   return (
     <div className="space-y-16 py-8">
@@ -144,80 +139,6 @@ export function HomePage() {
         </motion.div>
       </section>
 
-      {/* Categories */}
-      <section className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Категории</h2>
-            <p className="text-muted-foreground">Найдите то, что вам нужно</p>
-          </div>
-          <Link to="/catalog">
-            <Button variant="ghost" rightIcon={<ArrowRight className="h-4 w-4" />}>
-              Все категории
-            </Button>
-          </Link>
-        </div>
-
-        {categoriesLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <CategoryCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
-          >
-            {categories?.slice(0, 6).map((category) => (
-              <motion.div key={category.id} variants={itemVariants}>
-                <CategoryCard category={category} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </section>
-
-      {/* Popular Products */}
-      <section className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Популярные товары</h2>
-            <p className="text-muted-foreground">Чаще всего арендуют</p>
-          </div>
-          <Link to="/catalog?sort=popular">
-            <Button variant="ghost" rightIcon={<ArrowRight className="h-4 w-4" />}>
-              Все товары
-            </Button>
-          </Link>
-        </div>
-
-        {productsLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          >
-            {popularProducts?.items.map((product) => (
-              <motion.div key={product.id} variants={itemVariants}>
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </section>
-
       {/* CTA Section */}
       <section className="container mx-auto px-4">
         <motion.div
@@ -239,11 +160,11 @@ export function HomePage() {
                 Перейти в каталог
               </Button>
             </Link>
-            <Link to="/contacts">
-              <Button size="lg" variant="outline">
-                Связаться с нами
+            <a href={`tel:${phoneNumber}`}>
+              <Button size="lg" variant="outline" leftIcon={<Phone className="h-5 w-5" />}>
+                Позвонить
               </Button>
-            </Link>
+            </a>
           </div>
         </motion.div>
       </section>
