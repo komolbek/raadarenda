@@ -26,7 +26,7 @@ import { Button, Card } from '@/components/website/ui';
 export default function ProfilePage() {
   const router = useRouter();
   const { t } = useLanguageStore();
-  const { isAuthenticated, user, setUser } = useAuthStore();
+  const { isAuthenticated, user, setUser, _hasHydrated } = useAuthStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(user?.name || '');
@@ -35,13 +35,16 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
+    // Wait for auth store to hydrate before checking authentication
+    if (!_hasHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/auth?from=/profile');
       return;
     }
 
     fetchAddresses();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, _hasHydrated, router]);
 
   const fetchAddresses = async () => {
     try {
@@ -96,7 +99,8 @@ export default function ProfilePage() {
     }
   };
 
-  if (!isAuthenticated || !user) {
+  // Show loading state until hydration is complete
+  if (!_hasHydrated || !isAuthenticated || !user) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">

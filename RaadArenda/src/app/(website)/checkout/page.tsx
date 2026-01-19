@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { t } = useLanguageStore();
   const { items, subtotal, totalSavings, total, deliveryFee, clearCart, setDeliveryFee } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
 
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('DELIVERY');
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -51,6 +51,9 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for auth state to be hydrated from localStorage
+    if (!_hasHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/auth?from=/checkout');
       return;
@@ -62,7 +65,7 @@ export default function CheckoutPage() {
     }
 
     fetchData();
-  }, [isAuthenticated, router, items.length]);
+  }, [isAuthenticated, _hasHydrated, router, items.length]);
 
   const fetchData = async () => {
     try {
@@ -135,8 +138,14 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!isAuthenticated || items.length === 0) {
-    return null;
+  if (!_hasHydrated || !isAuthenticated || items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

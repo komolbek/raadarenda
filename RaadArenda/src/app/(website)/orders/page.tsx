@@ -32,7 +32,7 @@ const statusColors: Record<OrderStatus, string> = {
 export default function OrdersPage() {
   const router = useRouter();
   const { t } = useLanguageStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,13 +40,16 @@ export default function OrdersPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    // Wait for auth store to hydrate before checking authentication
+    if (!_hasHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/auth?from=/orders');
       return;
     }
 
     fetchOrders();
-  }, [isAuthenticated, router, page]);
+  }, [isAuthenticated, _hasHydrated, router, page]);
 
   const fetchOrders = async () => {
     try {
@@ -69,8 +72,15 @@ export default function OrdersPage() {
     return t.orders.deliveryType[type as keyof typeof t.orders.deliveryType] || type;
   };
 
-  if (!isAuthenticated) {
-    return null;
+  // Show loading state until hydration is complete
+  if (!_hasHydrated || !isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

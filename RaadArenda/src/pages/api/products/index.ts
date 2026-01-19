@@ -26,7 +26,8 @@ export default async function handler(
       search,
       page = '1',
       limit = '20',
-      sort_by = 'name',
+      sort = 'newest', // Frontend uses: newest, popular, price_asc, price_desc
+      sort_by,
       sort_order = 'asc',
     } = req.query
 
@@ -44,28 +45,83 @@ export default async function handler(
       where.name = { contains: search as string, mode: 'insensitive' }
     }
 
-    const orderBy: any = {}
-    if (sort_by === 'price') {
-      orderBy.dailyPrice = sort_order === 'desc' ? 'desc' : 'asc'
-    } else if (sort_by === 'name') {
-      orderBy.name = sort_order === 'desc' ? 'desc' : 'asc'
+    // Handle both old (sort_by/sort_order) and new (sort) parameter styles
+    let orderBy: any = {}
+    const sortValue = sort as string
+
+    if (sort_by) {
+      // Legacy support for sort_by/sort_order params
+      if (sort_by === 'price') {
+        orderBy.dailyPrice = sort_order === 'desc' ? 'desc' : 'asc'
+      } else if (sort_by === 'name') {
+        orderBy.name = sort_order === 'desc' ? 'desc' : 'asc'
+      } else {
+        orderBy.createdAt = 'desc'
+      }
     } else {
-      orderBy.createdAt = 'desc'
+      // New sort param handling
+      switch (sortValue) {
+        case 'price_asc':
+          orderBy.dailyPrice = 'asc'
+          break
+        case 'price_desc':
+          orderBy.dailyPrice = 'desc'
+          break
+        case 'popular':
+          // Will be handled separately with order count
+          orderBy = undefined
+          break
+        case 'newest':
+        default:
+          orderBy.createdAt = 'desc'
+          break
+      }
     }
 
-    const [products, totalCount] = await Promise.all([
-      prisma.product.findMany({
+    let products: any[]
+    let totalCount: number
+
+    if (sortValue === 'popular' && !sort_by) {
+      // For popularity sort, count orders per product using aggregation
+      // First get all products with their order counts
+      const productsWithOrderCount = await prisma.product.findMany({
         where,
         include: {
           pricingTiers: true,
           quantityPricing: true,
+          _count: {
+            select: { orderItems: true }
+          }
         },
-        orderBy,
-        skip,
-        take: limitNum,
-      }),
-      prisma.product.count({ where }),
-    ])
+      })
+
+      // Sort by order count (descending), then by createdAt
+      productsWithOrderCount.sort((a, b) => {
+        const countDiff = b._count.orderItems - a._count.orderItems
+        if (countDiff !== 0) return countDiff
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      })
+
+      totalCount = productsWithOrderCount.length
+
+      // Apply pagination
+      products = productsWithOrderCount.slice(skip, skip + limitNum)
+    } else {
+      // Standard query with ordering
+      [products, totalCount] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          include: {
+            pricingTiers: true,
+            quantityPricing: true,
+          },
+          orderBy,
+          skip,
+          take: limitNum,
+        }),
+        prisma.product.count({ where }),
+      ])
+    }
 
     const totalPages = Math.ceil(totalCount / limitNum)
 

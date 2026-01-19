@@ -3,26 +3,28 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Instagram, Facebook, Send } from 'lucide-react';
+import { useLanguageStore } from '@/stores/languageStore';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { t } = useLanguageStore();
 
   const footerLinks = {
     catalog: [
-      { label: 'Barcha kategoriyalar', href: '/catalog' },
-      { label: 'Mashhurlar', href: '/catalog?sort=popular' },
-      { label: 'Yangiliklar', href: '/catalog?sort=newest' },
+      { label: t.footer.allCategories, href: '/catalog' },
+      { label: t.footer.popular, href: '/catalog?sort=popular' },
+      { label: t.footer.newest, href: '/catalog?sort=newest' },
     ],
     company: [
-      { label: 'Biz haqimizda', href: '/about' },
-      { label: 'Yetkazib berish', href: '/delivery' },
-      { label: 'Tolov', href: '/payment' },
-      { label: 'Kontaktlar', href: '/contacts' },
+      { label: t.footer.aboutUs, href: '/about' },
+      { label: t.footer.delivery, href: '/delivery' },
+      { label: t.footer.payment, href: '/payment' },
+      { label: t.footer.contacts, href: '/contacts' },
     ],
     support: [
-      { label: 'FAQ', href: '/faq' },
-      { label: 'Arenda shartlari', href: '/terms' },
-      { label: 'Maxfiylik siyosati', href: '/privacy' },
+      { label: t.footer.faq, href: '/faq' },
+      { label: t.footer.rentalTerms, href: '/terms' },
+      { label: t.footer.privacyPolicy, href: '/privacy' },
     ],
   };
 
@@ -39,8 +41,7 @@ export function Footer() {
               <span className="font-bold text-xl">RaadArenda</span>
             </Link>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Toshkentda tadbirlar uchun jihozlar ijarasi. Keng tanlov,
-              qulay narxlar, tezkor yetkazib berish.
+              {t.footer.description}
             </p>
             <div className="flex gap-3">
               <motion.a
@@ -78,7 +79,7 @@ export function Footer() {
 
           {/* Catalog Links */}
           <div>
-            <h3 className="font-semibold mb-4">Katalog</h3>
+            <h3 className="font-semibold mb-4">{t.footer.catalog}</h3>
             <ul className="space-y-2">
               {footerLinks.catalog.map((link) => (
                 <li key={link.href}>
@@ -95,7 +96,7 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-semibold mb-4">Kompaniya</h3>
+            <h3 className="font-semibold mb-4">{t.footer.company}</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -112,7 +113,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-semibold mb-4">Kontaktlar</h3>
+            <h3 className="font-semibold mb-4">{t.footer.contacts}</h3>
             <ul className="space-y-3">
               <li>
                 <a
@@ -134,7 +135,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3 text-slate-500 dark:text-slate-400 text-sm">
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>Toshkent sh., Amir Temur ko&apos;chasi, 1</span>
+                <span>{t.footer.address}</span>
               </li>
             </ul>
           </div>
@@ -143,7 +144,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-slate-200 dark:border-slate-700 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            © {currentYear} RaadArenda. Barcha huquqlar himoyalangan.
+            © {currentYear} RaadArenda. {t.footer.allRightsReserved}.
           </p>
           <div className="flex gap-6">
             {footerLinks.support.map((link) => (

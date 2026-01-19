@@ -3,12 +3,77 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronDown } from 'lucide-react';
+import {
+  Search,
+  X,
+  ChevronDown,
+  Monitor,
+  Tv,
+  Flower2,
+  Armchair,
+  Sofa,
+  Lamp,
+  Music,
+  UtensilsCrossed,
+  PartyPopper,
+  Tent,
+  Camera,
+  Wine,
+  ChefHat,
+  Table,
+  Sparkles,
+  type LucideIcon
+} from 'lucide-react';
 import { categoriesApi, productsApi } from '@/lib/website/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/website/ui';
 import { ProductCard } from '@/components/website/catalog';
 import { cn } from '@/lib/website/utils';
 import { useLanguageStore } from '@/stores/languageStore';
+
+// Icon name to component mapping
+const iconMap: Record<string, LucideIcon> = {
+  monitor: Monitor,
+  tv: Tv,
+  television: Tv,
+  flower: Flower2,
+  flower2: Flower2,
+  sprout: Flower2,
+  armchair: Armchair,
+  chair: Armchair,
+  sofa: Sofa,
+  couch: Sofa,
+  lamp: Lamp,
+  light: Lamp,
+  music: Music,
+  audio: Music,
+  sound: Music,
+  utensils: UtensilsCrossed,
+  food: UtensilsCrossed,
+  catering: UtensilsCrossed,
+  party: PartyPopper,
+  celebration: PartyPopper,
+  tent: Tent,
+  outdoor: Tent,
+  camera: Camera,
+  photo: Camera,
+  wine: Wine,
+  drinks: Wine,
+  bar: Wine,
+  chef: ChefHat,
+  kitchen: ChefHat,
+  table: Table,
+  furniture: Table,
+  sparkles: Sparkles,
+  decor: Sparkles,
+  decoration: Sparkles,
+};
+
+function CategoryIcon({ name, className }: { name: string | null; className?: string }) {
+  if (!name) return null;
+  const IconComponent = iconMap[name.toLowerCase()];
+  if (!IconComponent) return null;
+  return <IconComponent className={className || 'h-4 w-4'} />;
+}
 
 export default function CatalogPage() {
   const searchParams = useSearchParams();
@@ -131,7 +196,7 @@ export default function CatalogPage() {
                         : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
                     )}
                   >
-                    {category.icon && <span>{category.icon}</span>}
+                    <CategoryIcon name={category.icon} className="h-4 w-4" />
                     {category.name}
                   </button>
                 ))}

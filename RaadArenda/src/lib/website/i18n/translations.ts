@@ -111,11 +111,20 @@ export const translations = {
 
     // Footer
     footer: {
-      description: 'Ваш надежный партнер по аренде оборудования для мероприятий в Ташкенте',
-      quickLinks: 'Быстрые ссылки',
-      categories: 'Категории',
-      contact: 'Контакты',
-      workingHours: 'Часы работы',
+      description: 'Аренда оборудования для мероприятий в Ташкенте. Широкий выбор, удобные цены, быстрая доставка.',
+      catalog: 'Каталог',
+      company: 'Компания',
+      contacts: 'Контакты',
+      allCategories: 'Все категории',
+      popular: 'Популярные',
+      newest: 'Новинки',
+      aboutUs: 'О нас',
+      delivery: 'Доставка',
+      payment: 'Оплата',
+      faq: 'FAQ',
+      rentalTerms: 'Условия аренды',
+      privacyPolicy: 'Политика конфиденциальности',
+      address: 'Ташкент, ул. Амира Темура, 1',
       allRightsReserved: 'Все права защищены',
     },
 
@@ -355,11 +364,20 @@ export const translations = {
 
     // Footer
     footer: {
-      description: "Toshkentda tadbirlar uchun jihozlar ijarasida ishonchli hamkoringiz",
-      quickLinks: 'Tezkor havolalar',
-      categories: 'Kategoriyalar',
-      contact: 'Aloqa',
-      workingHours: 'Ish vaqti',
+      description: "Toshkentda tadbirlar uchun jihozlar ijarasi. Keng tanlov, qulay narxlar, tezkor yetkazib berish.",
+      catalog: 'Katalog',
+      company: 'Kompaniya',
+      contacts: 'Kontaktlar',
+      allCategories: 'Barcha kategoriyalar',
+      popular: 'Mashhurlar',
+      newest: 'Yangiliklar',
+      aboutUs: 'Biz haqimizda',
+      delivery: 'Yetkazib berish',
+      payment: "To'lov",
+      faq: 'FAQ',
+      rentalTerms: 'Arenda shartlari',
+      privacyPolicy: 'Maxfiylik siyosati',
+      address: "Toshkent sh., Amir Temur ko'chasi, 1",
       allRightsReserved: 'Barcha huquqlar himoyalangan',
     },
 
@@ -599,11 +617,20 @@ export const translations = {
 
     // Footer
     footer: {
-      description: 'Your reliable partner for event equipment rental in Tashkent',
-      quickLinks: 'Quick Links',
-      categories: 'Categories',
-      contact: 'Contact',
-      workingHours: 'Working Hours',
+      description: 'Event equipment rental in Tashkent. Wide selection, affordable prices, fast delivery.',
+      catalog: 'Catalog',
+      company: 'Company',
+      contacts: 'Contacts',
+      allCategories: 'All categories',
+      popular: 'Popular',
+      newest: 'New arrivals',
+      aboutUs: 'About us',
+      delivery: 'Delivery',
+      payment: 'Payment',
+      faq: 'FAQ',
+      rentalTerms: 'Rental terms',
+      privacyPolicy: 'Privacy policy',
+      address: 'Tashkent, Amir Temur st., 1',
       allRightsReserved: 'All rights reserved',
     },
 
