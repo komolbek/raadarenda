@@ -6,29 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Sparkles, Truck, Shield, Clock, Phone } from 'lucide-react';
 import { Button, Card } from '@/components/website/ui';
 import { settingsApi } from '@/lib/website/api';
-
-const features = [
-  {
-    icon: Sparkles,
-    title: 'Keng tanlov',
-    description: 'Har qanday tadbirlar uchun 500 dan ortiq mahsulot',
-  },
-  {
-    icon: Truck,
-    title: 'Tezkor yetkazib berish',
-    description: 'Toshkent bo\'ylab buyurtma kunida yetkazib berish',
-  },
-  {
-    icon: Shield,
-    title: 'Sifat kafolati',
-    description: 'Barcha mahsulotlar tekshirilgan',
-  },
-  {
-    icon: Clock,
-    title: 'Moslashuvchan muddatlar',
-    description: '1 kundan 1 oygacha ijara',
-  },
-];
+import { useLanguageStore } from '@/stores/languageStore';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,12 +24,37 @@ const itemVariants = {
 };
 
 export default function HomePage() {
+  const { t } = useLanguageStore();
+
   const { data: settings } = useQuery({
     queryKey: ['businessSettings'],
     queryFn: settingsApi.getBusinessSettings,
   });
 
   const phoneNumber = settings?.phone || '+998901234567';
+
+  const features = [
+    {
+      icon: Sparkles,
+      title: t.home.features.quality.title,
+      description: t.home.features.quality.description,
+    },
+    {
+      icon: Truck,
+      title: t.home.features.delivery.title,
+      description: t.home.features.delivery.description,
+    },
+    {
+      icon: Shield,
+      title: t.home.features.support.title,
+      description: t.home.features.support.description,
+    },
+    {
+      icon: Clock,
+      title: t.home.features.pricing.title,
+      description: t.home.features.pricing.description,
+    },
+  ];
 
   return (
     <div className="space-y-16 py-8">
@@ -70,22 +73,13 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10 max-w-2xl">
-            <motion.span
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm mb-4"
-            >
-              Tadbirlar uchun ijara
-            </motion.span>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
             >
-              Mukammal tadbiringiz uchun hamma narsa
+              {t.home.heroTitle}
             </motion.h1>
 
             <motion.p
@@ -94,8 +88,7 @@ export default function HomePage() {
               transition={{ delay: 0.4 }}
               className="text-lg text-white/80 mb-8 max-w-lg"
             >
-              Mebel, dekor, yorug&apos;lik, ovoz va boshqalar. To&apos;y, korporativ yoki shaxsiy
-              ziyofat uchun kerakli hamma narsani ijaraga oling.
+              {t.home.heroSubtitle}
             </motion.p>
 
             <motion.div
@@ -110,7 +103,7 @@ export default function HomePage() {
                   className="bg-white text-primary-600 hover:bg-white/90 shadow-xl"
                   rightIcon={<ArrowRight className="h-5 w-5" />}
                 >
-                  Katalogni ko&apos;rish
+                  {t.home.viewCatalog}
                 </Button>
               </Link>
             </motion.div>
@@ -120,6 +113,14 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="container mx-auto px-4">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-2xl md:text-3xl font-bold text-center mb-8"
+        >
+          {t.home.whyChooseUs}
+        </motion.h2>
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -150,21 +151,20 @@ export default function HomePage() {
           className="rounded-3xl bg-slate-100 dark:bg-slate-800 p-8 md:p-12 text-center"
         >
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Tadbir tashkil qilishga tayyormisiz?
+            {t.home.readyToStart}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-lg mx-auto mb-6">
-            Katalogimizdan kerakli narsalarni tanlang yoki individual tanlov uchun
-            biz bilan bog&apos;laning.
+            {t.home.ctaSubtitle}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/catalog">
               <Button size="lg" variant="gradient">
-                Katalogga o&apos;tish
+                {t.home.browseProducts}
               </Button>
             </Link>
             <a href={`tel:${phoneNumber}`}>
               <Button size="lg" variant="outline" leftIcon={<Phone className="h-5 w-5" />}>
-                Qo&apos;ng&apos;iroq qilish
+                {t.nav.contact}
               </Button>
             </a>
           </div>
