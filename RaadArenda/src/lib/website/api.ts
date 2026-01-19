@@ -42,7 +42,8 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
-      window.location.href = '/auth';
+      // Don't redirect automatically - let the auth store and page components handle it
+      // This prevents redirect loops when multiple 401s happen simultaneously
     }
     return Promise.reject(error);
   }
@@ -187,7 +188,25 @@ export const userApi = {
   // Addresses
   getAddresses: async (): Promise<Address[]> => {
     const { data } = await api.get('/user/addresses');
-    return data.addresses || data;
+    // API returns { success: true, data: [...] }
+    const addresses = data.data || data.addresses || [];
+    return Array.isArray(addresses) ? addresses.map((addr: Record<string, unknown>) => ({
+      id: addr.id as string,
+      userId: (addr.user_id || addr.userId) as string,
+      title: addr.title as string,
+      fullAddress: (addr.full_address || addr.fullAddress) as string,
+      city: addr.city as string,
+      district: (addr.district || null) as string | null,
+      street: (addr.street || null) as string | null,
+      building: (addr.building || null) as string | null,
+      apartment: (addr.apartment || null) as string | null,
+      entrance: (addr.entrance || null) as string | null,
+      floor: (addr.floor || null) as string | null,
+      latitude: addr.latitude as number | null,
+      longitude: addr.longitude as number | null,
+      isDefault: (addr.is_default ?? addr.isDefault ?? false) as boolean,
+      createdAt: (addr.created_at || addr.createdAt || '') as string,
+    })) : [];
   },
 
   createAddress: async (address: Omit<Address, 'id' | 'userId' | 'createdAt'>): Promise<Address> => {
@@ -211,11 +230,26 @@ export const userApi = {
   // Favorites
   getFavorites: async (): Promise<Product[]> => {
     const { data } = await api.get('/user/favorites');
-    return data.favorites || data;
+    // API returns { success: true, data: [...] }
+    const products = data.data || data.favorites || [];
+    return Array.isArray(products) ? products.map((p: Record<string, unknown>) => ({
+      id: p.id as string,
+      name: p.name as string,
+      categoryId: (p.category_id || p.categoryId) as string,
+      photos: (p.photos || []) as string[],
+      specifications: p.specifications || {},
+      dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
+      pricingTiers: (p.pricing_tiers || p.pricingTiers || []) as Product['pricingTiers'],
+      quantityPricing: (p.quantity_pricing || p.quantityPricing || []) as Product['quantityPricing'],
+      totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      isActive: (p.is_active ?? p.isActive ?? true) as boolean,
+      createdAt: (p.created_at || p.createdAt || '') as string,
+    })) : [];
   },
 
   addToFavorites: async (productId: string): Promise<void> => {
-    await api.post(`/user/favorites/${productId}`);
+    // API expects product_id in the body, not URL
+    await api.post('/user/favorites', { product_id: productId });
   },
 
   removeFromFavorites: async (productId: string): Promise<void> => {
@@ -225,7 +259,19 @@ export const userApi = {
   // Cards
   getCards: async (): Promise<Card[]> => {
     const { data } = await api.get('/user/cards');
-    return data.cards || data;
+    // API returns { success: true, data: [...] }
+    const cards = data.data || data.cards || [];
+    return Array.isArray(cards) ? cards.map((card: Record<string, unknown>) => ({
+      id: card.id as string,
+      userId: (card.user_id || card.userId) as string,
+      cardNumber: (card.card_number || card.cardNumber) as string,
+      cardHolder: (card.card_holder || card.cardHolder) as string,
+      expiryMonth: (card.expiry_month ?? card.expiryMonth) as number,
+      expiryYear: (card.expiry_year ?? card.expiryYear) as number,
+      cardType: (card.card_type || card.cardType) as string,
+      isDefault: (card.is_default ?? card.isDefault ?? false) as boolean,
+      createdAt: (card.created_at || card.createdAt || '') as string,
+    })) : [];
   },
 
   addCard: async (cardNumber: string, expiryDate: string): Promise<Card> => {
@@ -253,18 +299,40 @@ export const ordersApi = {
     payment_method: 'PAYME' | 'CLICK' | 'UZUM';
     notes?: string;
   }): Promise<Order> => {
-    const { data } = await api.post('/orders', order);
-    return data.order || data;
+    // Map address_id to delivery_address_id expected by the API
+    const apiPayload = {
+      items: order.items,
+      rental_start_date: order.rental_start_date,
+      rental_end_date: order.rental_end_date,
+      delivery_type: order.delivery_type,
+      delivery_address_id: order.address_id,
+      payment_method: order.payment_method,
+      notes: order.notes,
+    };
+    const { data } = await api.post('/orders', apiPayload);
+    // API returns { success: true, data: {...} }
+    const orderData = data.data || data.order || data;
+    return orderData;
   },
 
   getMyOrders: async (params?: { page?: number; limit?: number }): Promise<PaginatedResponse<Order>> => {
     const { data } = await api.get('/orders/my-orders', { params });
-    return data;
+    // API returns { success: true, data: [...], pagination: {...} }
+    const orders = data.data || data.orders || [];
+    const pagination = data.pagination || {};
+    return {
+      items: Array.isArray(orders) ? orders : [],
+      total: pagination.total_count || 0,
+      page: pagination.current_page || 1,
+      limit: pagination.limit || 20,
+      totalPages: pagination.total_pages || 1,
+    };
   },
 
   getById: async (id: string): Promise<Order> => {
     const { data } = await api.get(`/orders/${id}`);
-    return data.order || data;
+    // API returns { success: true, data: {...} }
+    return data.data || data.order || data;
   },
 };
 
@@ -272,12 +340,25 @@ export const ordersApi = {
 export const settingsApi = {
   getBusinessSettings: async (): Promise<BusinessSettings> => {
     const { data } = await api.get('/business/info');
-    return data.settings || data;
+    // API returns { success: true, data: {...} }
+    const settings = data.data || data.settings || data;
+    return {
+      name: settings.name || '',
+      phone: settings.phone || '',
+      address: settings.address || '',
+      latitude: settings.latitude,
+      longitude: settings.longitude,
+      workingHours: settings.working_hours || settings.workingHours || '',
+      telegramUrl: settings.telegram_url || settings.telegramUrl,
+      deliveryInfo: settings.delivery_info || settings.deliveryInfo,
+    };
   },
 
   getDeliveryZones: async (): Promise<DeliveryZone[]> => {
     const { data } = await api.get('/settings/delivery-zones');
-    return data.zones || data;
+    // API likely returns { success: true, data: [...] }
+    const zones = data.data || data.zones || [];
+    return Array.isArray(zones) ? zones : [];
   },
 };
 
