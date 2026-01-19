@@ -1,0 +1,53 @@
+{
+  "name": "raadarenda-backend",
+  "version": "1.0.0",
+  "description": "RaadArenda - Multi-purpose rental platform backend",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "lint": "eslint . --ext .ts,.tsx",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.16.2",
+    "@tanstack/react-table": "8.21.3",
+    "@uploadthing/react": "^7.3.3",
+    "bcryptjs": "2.4.3",
+    "cloudinary": "2.8.0",
+    "cookie": "^1.1.1",
+    "date-fns": "4.1.0",
+    "formidable": "3.5.4",
+    "ioredis": "5.3.2",
+    "lucide-react": "0.546.0",
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "3.3.0",
+    "sharp": "^0.34.5",
+    "uploadthing": "^7.7.4",
+    "zod": "3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie": "^1.0.0",
+    "@types/formidable": "^3.4.6",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.2",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "prisma": "6.16.2",
+    "tailwindcss": "3.4.0",
+    "typescript": "5.1.6"
+  },
+  "packageManager": "pnpm@10.16.1"
+}

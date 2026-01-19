@@ -2,6 +2,7 @@
 node_modules/
 .pnp/
 .pnp.js
+.pnpm-store/
 
 # Build outputs
 dist/
@@ -12,6 +13,7 @@ out/
 # Environment files
 .env
 .env.local
+.env.*.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -34,6 +36,39 @@ Thumbs.db
 # Claude
 .claude/
 
+# iOS
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Prisma
+prisma/migrations/
+
 # Misc
 *.log
+*.tmp
 *.tsbuildinfo
+.cache/
+coverage/
+
+# Uploads (local development)
+public/uploads/
