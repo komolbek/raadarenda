@@ -261,17 +261,23 @@ export const userApi = {
     const { data } = await api.get('/user/cards');
     // API returns { success: true, data: [...] }
     const cards = data.data || data.cards || [];
-    return Array.isArray(cards) ? cards.map((card: Record<string, unknown>) => ({
-      id: card.id as string,
-      userId: (card.user_id || card.userId) as string,
-      cardNumber: (card.card_number || card.cardNumber) as string,
-      cardHolder: (card.card_holder || card.cardHolder) as string,
-      expiryMonth: (card.expiry_month ?? card.expiryMonth) as number,
-      expiryYear: (card.expiry_year ?? card.expiryYear) as number,
-      cardType: (card.card_type || card.cardType) as string,
-      isDefault: (card.is_default ?? card.isDefault ?? false) as boolean,
-      createdAt: (card.created_at || card.createdAt || '') as string,
-    })) : [];
+    return Array.isArray(cards) ? cards.map((card: Record<string, unknown>) => {
+      // Combine expiry_month and expiry_year into expiryDate format MM/YY
+      const expiryMonth = (card.expiry_month ?? card.expiryMonth ?? 1) as number;
+      const expiryYear = (card.expiry_year ?? card.expiryYear ?? 25) as number;
+      const expiryDate = `${String(expiryMonth).padStart(2, '0')}/${String(expiryYear).padStart(2, '0')}`;
+      const cardType = ((card.card_type || card.cardType || 'UNKNOWN') as string).toUpperCase();
+
+      return {
+        id: card.id as string,
+        userId: (card.user_id || card.userId) as string,
+        cardNumber: (card.card_number || card.cardNumber) as string,
+        cardType: cardType as Card['cardType'],
+        expiryDate,
+        isDefault: (card.is_default ?? card.isDefault ?? false) as boolean,
+        createdAt: (card.created_at || card.createdAt || '') as string,
+      };
+    }) : [];
   },
 
   addCard: async (cardNumber: string, expiryDate: string): Promise<Card> => {
@@ -342,15 +348,29 @@ export const settingsApi = {
     const { data } = await api.get('/business/info');
     // API returns { success: true, data: {...} }
     const settings = data.data || data.settings || data;
+
+    // Parse working_hours string (e.g., "09:00 - 18:00") into the expected format
+    const workingHoursStr = settings.working_hours || settings.workingHours || '09:00 - 18:00';
+    const [open, close] = workingHoursStr.split(' - ').map((s: string) => s.trim());
+    const workingHours: BusinessSettings['workingHours'] = {
+      monday: { open, close },
+      tuesday: { open, close },
+      wednesday: { open, close },
+      thursday: { open, close },
+      friday: { open, close },
+      saturday: { open, close },
+      sunday: { open, close, isClosed: true },
+    };
+
     return {
-      name: settings.name || '',
+      id: settings.id || 'default',
+      businessName: settings.name || settings.businessName || '',
       phone: settings.phone || '',
       address: settings.address || '',
-      latitude: settings.latitude,
-      longitude: settings.longitude,
-      workingHours: settings.working_hours || settings.workingHours || '',
-      telegramUrl: settings.telegram_url || settings.telegramUrl,
-      deliveryInfo: settings.delivery_info || settings.deliveryInfo,
+      email: settings.email || null,
+      latitude: settings.latitude ?? null,
+      longitude: settings.longitude ?? null,
+      workingHours,
     };
   },
 
