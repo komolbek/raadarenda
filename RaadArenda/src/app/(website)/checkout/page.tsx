@@ -74,18 +74,29 @@ export default function CheckoutPage() {
         userApi.getAddresses(),
         settingsApi.getBusinessSettings(),
       ]);
-      setAddresses(addressesData);
+
+      // Ensure addressesData is an array
+      const safeAddresses = Array.isArray(addressesData) ? addressesData : [];
+      setAddresses(safeAddresses);
       setPickupAddress(settingsData.address || '');
 
       // Set default address if available
-      const defaultAddr = addressesData.find((a) => a.isDefault);
+      const defaultAddr = safeAddresses.find((a) => a.isDefault);
       if (defaultAddr) {
         setSelectedAddressId(defaultAddr.id);
-      } else if (addressesData.length > 0) {
-        setSelectedAddressId(addressesData[0].id);
+      } else if (safeAddresses.length > 0) {
+        setSelectedAddressId(safeAddresses[0].id);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to fetch data:', error);
+      // If 401 error, redirect to login
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 401) {
+          router.push('/auth?from=/checkout');
+          return;
+        }
+      }
     } finally {
       setLoading(false);
     }
