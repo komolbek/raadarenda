@@ -32,9 +32,9 @@ export function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
+                <span className="text-white font-bold text-xl">4</span>
               </div>
-              <span className="font-bold text-xl">EventRent</span>
+              <span className="font-bold text-xl">4Event</span>
             </Link>
             <p className="text-muted-foreground text-sm">
               Аренда оборудования для мероприятий в Ташкенте. Широкий выбор,
@@ -123,11 +123,11 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:info@eventrent.uz"
+                  href="mailto:info@4event.uz"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors text-sm"
                 >
                   <Mail className="h-4 w-4 shrink-0" />
-                  info@eventrent.uz
+                  info@4event.uz
                 </a>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground text-sm">
@@ -141,7 +141,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} EventRent. Все права защищены.
+            © {currentYear} 4Event. Все права защищены.
           </p>
           <div className="flex gap-6">
             {footerLinks.support.map((link) => (

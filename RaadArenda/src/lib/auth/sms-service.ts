@@ -44,6 +44,6 @@ export async function sendOTPSMS(
   phoneNumber: string,
   code: string
 ): Promise<SMSResult> {
-  const message = `RaadArenda: Ваш код подтверждения: ${code}. Не сообщайте его никому.`
+  const message = `4Event: Ваш код подтверждения: ${code}. Не сообщайте его никому.`
   return sendSMS(phoneNumber, message)
 }

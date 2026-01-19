@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -65,20 +65,24 @@ export function ProductDetailPage() {
 
   const isFav = product ? isFavorite(product.id) : false;
 
-  // Calculate pricing
-  const rentalDays = dateRange?.from && dateRange?.to
-    ? calculateRentalDays(dateRange.from, dateRange.to)
-    : 1;
+  // Calculate pricing with useMemo to ensure recalculation on date/quantity change
+  const rentalDays = useMemo(() => {
+    return dateRange?.from && dateRange?.to
+      ? calculateRentalDays(dateRange.from, dateRange.to)
+      : 1;
+  }, [dateRange]);
 
-  const priceInfo = product
-    ? calculatePrice(
-        product.dailyPrice,
-        rentalDays,
-        quantity,
-        product.pricingTiers,
-        product.quantityPricing
-      )
-    : { totalPrice: 0, dailyPriceUsed: 0, savings: 0 };
+  const priceInfo = useMemo(() => {
+    return product
+      ? calculatePrice(
+          product.dailyPrice,
+          rentalDays,
+          quantity,
+          product.pricingTiers,
+          product.quantityPricing
+        )
+      : { totalPrice: 0, dailyPriceUsed: 0, savings: 0 };
+  }, [product, rentalDays, quantity]);
 
   const handleAddToCart = () => {
     if (!product || !dateRange?.from || !dateRange?.to) {

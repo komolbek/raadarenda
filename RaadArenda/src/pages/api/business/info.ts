@@ -25,7 +25,7 @@ export default async function handler(
         update: {},
         create: {
           id: 'default',
-          name: 'RaadArenda',
+          name: '4Event',
           phone: '+998888008002',
           address: 'Ташкент, Узбекистан',
           workingHours: '09:00 - 18:00',

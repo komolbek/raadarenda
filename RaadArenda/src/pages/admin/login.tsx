@@ -37,12 +37,12 @@ export default function AdminLogin() {
   return (
     <>
       <Head>
-        <title>Вход - RaadArenda Admin</title>
+        <title>Вход - 4Event Admin</title>
       </Head>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">RaadArenda</h1>
+            <h1 className="text-2xl font-bold text-gray-900">4Event</h1>
             <p className="text-gray-600">Панель администратора</p>
           </div>
 
