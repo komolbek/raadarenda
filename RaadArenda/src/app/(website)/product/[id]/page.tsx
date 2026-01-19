@@ -36,7 +36,7 @@ export default function ProductDetailPage() {
   const { t } = useLanguageStore();
   const { addItem } = useCartStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,6 +82,11 @@ export default function ProductDetailPage() {
 
   const handleFavoriteClick = async () => {
     if (!product) return;
+
+    // Wait for hydration before checking auth
+    if (!_hasHydrated) {
+      return;
+    }
 
     if (!isAuthenticated) {
       toast.error(t.favorites.loginRequired);
@@ -212,17 +217,6 @@ export default function ProductDetailPage() {
               >
                 <Heart className={cn('h-6 w-6', isFav && 'fill-current')} />
               </motion.button>
-
-              {/* Stock badge */}
-              <div className="absolute top-4 left-4">
-                {product.totalStock > 0 ? (
-                  <Badge variant="success">
-                    {t.product.inStock}: {product.totalStock} {t.product.pcs}
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive">{t.product.outOfStock}</Badge>
-                )}
-              </div>
             </div>
 
             {/* Thumbnail gallery */}
@@ -249,13 +243,33 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-              <p className="text-2xl font-bold text-primary-500">
-                {formatPrice(product.dailyPrice)} UZS
-                <span className="text-base font-normal text-slate-500 dark:text-slate-400 ml-2">
-                  / {t.common.perDay}
-                </span>
-              </p>
+              <h1 className="text-3xl font-bold mb-3">{product.name}</h1>
+              <div className="flex flex-wrap items-center gap-4 mb-3">
+                <p className="text-2xl font-bold text-primary-500">
+                  {formatPrice(product.dailyPrice)} UZS
+                  <span className="text-base font-normal text-slate-500 dark:text-slate-400 ml-2">
+                    / {t.common.perDay}
+                  </span>
+                </p>
+              </div>
+              {/* Stock indicator - modern inline style */}
+              <div className="flex items-center gap-2">
+                {product.totalStock > 0 ? (
+                  <>
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      {t.product.inStock} — {product.totalStock} {t.product.pcs}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                    <span className="text-sm text-red-600 dark:text-red-400 font-medium">
+                      {t.product.outOfStock}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Date Selection */}
@@ -462,33 +476,42 @@ export default function ProductDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowSuccessModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
-                  <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{t.product.addedToCart}</h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">{product?.name}</p>
-                <div className="flex gap-3">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                  className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-6 shadow-lg shadow-green-500/30"
+                >
+                  <Check className="h-10 w-10 text-white" />
+                </motion.div>
+                <h3 className="text-2xl font-bold mb-2">{t.product.addedToCart}</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-8 line-clamp-2">{product?.name}</p>
+                <div className="flex flex-col gap-3">
+                  <Link href="/cart" className="w-full">
+                    <Button size="lg" className="w-full h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow">
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      {t.product.goToCart}
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
-                    className="flex-1"
+                    size="lg"
+                    className="w-full h-14 text-base font-semibold rounded-xl border-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
                     onClick={() => setShowSuccessModal(false)}
                   >
                     {t.product.continueShopping}
                   </Button>
-                  <Link href="/cart" className="flex-1">
-                    <Button className="w-full">{t.product.goToCart}</Button>
-                  </Link>
                 </div>
               </div>
             </motion.div>

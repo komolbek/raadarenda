@@ -15,20 +15,30 @@ import { Button } from '@/components/website/ui';
 export default function FavoritesPage() {
   const router = useRouter();
   const { t } = useLanguageStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { favorites, isLoading, fetchFavorites } = useFavoritesStore();
 
   useEffect(() => {
+    // Wait for auth store to hydrate before checking authentication
+    if (!_hasHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/auth?from=/favorites');
       return;
     }
 
     fetchFavorites();
-  }, [isAuthenticated, router, fetchFavorites]);
+  }, [isAuthenticated, _hasHydrated, router, fetchFavorites]);
 
-  if (!isAuthenticated) {
-    return null;
+  // Show loading state until hydration is complete
+  if (!_hasHydrated || !isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
+        </div>
+      </div>
+    );
   }
 
   if (isLoading) {

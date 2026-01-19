@@ -20,7 +20,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, className }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
   const { t } = useLanguageStore();
 
@@ -30,6 +30,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Wait for hydration before checking auth - if not hydrated yet, just return silently
+    if (!_hasHydrated) {
+      return;
+    }
 
     if (!isAuthenticated) {
       toast.error(t.favorites.loginRequired);
