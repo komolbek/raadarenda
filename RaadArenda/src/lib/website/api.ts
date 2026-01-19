@@ -76,7 +76,17 @@ export const authApi = {
 export const categoriesApi = {
   getAll: async (): Promise<Category[]> => {
     const { data } = await api.get('/categories');
-    return data.categories || data;
+    // API returns { success: true, data: [...] } with snake_case fields
+    const categories = data.data || data.categories || data;
+    return Array.isArray(categories) ? categories.map((cat: Record<string, unknown>) => ({
+      id: cat.id as string,
+      name: cat.name as string,
+      icon: (cat.icon_name || cat.icon || null) as string | null,
+      image: (cat.image_url || cat.image || null) as string | null,
+      displayOrder: (cat.display_order ?? cat.displayOrder ?? 0) as number,
+      isActive: (cat.is_active ?? cat.isActive ?? true) as boolean,
+      createdAt: (cat.created_at || cat.createdAt || '') as string,
+    })) : [];
   },
 };
 
@@ -90,12 +100,63 @@ export const productsApi = {
     sort?: string;
   }): Promise<PaginatedResponse<Product>> => {
     const { data } = await api.get('/products', { params });
-    return data;
+    // API returns { success, data: [...], pagination: {...} }
+    const products = data.data || data.items || [];
+    const pagination = data.pagination || {};
+
+    // Map snake_case product fields to camelCase
+    const mappedProducts = Array.isArray(products) ? products.map((p: Record<string, unknown>) => ({
+      id: p.id as string,
+      name: p.name as string,
+      categoryId: (p.category_id || p.categoryId) as string,
+      photos: (p.photos || []) as string[],
+      specifications: p.specifications || {},
+      dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
+      pricingTiers: (p.pricing_tiers || p.pricingTiers || []) as Product['pricingTiers'],
+      quantityPricing: (p.quantity_pricing || p.quantityPricing || []) as Product['quantityPricing'],
+      totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      isActive: (p.is_active ?? p.isActive ?? true) as boolean,
+      createdAt: (p.created_at || p.createdAt || '') as string,
+    })) : [];
+
+    return {
+      items: mappedProducts,
+      total: pagination.total_count || pagination.total || mappedProducts.length,
+      page: pagination.current_page || pagination.page || 1,
+      limit: pagination.limit || 12,
+      totalPages: pagination.total_pages || pagination.totalPages || 1,
+    };
   },
 
   getById: async (id: string): Promise<Product> => {
     const { data } = await api.get(`/products/${id}`);
-    return data.product || data;
+    // API returns { success, data: {...} } with snake_case fields
+    const p = data.data || data.product || data;
+    return {
+      id: p.id as string,
+      name: p.name as string,
+      categoryId: (p.category_id || p.categoryId) as string,
+      photos: (p.photos || []) as string[],
+      specifications: p.specifications || {},
+      dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
+      pricingTiers: ((p.pricing_tiers || p.pricingTiers || []) as Array<{ days?: number; min_days?: number; minDays?: number; total_price?: number; totalPrice?: number; dailyPrice?: number; daily_price?: number }>).map((tier) => ({
+        id: '',
+        productId: p.id as string,
+        minDays: tier.days || tier.min_days || tier.minDays || 0,
+        maxDays: null,
+        dailyPrice: tier.total_price || tier.totalPrice || tier.dailyPrice || tier.daily_price || 0,
+      })),
+      quantityPricing: ((p.quantity_pricing || p.quantityPricing || []) as Array<{ quantity?: number; min_quantity?: number; minQuantity?: number; total_price?: number; totalPrice?: number; pricePerUnit?: number; price_per_unit?: number }>).map((qp) => ({
+        id: '',
+        productId: p.id as string,
+        minQuantity: qp.quantity || qp.min_quantity || qp.minQuantity || 0,
+        maxQuantity: null,
+        pricePerUnit: qp.total_price || qp.totalPrice || qp.pricePerUnit || qp.price_per_unit || 0,
+      })),
+      totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      isActive: (p.is_active ?? p.isActive ?? true) as boolean,
+      createdAt: (p.created_at || p.createdAt || '') as string,
+    };
   },
 
   checkAvailability: async (

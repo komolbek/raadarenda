@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronDown, Grid3X3, LayoutList } from 'lucide-react';
+import { Search, X, ChevronDown } from 'lucide-react';
 import { categoriesApi, productsApi } from '@/lib/website/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/website/ui';
 import { ProductCard } from '@/components/website/catalog';
@@ -14,7 +13,6 @@ import { useLanguageStore } from '@/stores/languageStore';
 export default function CatalogPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { t } = useLanguageStore();
 
   const categoryId = searchParams?.get('category') || undefined;
@@ -177,39 +175,11 @@ export default function CatalogPage() {
           )}
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={cn(
-              'p-2 rounded-lg transition-colors',
-              viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-white/50 dark:hover:bg-slate-700/50'
-            )}
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={cn(
-              'p-2 rounded-lg transition-colors',
-              viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-white/50 dark:hover:bg-slate-700/50'
-            )}
-          >
-            <LayoutList className="h-4 w-4" />
-          </button>
-        </div>
       </motion.div>
 
       {/* Products Grid */}
       {productsLoading ? (
-        <div
-          className={cn(
-            'grid gap-4',
-            viewMode === 'grid'
-              ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-              : 'grid-cols-1'
-          )}
-        >
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(12)].map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -230,12 +200,7 @@ export default function CatalogPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={cn(
-              'grid gap-4',
-              viewMode === 'grid'
-                ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-                : 'grid-cols-1'
-            )}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
             <AnimatePresence mode="popLayout">
               {products?.items.map((product, index) => (

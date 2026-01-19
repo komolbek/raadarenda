@@ -103,7 +103,7 @@ export interface Card {
 // Order types
 export type OrderStatus = 'CONFIRMED' | 'PREPARING' | 'DELIVERED' | 'RETURNED' | 'CANCELLED';
 export type DeliveryType = 'DELIVERY' | 'SELF_PICKUP';
-export type PaymentMethod = 'PAYME' | 'CLICK' | 'UZUM';
+export type PaymentMethod = 'CASH' | 'ONLINE' | 'PAYME' | 'CLICK' | 'UZUM';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED';
 
 export interface OrderItem {
