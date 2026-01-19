@@ -10,6 +10,7 @@ import { Card, Badge } from '@/components/website/ui';
 import { formatPrice, cn } from '@/lib/website/utils';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useLanguageStore } from '@/stores/languageStore';
 import { toast } from 'react-hot-toast';
 
 interface ProductCardProps {
@@ -21,24 +22,25 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const { t } = useLanguageStore();
 
   const isFav = isFavorite(product.id);
-  const hasDiscount = product.pricingTiers.length > 0 || product.quantityPricing.length > 0;
+  const hasDiscount = (product.pricingTiers?.length ?? 0) > 0 || (product.quantityPricing?.length ?? 0) > 0;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error('Sevimliga qo\'shish uchun hisobingizga kiring');
+      toast.error(t.favorites.loginRequired);
       return;
     }
 
     try {
       await toggleFavorite(product);
-      toast.success(isFav ? 'Sevimlilardan o\'chirildi' : 'Sevimlilarga qo\'shildi');
+      toast.success(isFav ? t.favorites.removedFromFavorites : t.favorites.addedToFavorites);
     } catch (error) {
-      toast.error('Sevimlilarni yangilab bo\'lmadi');
+      toast.error(t.favorites.updateError);
     }
   };
 
@@ -53,14 +55,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <Card hover className={cn('overflow-hidden group', className)}>
           {/* Image */}
           <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-            {product.photos[0] ? (
+            {product.photos?.[0] ? (
               <motion.div
                 className="h-full w-full"
                 animate={{ scale: isHovered ? 1.05 : 1 }}
                 transition={{ duration: 0.3 }}
               >
                 <Image
-                  src={product.photos[0]}
+                  src={product.photos![0]}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -79,17 +81,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <div className="absolute top-3 left-3 flex flex-col gap-1">
               {hasDiscount && (
                 <Badge variant="success" size="sm">
-                  Chegirma
+                  {t.common.discount}
                 </Badge>
               )}
               {product.totalStock <= 3 && product.totalStock > 0 && (
                 <Badge variant="warning" size="sm">
-                  {product.totalStock} ta qoldi
+                  {product.totalStock} {t.common.itemsLeft}
                 </Badge>
               )}
               {product.totalStock === 0 && (
                 <Badge variant="destructive" size="sm">
-                  Mavjud emas
+                  {t.common.notAvailable}
                 </Badge>
               )}
             </div>
@@ -140,7 +142,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 <p className="text-lg font-bold text-primary-500">
                   {formatPrice(product.dailyPrice)} UZS
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">kuniga</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t.common.perDay}</p>
               </div>
 
               <motion.div

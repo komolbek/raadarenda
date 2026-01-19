@@ -9,23 +9,25 @@ import { categoriesApi, productsApi } from '@/lib/website/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/website/ui';
 import { ProductCard } from '@/components/website/catalog';
 import { cn } from '@/lib/website/utils';
-
-const sortOptions = [
-  { value: 'newest', label: 'Eng yangilar' },
-  { value: 'popular', label: 'Mashhurlik bo\'yicha' },
-  { value: 'price_asc', label: 'Arzon' },
-  { value: 'price_desc', label: 'Qimmat' },
-];
+import { useLanguageStore } from '@/stores/languageStore';
 
 export default function CatalogPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { t } = useLanguageStore();
 
   const categoryId = searchParams?.get('category') || undefined;
   const search = searchParams?.get('q') || undefined;
   const sort = searchParams?.get('sort') || 'newest';
   const page = parseInt(searchParams?.get('page') || '1');
+
+  const sortOptions = [
+    { value: 'newest', label: t.catalog.sort.newest },
+    { value: 'popular', label: t.catalog.sort.popular },
+    { value: 'price_asc', label: t.catalog.sort.priceAsc },
+    { value: 'price_desc', label: t.catalog.sort.priceDesc },
+  ];
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
@@ -62,6 +64,19 @@ export default function CatalogPage() {
     router.push(`/catalog?${newParams.toString()}`);
   };
 
+  const getTitle = () => {
+    if (selectedCategory) return selectedCategory.name;
+    if (search) return t.catalog.searchResults.replace('{query}', search);
+    return t.catalog.title;
+  };
+
+  const getProductsCount = () => {
+    if (products?.total) {
+      return t.catalog.productsCount.replace('{count}', String(products.total));
+    }
+    return t.common.loading;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -71,7 +86,7 @@ export default function CatalogPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-bold mb-2"
         >
-          {selectedCategory ? selectedCategory.name : search ? `Qidiruv: "${search}"` : 'Katalog'}
+          {getTitle()}
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -79,9 +94,7 @@ export default function CatalogPage() {
           transition={{ delay: 0.1 }}
           className="text-slate-500 dark:text-slate-400"
         >
-          {products?.total
-            ? `${products.total} ta mahsulot`
-            : 'Yuklanmoqda...'}
+          {getProductsCount()}
         </motion.p>
       </div>
 
@@ -103,7 +116,7 @@ export default function CatalogPage() {
                   : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
               )}
             >
-              Hammasi
+              {t.common.all}
             </button>
             {categoriesLoading
               ? [...Array(6)].map((_, i) => (
@@ -204,11 +217,11 @@ export default function CatalogPage() {
       ) : products?.items.length === 0 ? (
         <EmptyState
           icon={<Search className="h-12 w-12" />}
-          title="Hech narsa topilmadi"
-          description="Qidiruv parametrlarini o'zgartiring yoki boshqa kategoriyani tanlang"
+          title={t.catalog.noResults}
+          description={t.catalog.noResultsDescription}
           action={
             <Button onClick={() => router.push('/catalog')}>
-              Filtrlarni tozalash
+              {t.catalog.clearFilters}
             </Button>
           }
         />

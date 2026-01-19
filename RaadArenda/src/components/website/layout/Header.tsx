@@ -20,8 +20,10 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useLanguageStore } from '@/stores/languageStore';
 import { cn } from '@/lib/website/utils';
 import { Button } from '@/components/website/ui';
+import { LanguageSelector } from './LanguageSelector';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +35,7 @@ export function Header() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const { itemCount } = useCartStore();
   const { theme, setTheme, resolvedTheme } = useThemeStore();
+  const { t } = useLanguageStore();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +60,8 @@ export function Header() {
   };
 
   const navLinks = [
-    { href: '/', label: 'Bosh sahifa' },
-    { href: '/catalog', label: 'Katalog' },
+    { href: '/', label: t.nav.home },
+    { href: '/catalog', label: t.nav.catalog },
   ];
 
   return (
@@ -102,7 +105,7 @@ export function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Mahsulotlarni qidirish..."
+                placeholder={`${t.common.search}...`}
                 className="w-full h-10 rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
@@ -131,6 +134,9 @@ export function Header() {
                 <Moon className="h-5 w-5" />
               )}
             </motion.button>
+
+            {/* Language Selector */}
+            <LanguageSelector />
 
             {/* Cart */}
             <Link href="/cart" className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -182,7 +188,7 @@ export function Header() {
                         className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl z-50 py-2 overflow-hidden"
                       >
                         <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                          <p className="font-medium truncate">{user?.name || 'Foydalanuvchi'}</p>
+                          <p className="font-medium truncate">{user?.name || t.nav.profile}</p>
                           <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                             {user?.phoneNumber}
                           </p>
@@ -194,7 +200,7 @@ export function Header() {
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                           >
                             <User className="h-4 w-4 text-slate-500" />
-                            <span>Profil</span>
+                            <span>{t.nav.profile}</span>
                           </Link>
                           <Link
                             href="/orders"
@@ -202,7 +208,7 @@ export function Header() {
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                           >
                             <Package className="h-4 w-4 text-slate-500" />
-                            <span>Buyurtmalarim</span>
+                            <span>{t.nav.orders}</span>
                           </Link>
                           <Link
                             href="/favorites"
@@ -210,7 +216,7 @@ export function Header() {
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                           >
                             <Heart className="h-4 w-4 text-slate-500" />
-                            <span>Sevimlilar</span>
+                            <span>{t.nav.favorites}</span>
                           </Link>
                         </div>
                         <div className="border-t border-slate-200 dark:border-slate-700 pt-1">
@@ -219,7 +225,7 @@ export function Header() {
                             className="flex items-center gap-3 px-4 py-2.5 w-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-red-500"
                           >
                             <LogOut className="h-4 w-4" />
-                            <span>Chiqish</span>
+                            <span>{t.nav.logout}</span>
                           </button>
                         </div>
                       </motion.div>
@@ -230,7 +236,7 @@ export function Header() {
             ) : (
               <Link href="/auth">
                 <Button size="sm" variant="primary">
-                  Kirish
+                  {t.nav.login}
                 </Button>
               </Link>
             )}
