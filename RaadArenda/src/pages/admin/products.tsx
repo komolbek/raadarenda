@@ -435,7 +435,7 @@ export default function Products() {
   return (
     <>
       <Head>
-        <title>Товары - RaadArenda Admin</title>
+        <title>Товары - 4Event Admin</title>
       </Head>
       <AdminLayout title="Товары">
         {/* Header */}

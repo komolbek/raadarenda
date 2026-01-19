@@ -112,7 +112,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Главная - RaadArenda Admin</title>
+        <title>Главная - 4Event Admin</title>
       </Head>
       <AdminLayout title="Главная">
         {/* Stats Cards */}

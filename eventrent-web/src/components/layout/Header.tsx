@@ -68,9 +68,9 @@ export function Header() {
               whileHover={{ scale: 1.05 }}
               className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center"
             >
-              <span className="text-white font-bold text-lg">E</span>
+              <span className="text-white font-bold text-lg">4</span>
             </motion.div>
-            <span className="font-bold text-xl hidden sm:block">EventRent</span>
+            <span className="font-bold text-xl hidden sm:block">4Event</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -181,7 +181,7 @@ export function Header() {
                         <div className="px-4 py-3 border-b border-border">
                           <p className="font-medium truncate">{user?.name || 'Пользователь'}</p>
                           <p className="text-sm text-muted-foreground truncate">
-                            {user?.phoneNumber}
+                            {user?.phone_number}
                           </p>
                         </div>
                         <div className="py-1">

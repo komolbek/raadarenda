@@ -1,9 +1,9 @@
 // User types
 export interface User {
   id: string;
-  phoneNumber: string;
+  phone_number: string;
   name: string | null;
-  createdAt: string;
+  created_at: string;
 }
 
 // Category types

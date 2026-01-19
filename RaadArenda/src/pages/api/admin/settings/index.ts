@@ -29,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         settings = await prisma.businessSettings.create({
           data: {
             id: 'default',
-            name: 'RaadArenda',
+            name: '4Event',
             phone: '',
             address: '',
             workingHours: '09:00 - 18:00',
@@ -78,7 +78,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         update: updateData,
         create: {
           id: 'default',
-          name: body.name || 'RaadArenda',
+          name: body.name || '4Event',
           phone: body.phone || '',
           address: body.address || '',
           latitude: body.latitude,

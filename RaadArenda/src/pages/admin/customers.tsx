@@ -155,7 +155,7 @@ export default function Customers() {
   return (
     <>
       <Head>
-        <title>Клиенты - RaadArenda Admin</title>
+        <title>Клиенты - 4Event Admin</title>
       </Head>
       <AdminLayout title="Клиенты">
         {/* Header */}

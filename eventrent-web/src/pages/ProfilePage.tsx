@@ -164,7 +164,7 @@ export function ProfilePage() {
                     </div>
                   )}
                   <p className="text-muted-foreground">
-                    {user?.phoneNumber ? formatPhoneNumber(user.phoneNumber) : ''}
+                    {user?.phone_number ? formatPhoneNumber(user.phone_number) : ''}
                   </p>
                 </div>
               </div>

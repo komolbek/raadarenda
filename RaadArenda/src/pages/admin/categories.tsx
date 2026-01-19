@@ -233,7 +233,7 @@ export default function Categories() {
   return (
     <>
       <Head>
-        <title>Категории - RaadArenda Admin</title>
+        <title>Категории - 4Event Admin</title>
       </Head>
       <AdminLayout title="Категории">
         {/* Header */}

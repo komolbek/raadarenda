@@ -79,7 +79,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         }`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b">
-          <span className="text-xl font-bold text-blue-600">RaadArenda</span>
+          <span className="text-xl font-bold text-blue-600">4Event</span>
           <button
             className="lg:hidden"
             onClick={() => setSidebarOpen(false)}

@@ -139,7 +139,7 @@ export default function Orders() {
   return (
     <>
       <Head>
-        <title>Заказы - RaadArenda Admin</title>
+        <title>Заказы - 4Event Admin</title>
       </Head>
       <AdminLayout title="Заказы">
         {/* Filters */}

@@ -77,14 +77,12 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       message: t('loginSuccess'),
-      data: {
-        user: {
-          id: user.id,
-          phone_number: user.phoneNumber,
-          name: user.name,
-          created_at: user.createdAt,
-        },
-        session_token: sessionToken,
+      token: sessionToken,
+      user: {
+        id: user.id,
+        phone_number: user.phoneNumber,
+        name: user.name,
+        created_at: user.createdAt,
       },
     })
   } catch (error) {
