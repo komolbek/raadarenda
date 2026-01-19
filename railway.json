@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "cd RaadArenda && pnpm install && pnpm run build",
+    "watchPatterns": ["RaadArenda/**"]
+  },
+  "deploy": {
+    "startCommand": "cd RaadArenda && pnpm run start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10,
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300
+  }
+}
