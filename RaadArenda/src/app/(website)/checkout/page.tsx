@@ -21,11 +21,13 @@ import { useLanguageStore } from '@/stores/languageStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { ordersApi, userApi, settingsApi } from '@/lib/website/api';
-import type { Address, DeliveryType, PaymentMethod } from '@/lib/website/types';
+import type { Address, DeliveryType } from '@/lib/website/types';
+
+type CheckoutPaymentMethod = 'PAYME' | 'CLICK' | 'UZUM';
 import { formatPrice, formatDateShort, cn } from '@/lib/website/utils';
 import { Button, Card } from '@/components/website/ui';
 
-const paymentMethods: { id: PaymentMethod; name: string; icon: string }[] = [
+const paymentMethods: { id: CheckoutPaymentMethod; name: string; icon: string }[] = [
   { id: 'PAYME', name: 'Payme', icon: '💳' },
   { id: 'CLICK', name: 'Click', icon: '📱' },
   { id: 'UZUM', name: 'Uzum', icon: '🏦' },
@@ -39,7 +41,7 @@ export default function CheckoutPage() {
 
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('DELIVERY');
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('PAYME');
+  const [selectedPayment, setSelectedPayment] = useState<CheckoutPaymentMethod>('PAYME');
   const [notes, setNotes] = useState('');
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [pickupAddress, setPickupAddress] = useState('');
