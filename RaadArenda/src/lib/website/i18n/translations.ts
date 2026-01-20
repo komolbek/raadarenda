@@ -128,6 +128,23 @@ export const translations = {
       allRightsReserved: 'Все права защищены',
     },
 
+    // About page
+    about: {
+      title: 'О нас',
+      subtitle: '4Event - ваш надежный партнер в организации мероприятий в Ташкенте',
+      yearsExperience: 'лет опыта',
+      happyClients: 'довольных клиентов',
+      eventsOrganized: 'мероприятий',
+      support: 'поддержка',
+      whoWeAre: 'Кто мы',
+      whoWeAreText: '4Event - это сервис аренды инвентаря для мероприятий в Ташкенте. Мы предоставляем широкий выбор оборудования для свадеб, корпоративов, дней рождения и других торжеств. Наша миссия - сделать каждое ваше мероприятие незабываемым.',
+      whyUs: 'Почему мы',
+      reason1: 'Широкий ассортимент качественного оборудования',
+      reason2: 'Доступные цены и гибкая система скидок',
+      reason3: 'Быстрая доставка по всему Ташкенту',
+      reason4: 'Профессиональная консультация и поддержка',
+    },
+
     // Product page
     product: {
       addToCart: 'Добавить в корзину',
@@ -198,6 +215,25 @@ export const translations = {
       saveName: 'Сохранить',
       nameUpdated: 'Имя обновлено',
       updateError: 'Ошибка при обновлении',
+      fillRequiredFields: 'Заполните обязательные поля',
+      addressTitle: 'Название адреса',
+      addressTitlePlaceholder: 'Дом, Работа и т.д.',
+      fullAddress: 'Полный адрес',
+      fullAddressPlaceholder: 'Улица, дом, квартира',
+      city: 'Город',
+      district: 'Район',
+      districtPlaceholder: 'Мирзо Улугбек и т.д.',
+      street: 'Улица',
+      streetPlaceholder: 'Название улицы',
+      building: 'Дом',
+      buildingPlaceholder: 'Номер дома',
+      apartment: 'Квартира',
+      apartmentPlaceholder: 'Кв.',
+      entrance: 'Подъезд',
+      entrancePlaceholder: '№',
+      floor: 'Этаж',
+      floorPlaceholder: '№',
+      selectOnMap: 'Выберите на карте',
     },
 
     // Orders page
@@ -381,6 +417,23 @@ export const translations = {
       allRightsReserved: 'Barcha huquqlar himoyalangan',
     },
 
+    // About page
+    about: {
+      title: 'Biz haqimizda',
+      subtitle: "4Event - Toshkentda tadbirlarni tashkil etishda ishonchli hamkoringiz",
+      yearsExperience: 'yillik tajriba',
+      happyClients: 'mamnun mijozlar',
+      eventsOrganized: 'tadbirlar',
+      support: "qo'llab-quvvatlash",
+      whoWeAre: 'Biz kim',
+      whoWeAreText: "4Event - bu Toshkentda tadbirlar uchun jihozlar ijarasi xizmati. Biz to'ylar, korporativ tadbirlar, tug'ilgan kunlar va boshqa bayramlar uchun keng turdagi jihozlarni taqdim etamiz. Bizning vazifamiz - har bir tadbiringizni unutilmas qilish.",
+      whyUs: 'Nega biz',
+      reason1: 'Sifatli jihozlarning keng assortimenti',
+      reason2: "Qulay narxlar va moslashuvchan chegirmalar tizimi",
+      reason3: 'Butun Toshkent bo\'ylab tezkor yetkazib berish',
+      reason4: "Professional maslahat va qo'llab-quvvatlash",
+    },
+
     // Product page
     product: {
       addToCart: "Savatga qo'shish",
@@ -451,6 +504,25 @@ export const translations = {
       saveName: 'Saqlash',
       nameUpdated: 'Ism yangilandi',
       updateError: 'Yangilashda xato',
+      fillRequiredFields: 'Majburiy maydonlarni to\'ldiring',
+      addressTitle: 'Manzil nomi',
+      addressTitlePlaceholder: 'Uy, Ish va h.k.',
+      fullAddress: 'To\'liq manzil',
+      fullAddressPlaceholder: 'Ko\'cha, uy, xonadon',
+      city: 'Shahar',
+      district: 'Tuman',
+      districtPlaceholder: 'Mirzo Ulug\'bek va h.k.',
+      street: 'Ko\'cha',
+      streetPlaceholder: 'Ko\'cha nomi',
+      building: 'Uy',
+      buildingPlaceholder: 'Uy raqami',
+      apartment: 'Xonadon',
+      apartmentPlaceholder: 'Xon.',
+      entrance: 'Kirish',
+      entrancePlaceholder: '№',
+      floor: 'Qavat',
+      floorPlaceholder: '№',
+      selectOnMap: 'Xaritadan tanlang',
     },
 
     // Orders page
@@ -634,6 +706,23 @@ export const translations = {
       allRightsReserved: 'All rights reserved',
     },
 
+    // About page
+    about: {
+      title: 'About Us',
+      subtitle: '4Event - your reliable partner in organizing events in Tashkent',
+      yearsExperience: 'years of experience',
+      happyClients: 'happy clients',
+      eventsOrganized: 'events organized',
+      support: 'support',
+      whoWeAre: 'Who We Are',
+      whoWeAreText: '4Event is an event equipment rental service in Tashkent. We provide a wide range of equipment for weddings, corporate events, birthdays and other celebrations. Our mission is to make every event unforgettable.',
+      whyUs: 'Why Choose Us',
+      reason1: 'Wide range of quality equipment',
+      reason2: 'Affordable prices and flexible discount system',
+      reason3: 'Fast delivery throughout Tashkent',
+      reason4: 'Professional consultation and support',
+    },
+
     // Product page
     product: {
       addToCart: 'Add to Cart',
@@ -704,6 +793,25 @@ export const translations = {
       saveName: 'Save',
       nameUpdated: 'Name updated',
       updateError: 'Update failed',
+      fillRequiredFields: 'Please fill in required fields',
+      addressTitle: 'Address Name',
+      addressTitlePlaceholder: 'Home, Work, etc.',
+      fullAddress: 'Full Address',
+      fullAddressPlaceholder: 'Street, building, apartment',
+      city: 'City',
+      district: 'District',
+      districtPlaceholder: 'Mirzo Ulugbek, etc.',
+      street: 'Street',
+      streetPlaceholder: 'Street name',
+      building: 'Building',
+      buildingPlaceholder: 'Building number',
+      apartment: 'Apartment',
+      apartmentPlaceholder: 'Apt #',
+      entrance: 'Entrance',
+      entrancePlaceholder: '#',
+      floor: 'Floor',
+      floorPlaceholder: '#',
+      selectOnMap: 'Select on map',
     },
 
     // Orders page

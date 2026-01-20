@@ -27,10 +27,10 @@ type CheckoutPaymentMethod = 'PAYME' | 'CLICK' | 'UZUM';
 import { formatPrice, formatDateShort, cn } from '@/lib/website/utils';
 import { Button, Card } from '@/components/website/ui';
 
-const paymentMethods: { id: CheckoutPaymentMethod; name: string; icon: string }[] = [
-  { id: 'PAYME', name: 'Payme', icon: '💳' },
-  { id: 'CLICK', name: 'Click', icon: '📱' },
-  { id: 'UZUM', name: 'Uzum', icon: '🏦' },
+const paymentMethods: { id: CheckoutPaymentMethod; name: string; logo: string }[] = [
+  { id: 'PAYME', name: 'Payme', logo: '/images/payments/payme.svg' },
+  { id: 'CLICK', name: 'Click', logo: '/images/payments/click.svg' },
+  { id: 'UZUM', name: 'Uzum', logo: '/images/payments/uzum.svg' },
 ];
 
 export default function CheckoutPage() {
@@ -297,7 +297,14 @@ export default function CheckoutPage() {
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     )}
                   >
-                    <span className="text-2xl block mb-1">{method.icon}</span>
+                    <div className="relative h-10 w-full mb-2">
+                      <Image
+                        src={method.logo}
+                        alt={method.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
                     <span className="font-medium text-sm">{method.name}</span>
                   </button>
                 ))}

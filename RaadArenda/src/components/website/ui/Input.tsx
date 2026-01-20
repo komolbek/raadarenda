@@ -12,12 +12,13 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, leftIcon, rightIcon, type, ...props }, ref) => {
+  ({ className, label, error, helperText, leftIcon, rightIcon, type, required, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
           <label className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
             {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
@@ -28,6 +29,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             type={type}
+            required={required}
             className={cn(
               'flex h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-base transition-all duration-200',
               'placeholder:text-slate-400',

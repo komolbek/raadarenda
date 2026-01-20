@@ -13,6 +13,7 @@ import {
   Plus,
   Check,
   X,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -21,7 +22,21 @@ import { useAuthStore } from '@/stores/authStore';
 import { userApi } from '@/lib/website/api';
 import type { Address } from '@/lib/website/types';
 import { formatPhoneNumber, cn } from '@/lib/website/utils';
-import { Button, Card } from '@/components/website/ui';
+import { Button, Card, Modal, Input, YandexMapPicker } from '@/components/website/ui';
+
+interface AddressFormData {
+  title: string;
+  full_address: string;
+  city: string;
+  district: string;
+  street: string;
+  building: string;
+  apartment: string;
+  entrance: string;
+  floor: string;
+  latitude: number | null;
+  longitude: number | null;
+}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -33,6 +48,21 @@ export default function ProfilePage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [savingName, setSavingName] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState<AddressFormData>({
+    title: '',
+    full_address: '',
+    city: 'Ташкент',
+    district: '',
+    street: '',
+    building: '',
+    apartment: '',
+    entrance: '',
+    floor: '',
+    latitude: null,
+    longitude: null,
+  });
 
   useEffect(() => {
     // Wait for auth store to hydrate before checking authentication
@@ -97,6 +127,73 @@ export default function ProfilePage() {
     } catch (error) {
       toast.error(t.profile.updateError);
     }
+  };
+
+  const handleAddAddress = async () => {
+    if (!addressForm.title.trim() || !addressForm.full_address.trim()) {
+      toast.error(t.profile.fillRequiredFields || 'Please fill in required fields');
+      return;
+    }
+
+    try {
+      setSavingAddress(true);
+      const newAddress = await userApi.createAddress({
+        title: addressForm.title,
+        fullAddress: addressForm.full_address,
+        city: addressForm.city,
+        district: addressForm.district || null,
+        street: addressForm.street || null,
+        building: addressForm.building || null,
+        apartment: addressForm.apartment || null,
+        entrance: addressForm.entrance || null,
+        floor: addressForm.floor || null,
+        latitude: addressForm.latitude,
+        longitude: addressForm.longitude,
+        isDefault: addresses.length === 0,
+      });
+      setAddresses((prev) => [...prev, newAddress]);
+      setShowAddressModal(false);
+      setAddressForm({
+        title: '',
+        full_address: '',
+        city: 'Ташкент',
+        district: '',
+        street: '',
+        building: '',
+        apartment: '',
+        entrance: '',
+        floor: '',
+        latitude: null,
+        longitude: null,
+      });
+      toast.success(t.common.success);
+    } catch (error) {
+      console.error('Failed to add address:', error);
+      toast.error(t.profile.updateError);
+    } finally {
+      setSavingAddress(false);
+    }
+  };
+
+  const handleMapAddressSelect = (addressData: {
+    fullAddress: string;
+    city: string;
+    district: string;
+    street: string;
+    building: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    setAddressForm((prev) => ({
+      ...prev,
+      full_address: addressData.fullAddress,
+      city: addressData.city || 'Ташкент',
+      district: addressData.district,
+      street: addressData.street,
+      building: addressData.building,
+      latitude: addressData.latitude,
+      longitude: addressData.longitude,
+    }));
   };
 
   // Show loading state until hydration is complete
@@ -187,7 +284,7 @@ export default function ProfilePage() {
             <MapPin className="h-5 w-5 text-primary-500" />
             {t.profile.addresses}
           </h2>
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={() => setShowAddressModal(true)}>
             <Plus className="h-4 w-4 mr-1" />
             {t.profile.addAddress}
           </Button>
@@ -261,6 +358,114 @@ export default function ProfilePage() {
           </div>
         )}
       </Card>
+
+      {/* Add Address Modal */}
+      <Modal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        title={t.profile.addAddress}
+        size="xl"
+      >
+        <div className="space-y-4">
+          {/* Map Picker */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
+              {t.profile.selectOnMap || 'Выберите на карте'}
+            </label>
+            <YandexMapPicker
+              onAddressSelect={handleMapAddressSelect}
+              initialCoordinates={
+                addressForm.latitude && addressForm.longitude
+                  ? [addressForm.latitude, addressForm.longitude]
+                  : undefined
+              }
+            />
+          </div>
+
+          <Input
+            label={t.profile.addressTitle || 'Address Name'}
+            placeholder={t.profile.addressTitlePlaceholder || 'Home, Work, etc.'}
+            value={addressForm.title}
+            onChange={(e) => setAddressForm((prev) => ({ ...prev, title: e.target.value }))}
+            required
+          />
+
+          <Input
+            label={t.profile.fullAddress || 'Full Address'}
+            placeholder={t.profile.fullAddressPlaceholder || 'Street, building, apartment'}
+            value={addressForm.full_address}
+            onChange={(e) => setAddressForm((prev) => ({ ...prev, full_address: e.target.value }))}
+            required
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={t.profile.city || 'City'}
+              value={addressForm.city}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))}
+              disabled
+            />
+            <Input
+              label={t.profile.district || 'District'}
+              placeholder={t.profile.districtPlaceholder || 'Mirzo Ulugbek, etc.'}
+              value={addressForm.district}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, district: e.target.value }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={t.profile.street || 'Street'}
+              placeholder={t.profile.streetPlaceholder || 'Street name'}
+              value={addressForm.street}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, street: e.target.value }))}
+            />
+            <Input
+              label={t.profile.building || 'Building'}
+              placeholder={t.profile.buildingPlaceholder || 'Building number'}
+              value={addressForm.building}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, building: e.target.value }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <Input
+              label={t.profile.apartment || 'Apartment'}
+              placeholder={t.profile.apartmentPlaceholder || 'Apt #'}
+              value={addressForm.apartment}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, apartment: e.target.value }))}
+            />
+            <Input
+              label={t.profile.entrance || 'Entrance'}
+              placeholder={t.profile.entrancePlaceholder || '#'}
+              value={addressForm.entrance}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, entrance: e.target.value }))}
+            />
+            <Input
+              label={t.profile.floor || 'Floor'}
+              placeholder={t.profile.floorPlaceholder || '#'}
+              value={addressForm.floor}
+              onChange={(e) => setAddressForm((prev) => ({ ...prev, floor: e.target.value }))}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowAddressModal(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button onClick={handleAddAddress} disabled={savingAddress}>
+              {savingAddress ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t.common.saving || 'Saving...'}
+                </>
+              ) : (
+                t.common.save
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

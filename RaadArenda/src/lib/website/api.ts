@@ -222,8 +222,40 @@ export const userApi = {
   },
 
   createAddress: async (address: Omit<Address, 'id' | 'userId' | 'createdAt'>): Promise<Address> => {
-    const { data } = await api.post('/user/addresses', address);
-    return data.address || data;
+    // Convert camelCase to snake_case for API
+    const payload = {
+      title: address.title,
+      full_address: address.fullAddress,
+      city: address.city,
+      district: address.district,
+      street: address.street,
+      building: address.building,
+      apartment: address.apartment,
+      entrance: address.entrance,
+      floor: address.floor,
+      latitude: address.latitude,
+      longitude: address.longitude,
+    };
+    const { data } = await api.post('/user/addresses', payload);
+    // Map snake_case response to camelCase
+    const addr = data.data || data.address || data;
+    return {
+      id: addr.id,
+      userId: addr.user_id || addr.userId,
+      title: addr.title,
+      fullAddress: addr.full_address || addr.fullAddress,
+      city: addr.city,
+      district: addr.district,
+      street: addr.street,
+      building: addr.building,
+      apartment: addr.apartment,
+      entrance: addr.entrance,
+      floor: addr.floor,
+      latitude: addr.latitude ? Number(addr.latitude) : null,
+      longitude: addr.longitude ? Number(addr.longitude) : null,
+      isDefault: addr.is_default ?? addr.isDefault ?? false,
+      createdAt: addr.created_at || addr.createdAt || '',
+    };
   },
 
   updateAddress: async (id: string, address: Partial<Address>): Promise<Address> => {
