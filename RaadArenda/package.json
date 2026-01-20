@@ -1,11 +1,11 @@
 {
   "name": "raadarenda-backend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "RaadArenda - Multi-purpose rental platform backend",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma db push --accept-data-loss --skip-generate && prisma generate && next build",
+    "build": "rm -rf .next && prisma db push --accept-data-loss --skip-generate && prisma generate && next build",
     "start": "next start",
     "postinstall": "echo 'Skipping postinstall prisma generate - will run in build'",
     "lint": "eslint . --ext .ts,.tsx",
