@@ -20,7 +20,8 @@ export function formatPriceWithCurrency(price: number): string {
 }
 
 // Format phone number for display (+998 XX XXX XX XX)
-export function formatPhoneNumber(phone: string): string {
+export function formatPhoneNumber(phone: string | null | undefined): string {
+  if (!phone) return '';
   const cleaned = phone.replace(/\D/g, '');
   if (cleaned.length === 12 && cleaned.startsWith('998')) {
     return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 10)} ${cleaned.slice(10, 12)}`;
@@ -48,8 +49,10 @@ export function calculateRentalDays(startDate: Date, endDate: Date): number {
 }
 
 // Format date for display
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return '';
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'long',
@@ -58,8 +61,10 @@ export function formatDate(date: string | Date): string {
 }
 
 // Format date short
-export function formatDateShort(date: string | Date): string {
+export function formatDateShort(date: string | Date | null | undefined): string {
+  if (!date) return '';
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'short',

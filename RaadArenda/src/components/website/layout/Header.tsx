@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   Search,
   ShoppingCart,
@@ -67,16 +68,26 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/80">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-[72px] items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center"
-            >
-              <span className="text-white font-bold text-lg">R</span>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              {/* Icon only on mobile, full logo on desktop */}
+              <Image
+                src="/logo-icon.svg"
+                alt="4Event"
+                width={44}
+                height={44}
+                className="sm:hidden h-11 w-11"
+              />
+              <Image
+                src="/logo-horizontal.svg"
+                alt="4Event"
+                width={180}
+                height={52}
+                className="hidden sm:block h-[52px] w-auto"
+              />
             </motion.div>
-            <span className="font-bold text-xl hidden sm:block">RaadArenda</span>
           </Link>
 
           {/* Desktop Navigation */}

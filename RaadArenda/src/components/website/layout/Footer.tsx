@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Instagram, Facebook, Send } from 'lucide-react';
 import { useLanguageStore } from '@/stores/languageStore';
@@ -34,11 +35,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">R</span>
-              </div>
-              <span className="font-bold text-xl">RaadArenda</span>
+            <Link href="/" className="inline-block">
+              <Image
+                src="/logo-horizontal.svg"
+                alt="4Event"
+                width={200}
+                height={58}
+                className="h-[58px] w-auto"
+              />
             </Link>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
               {t.footer.description}
@@ -144,7 +148,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-slate-200 dark:border-slate-700 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            © {currentYear} RaadArenda. {t.footer.allRightsReserved}.
+            © {currentYear} 4Event. {t.footer.allRightsReserved}.
           </p>
           <div className="flex gap-6">
             {footerLinks.support.map((link) => (
