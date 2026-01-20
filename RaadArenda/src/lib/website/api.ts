@@ -177,12 +177,24 @@ export const productsApi = {
 export const userApi = {
   getProfile: async (): Promise<User> => {
     const { data } = await api.get('/user/profile');
-    return data.user || data;
+    const userData = data.data || data.user || data;
+    return {
+      id: userData.id,
+      phoneNumber: userData.phone_number || userData.phoneNumber || '',
+      name: userData.name || null,
+      createdAt: userData.created_at || userData.createdAt || '',
+    };
   },
 
   updateProfile: async (name: string): Promise<User> => {
     const { data } = await api.post('/user/profile', { name });
-    return data.user || data;
+    const userData = data.data || data.user || data;
+    return {
+      id: userData.id,
+      phoneNumber: userData.phone_number || userData.phoneNumber || '',
+      name: userData.name || null,
+      createdAt: userData.created_at || userData.createdAt || '',
+    };
   },
 
   // Addresses
@@ -326,19 +338,82 @@ export const ordersApi = {
     // API returns { success: true, data: [...], pagination: {...} }
     const orders = data.data || data.orders || [];
     const pagination = data.pagination || {};
+
+    // Map snake_case to camelCase for orders
+    const mappedOrders = Array.isArray(orders) ? orders.map((order: Record<string, unknown>) => ({
+      id: order.id as string,
+      orderNumber: (order.order_number || order.orderNumber) as string,
+      userId: (order.user_id || order.userId) as string,
+      status: order.status as string,
+      items: Array.isArray(order.items) ? order.items.map((item: Record<string, unknown>) => ({
+        id: item.id,
+        orderId: item.order_id || item.orderId,
+        productId: item.product_id || item.productId,
+        product: item.product,
+        quantity: item.quantity,
+        dailyPrice: item.daily_price || item.dailyPrice,
+        totalPrice: item.total_price || item.totalPrice,
+        rentalDays: item.rental_days || item.rentalDays,
+      })) : [],
+      deliveryType: (order.delivery_type || order.deliveryType) as string,
+      deliveryAddress: order.delivery_address || order.deliveryAddress,
+      deliveryAddressId: (order.delivery_address_id || order.deliveryAddressId) as string | null,
+      deliveryFee: (order.delivery_fee || order.deliveryFee || 0) as number,
+      subtotal: (order.subtotal || 0) as number,
+      totalAmount: (order.total_amount || order.totalAmount || 0) as number,
+      totalSavings: (order.total_savings || order.totalSavings || 0) as number,
+      rentalStartDate: (order.rental_start_date || order.rentalStartDate || '') as string,
+      rentalEndDate: (order.rental_end_date || order.rentalEndDate || '') as string,
+      paymentMethod: (order.payment_method || order.paymentMethod) as string,
+      paymentStatus: (order.payment_status || order.paymentStatus) as string,
+      notes: (order.notes || null) as string | null,
+      createdAt: (order.created_at || order.createdAt || '') as string,
+      updatedAt: (order.updated_at || order.updatedAt || '') as string,
+    })) : [];
+
     return {
-      items: Array.isArray(orders) ? orders : [],
-      total: pagination.total_count || 0,
-      page: pagination.current_page || 1,
+      items: mappedOrders as Order[],
+      total: pagination.total_count || pagination.total || 0,
+      page: pagination.current_page || pagination.page || 1,
       limit: pagination.limit || 20,
-      totalPages: pagination.total_pages || 1,
+      totalPages: pagination.total_pages || pagination.totalPages || 1,
     };
   },
 
   getById: async (id: string): Promise<Order> => {
     const { data } = await api.get(`/orders/${id}`);
     // API returns { success: true, data: {...} }
-    return data.data || data.order || data;
+    const order = data.data || data.order || data;
+    return {
+      id: order.id,
+      orderNumber: order.order_number || order.orderNumber,
+      userId: order.user_id || order.userId,
+      status: order.status,
+      items: Array.isArray(order.items) ? order.items.map((item: Record<string, unknown>) => ({
+        id: item.id,
+        orderId: item.order_id || item.orderId,
+        productId: item.product_id || item.productId,
+        product: item.product,
+        quantity: item.quantity,
+        dailyPrice: item.daily_price || item.dailyPrice,
+        totalPrice: item.total_price || item.totalPrice,
+        rentalDays: item.rental_days || item.rentalDays,
+      })) : [],
+      deliveryType: order.delivery_type || order.deliveryType,
+      deliveryAddress: order.delivery_address || order.deliveryAddress,
+      deliveryAddressId: order.delivery_address_id || order.deliveryAddressId,
+      deliveryFee: order.delivery_fee || order.deliveryFee || 0,
+      subtotal: order.subtotal || 0,
+      totalAmount: order.total_amount || order.totalAmount || 0,
+      totalSavings: order.total_savings || order.totalSavings || 0,
+      rentalStartDate: order.rental_start_date || order.rentalStartDate || '',
+      rentalEndDate: order.rental_end_date || order.rentalEndDate || '',
+      paymentMethod: order.payment_method || order.paymentMethod,
+      paymentStatus: order.payment_status || order.paymentStatus,
+      notes: order.notes || null,
+      createdAt: order.created_at || order.createdAt || '',
+      updatedAt: order.updated_at || order.updatedAt || '',
+    } as Order;
   },
 };
 
