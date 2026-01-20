@@ -7,3 +7,4 @@ export { Select, type SelectOption } from './Select';
 export { EmptyState } from './EmptyState';
 export { Skeleton, ProductCardSkeleton, CategoryCardSkeleton, OrderCardSkeleton, ProductDetailSkeleton } from './Skeleton';
 export { QuantitySelector } from './QuantitySelector';
+export { YandexMapPicker } from './YandexMapPicker';
