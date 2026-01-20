@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "rm -rf .next && prisma db push --accept-data-loss --skip-generate && prisma generate && next build",
+    "build": "find .next -mindepth 1 -maxdepth 1 ! -name 'cache' -exec rm -rf {} + 2>/dev/null || true && prisma db push --accept-data-loss --skip-generate && prisma generate && next build",
     "start": "next start",
     "postinstall": "echo 'Skipping postinstall prisma generate - will run in build'",
     "lint": "eslint . --ext .ts,.tsx",
