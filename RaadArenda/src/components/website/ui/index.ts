@@ -8,3 +8,4 @@ export { EmptyState } from './EmptyState';
 export { Skeleton, ProductCardSkeleton, CategoryCardSkeleton, OrderCardSkeleton, ProductDetailSkeleton } from './Skeleton';
 export { QuantitySelector } from './QuantitySelector';
 export { YandexMapPicker } from './YandexMapPicker';
+export { OrderConfirmation } from './OrderConfirmation';

@@ -4,14 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Truck,
   MapPin,
   CreditCard,
   Package,
   Check,
-  ChevronRight,
   Plus,
   AlertCircle,
 } from 'lucide-react';
@@ -25,7 +23,7 @@ import type { Address, DeliveryType } from '@/lib/website/types';
 
 type CheckoutPaymentMethod = 'PAYME' | 'CLICK' | 'UZUM';
 import { formatPrice, formatDateShort, cn } from '@/lib/website/utils';
-import { Button, Card } from '@/components/website/ui';
+import { Button, Card, OrderConfirmation } from '@/components/website/ui';
 
 const paymentMethods: { id: CheckoutPaymentMethod; name: string; logo: string }[] = [
   { id: 'PAYME', name: 'Payme', logo: '/images/payments/payme.svg' },
@@ -413,45 +411,19 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Success Modal */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-md w-full text-center"
-            >
-              <div className="mx-auto h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-                <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">{t.checkout.orderSuccess}</h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                {t.checkout.orderSuccessDescription}
-              </p>
-              <div className="flex gap-3">
-                <Link href="/catalog" className="flex-1">
-                  <Button variant="outline" className="w-full">
-                    {t.product.continueShopping}
-                  </Button>
-                </Link>
-                <Link href="/orders" className="flex-1">
-                  <Button className="w-full">
-                    {t.checkout.goToOrders}
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Order Confirmation Modal */}
+      <OrderConfirmation
+        isOpen={showSuccess}
+        orderId={orderId}
+        orderDetails={{
+          totalAmount: total,
+          itemCount: items.length,
+          deliveryType: deliveryType,
+          paymentMethod: selectedPayment,
+          rentalStartDate: items[0]?.rentalStartDate,
+          rentalEndDate: items[0]?.rentalEndDate,
+        }}
+      />
     </>
   );
 }

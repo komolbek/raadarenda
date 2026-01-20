@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { MapPin, Search, Loader2, CheckCircle } from 'lucide-react';
+import { MapPin, Search, Loader2, CheckCircle, Navigation } from 'lucide-react';
 import { cn } from '@/lib/website/utils';
 
 // Tashkent center coordinates
@@ -31,7 +31,8 @@ interface YandexMapPickerProps {
 
 declare global {
   interface Window {
-    ymaps: typeof ymaps;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ymaps: any;
   }
 }
 
@@ -41,24 +42,49 @@ export function YandexMapPicker({
   className,
 }: YandexMapPickerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<ymaps.Map | null>(null);
-  const placemarkerRef = useRef<ymaps.Placemark | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const placemarkerRef = useRef<any>(null);
   const onAddressSelectRef = useRef(onAddressSelect);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Keep the ref updated
   useEffect(() => {
     onAddressSelectRef.current = onAddressSelect;
   }, [onAddressSelect]);
 
-  const parseGeocoderResult = useCallback((geoObject: ymaps.IGeoObject): AddressData | null => {
+  // Auto-dismiss error after 5 seconds
+  const showError = useCallback((message: string) => {
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
+    setError(message);
+    errorTimeoutRef.current = setTimeout(() => {
+      setError(null);
+    }, 5000);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const parseGeocoderResult = useCallback((geoObject: any): AddressData | null => {
     try {
-      const properties = geoObject.properties as ymaps.IDataManager;
-      const geometry = geoObject.geometry as ymaps.IPointGeometry;
+      const properties = geoObject.properties;
+      const geometry = geoObject.geometry;
       const coords = geometry.getCoordinates();
 
       if (!coords) return null;
@@ -135,7 +161,7 @@ export function YandexMapPicker({
       lon < TASHKENT_BOUNDS.minLon ||
       lon > TASHKENT_BOUNDS.maxLon
     ) {
-      setError('Доставка только по Ташкенту');
+      showError('Доставка только по Ташкенту');
       return;
     }
 
@@ -176,13 +202,17 @@ export function YandexMapPicker({
           onAddressSelectRef.current(addressData);
           setSelectedAddress(addressData.fullAddress);
           setError(null);
+        } else {
+          showError('Не удалось определить адрес для этой точки');
         }
+      } else {
+        showError('Не удалось определить адрес');
       }
     } catch (err) {
       console.error('Geocoding error:', err);
-      setError('Не удалось определить адрес');
+      showError('Не удалось определить адрес. Проверьте подключение к интернету.');
     }
-  }, [parseGeocoderResult]);
+  }, [parseGeocoderResult, showError]);
 
   const handleSearch = useCallback(async () => {
     if (!window.ymaps || !mapRef.current || !searchQuery.trim()) return;
@@ -204,21 +234,77 @@ export function YandexMapPicker({
       const geoObject = result.geoObjects.get(0);
 
       if (geoObject) {
-        const coords = (geoObject.geometry as ymaps.IPointGeometry).getCoordinates();
+        const coords = geoObject.geometry.getCoordinates();
         if (coords) {
           mapRef.current.setCenter(coords, 17);
           handleMapClick(coords as [number, number]);
         }
       } else {
-        setError('Адрес не найден');
+        showError('Адрес не найден. Попробуйте другой запрос.');
       }
     } catch (err) {
       console.error('Search error:', err);
-      setError('Ошибка поиска');
+      showError('Ошибка поиска. Проверьте подключение к интернету.');
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery, handleMapClick]);
+  }, [searchQuery, handleMapClick, showError]);
+
+  const handleMyLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      showError('Геолокация не поддерживается вашим браузером');
+      return;
+    }
+
+    setIsLocating(true);
+    setError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+
+        // Check if within Tashkent bounds
+        if (
+          coords[0] < TASHKENT_BOUNDS.minLat ||
+          coords[0] > TASHKENT_BOUNDS.maxLat ||
+          coords[1] < TASHKENT_BOUNDS.minLon ||
+          coords[1] > TASHKENT_BOUNDS.maxLon
+        ) {
+          showError('Ваше местоположение за пределами Ташкента');
+          setIsLocating(false);
+          return;
+        }
+
+        if (mapRef.current) {
+          mapRef.current.setCenter(coords, 17);
+          handleMapClick(coords);
+        }
+        setIsLocating(false);
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            showError('Разрешите доступ к геолокации в настройках браузера');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            showError('Местоположение недоступно');
+            break;
+          case err.TIMEOUT:
+            showError('Время ожидания истекло. Попробуйте еще раз.');
+            break;
+          default:
+            showError('Не удалось определить местоположение');
+        }
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  }, [handleMapClick, showError]);
 
   useEffect(() => {
     // Load Yandex Maps API
@@ -230,7 +316,8 @@ export function YandexMapPicker({
         }
 
         const script = document.createElement('script');
-        script.src = 'https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU';
+        const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || '';
+        script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`;
         script.async = true;
         script.onload = () => {
           window.ymaps.ready(() => resolve());
@@ -261,7 +348,8 @@ export function YandexMapPicker({
         ]);
 
         // Click handler
-        mapRef.current.events.add('click', (e: ymaps.IEvent) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapRef.current.events.add('click', (e: any) => {
           const coords = e.get('coords') as [number, number];
           handleMapClick(coords);
         });
@@ -274,7 +362,7 @@ export function YandexMapPicker({
         setIsLoading(false);
       } catch (err) {
         console.error('Map init error:', err);
-        setError('Ошибка загрузки карты');
+        showError('Ошибка загрузки карты');
         setIsLoading(false);
       }
     };
@@ -287,7 +375,7 @@ export function YandexMapPicker({
         mapRef.current = null;
       }
     };
-  }, [initialCoordinates, handleMapClick]);
+  }, [initialCoordinates, handleMapClick, showError]);
 
   return (
     <div className={cn('relative', className)}>
@@ -311,6 +399,18 @@ export function YandexMapPicker({
             className="h-10 px-4 rounded-xl bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
           >
             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Найти'}
+          </button>
+          <button
+            onClick={handleMyLocation}
+            disabled={isLocating || isLoading}
+            className="h-10 w-10 rounded-xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+            title="Моё местоположение"
+          >
+            {isLocating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Navigation className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
