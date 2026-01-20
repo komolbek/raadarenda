@@ -23,6 +23,8 @@ export const uz = {
   addressCreated: 'Manzil qo\'shildi',
   addressUpdated: 'Manzil yangilandi',
   addressDeleted: 'Manzil o\'chirildi',
+  addressNotFound: 'Manzil topilmadi',
+  addressSetDefault: 'Manzil asosiy qilib belgilandi',
   maxAddressesReached: 'Maksimal manzillar soniga yetildi (5)',
 
   // Catalog

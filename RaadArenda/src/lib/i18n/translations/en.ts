@@ -23,6 +23,8 @@ export const en = {
   addressCreated: 'Address created',
   addressUpdated: 'Address updated',
   addressDeleted: 'Address deleted',
+  addressNotFound: 'Address not found',
+  addressSetDefault: 'Address set as default',
   maxAddressesReached: 'Maximum addresses reached (5)',
 
   // Catalog

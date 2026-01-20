@@ -23,6 +23,8 @@ export const ru = {
   addressCreated: 'Адрес добавлен',
   addressUpdated: 'Адрес обновлён',
   addressDeleted: 'Адрес удалён',
+  addressNotFound: 'Адрес не найден',
+  addressSetDefault: 'Адрес установлен как основной',
   maxAddressesReached: 'Достигнуто максимальное количество адресов (5)',
 
   // Catalog
