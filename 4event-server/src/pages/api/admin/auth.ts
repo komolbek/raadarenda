@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { serialize, parse } from 'cookie'
+import bcrypt from 'bcryptjs'
+import prisma from '@/lib/db'
 import {
-  verifyAdminKey,
   createAdminSession,
   validateAdminSession,
   clearAdminSession,
@@ -14,18 +15,78 @@ export default async function handler(
 ) {
   const t = createTranslator(req)
 
-  // Login
+  // Login with phone + password
   if (req.method === 'POST') {
-    const { api_key } = req.body
+    const { phone, password } = req.body
 
-    if (!api_key || !verifyAdminKey(api_key)) {
-      return res.status(401).json({
+    if (!phone || !password) {
+      return res.status(400).json({
         success: false,
-        message: t('adminInvalidKey'),
+        message: 'Введите номер телефона и пароль',
       })
     }
 
-    const sessionToken = createAdminSession()
+    // Normalize phone: ensure +998 prefix
+    const normalizedPhone = phone.startsWith('+') ? phone : `+${phone}`
+
+    const staff = await prisma.staff.findUnique({
+      where: { phoneNumber: normalizedPhone },
+    })
+
+    if (!staff || !staff.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Неверный номер телефона или пароль',
+      })
+    }
+
+    // First-time login: staff has no password yet
+    if (!staff.passwordHash) {
+      // Allow login without password for first-time setup
+      if (staff.mustChangePassword) {
+        const sessionToken = createAdminSession(staff.id)
+
+        res.setHeader(
+          'Set-Cookie',
+          serialize('admin_session', sessionToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24,
+            path: '/',
+          })
+        )
+
+        return res.status(200).json({
+          success: true,
+          mustChangePassword: true,
+          message: 'Необходимо установить пароль',
+        })
+      }
+
+      return res.status(401).json({
+        success: false,
+        message: 'Неверный номер телефона или пароль',
+      })
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, staff.passwordHash)
+
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        message: 'Неверный номер телефона или пароль',
+      })
+    }
+
+    // Update last login
+    await prisma.staff.update({
+      where: { id: staff.id },
+      data: { lastLoginAt: new Date() },
+    })
+
+    const sessionToken = createAdminSession(staff.id)
 
     res.setHeader(
       'Set-Cookie',
@@ -33,14 +94,28 @@ export default async function handler(
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 60 * 60 * 24, // 24 hours
+        maxAge: 60 * 60 * 24,
         path: '/',
       })
     )
 
+    // Check if must change password
+    if (staff.mustChangePassword) {
+      return res.status(200).json({
+        success: true,
+        mustChangePassword: true,
+        message: 'Необходимо установить пароль',
+      })
+    }
+
     return res.status(200).json({
       success: true,
       message: t('adminLoginSuccess'),
+      staff: {
+        id: staff.id,
+        name: staff.name,
+        role: staff.role,
+      },
     })
   }
 
@@ -49,7 +124,28 @@ export default async function handler(
     const cookies = parse(req.headers.cookie || '')
     const sessionToken = cookies.admin_session
 
-    if (!sessionToken || !validateAdminSession(sessionToken)) {
+    const result = validateAdminSession(sessionToken || '')
+
+    if (!result.valid || !result.staffId) {
+      return res.status(401).json({
+        success: false,
+        message: t('unauthorized'),
+      })
+    }
+
+    const staff = await prisma.staff.findUnique({
+      where: { id: result.staffId },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        phoneNumber: true,
+        isActive: true,
+        mustChangePassword: true,
+      },
+    })
+
+    if (!staff || !staff.isActive) {
       return res.status(401).json({
         success: false,
         message: t('unauthorized'),
@@ -59,6 +155,13 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       authenticated: true,
+      staff: {
+        id: staff.id,
+        name: staff.name,
+        role: staff.role,
+        phoneNumber: staff.phoneNumber,
+        mustChangePassword: staff.mustChangePassword,
+      },
     })
   }
 

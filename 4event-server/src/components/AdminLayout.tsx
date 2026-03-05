@@ -11,11 +11,19 @@ import {
   LogOut,
   Menu,
   X,
+  UserPlus,
 } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
   title: string
+}
+
+interface StaffInfo {
+  id: string
+  name: string
+  role: string
+  phoneNumber: string
 }
 
 const navItems = [
@@ -27,10 +35,15 @@ const navItems = [
   { href: '/admin/settings', label: 'Настройки', icon: Settings },
 ]
 
+const ownerNavItems = [
+  { href: '/admin/staff', label: 'Сотрудники', icon: UserPlus },
+]
+
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [staff, setStaff] = useState<StaffInfo | null>(null)
 
   useEffect(() => {
     checkAuth()
@@ -41,6 +54,15 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
       const res = await fetch('/api/admin/auth')
       if (!res.ok) {
         router.push('/admin/login')
+        return
+      }
+      const data = await res.json()
+      if (data.staff) {
+        setStaff(data.staff)
+      }
+      // Redirect to set-password if needed
+      if (data.staff?.mustChangePassword) {
+        router.push('/admin/set-password')
         return
       }
       setLoading(false)
@@ -57,10 +79,13 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     )
   }
+
+  const allNavItems =
+    staff?.role === 'OWNER' ? [...navItems, ...ownerNavItems] : navItems
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -79,7 +104,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         }`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b">
-          <span className="text-xl font-bold text-blue-600">4Event</span>
+          <span className="text-xl font-bold text-primary-500">4Event</span>
           <button
             className="lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -89,7 +114,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         </div>
 
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
+          {allNavItems.map((item) => {
             const Icon = item.icon
             const isActive = router.pathname === item.href
             return (
@@ -98,7 +123,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                 href={item.href}
                 className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-primary-50 text-primary-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -109,14 +134,38 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <LogOut className="h-5 w-5 mr-3" />
-            Выйти
-          </button>
+        {/* Staff info & Logout */}
+        <div className="absolute bottom-0 left-0 right-0 border-t">
+          {staff && (
+            <div className="px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 font-semibold text-sm">
+                  {staff.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {staff.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {staff.role === 'OWNER'
+                      ? 'Владелец'
+                      : staff.role === 'ADMIN'
+                      ? 'Администратор'
+                      : 'Менеджер'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="p-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Выйти
+            </button>
+          </div>
         </div>
       </aside>
 
