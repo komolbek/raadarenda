@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { generateOTP } from '@/lib/auth/otp-service'
-import { sendOTPSMS } from '@/lib/auth/sms-service'
+import { sendOTPSMS, isMockMode } from '@/lib/auth/sms-service'
 import { createTranslator } from '@/lib/i18n'
 import { logRequest, logResponse } from '@/lib/logger'
 import { z } from 'zod'
@@ -41,6 +41,8 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       message: t('otpSent'),
+      // In dev mode, return the code so clients can show it
+      ...(isMockMode() && { dev_code: code }),
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
