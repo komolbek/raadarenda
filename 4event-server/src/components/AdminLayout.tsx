@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   UserPlus,
+  MessageSquare,
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -37,6 +38,7 @@ const navItems = [
 
 const ownerNavItems = [
   { href: '/admin/staff', label: 'Сотрудники', icon: UserPlus },
+  { href: '/admin/dev-otp', label: 'SMS / OTP', icon: MessageSquare },
 ]
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {

@@ -1,10 +1,59 @@
-// SMS Service - Mock implementation for development
-// Replace with actual SMS provider (Eskiz, PlayMobile, etc.) in production
+// SMS Service — supports mock (dev) and Eskiz (prod) providers
+// Controlled by SMS_PROVIDER env var: "mock" | "eskiz"
 
 export interface SMSResult {
   success: boolean
   messageId?: string
   error?: string
+}
+
+// ===================== DEV OTP LOG =====================
+// In-memory store for OTPs sent in mock mode — displayed on /admin/dev-otp
+
+export interface DevOTPEntry {
+  id: string
+  phoneNumber: string
+  code: string
+  type: 'customer_auth' | 'admin_reset'
+  message: string
+  createdAt: string
+}
+
+const MAX_DEV_ENTRIES = 50
+const devOTPLog: DevOTPEntry[] = []
+
+export function getDevOTPLog(): DevOTPEntry[] {
+  return [...devOTPLog]
+}
+
+export function clearDevOTPLog(): void {
+  devOTPLog.length = 0
+}
+
+function addDevOTPEntry(
+  phoneNumber: string,
+  code: string,
+  type: DevOTPEntry['type'],
+  message: string
+) {
+  devOTPLog.unshift({
+    id: `dev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    phoneNumber,
+    code,
+    type,
+    message,
+    createdAt: new Date().toISOString(),
+  })
+  // Keep only last N entries
+  if (devOTPLog.length > MAX_DEV_ENTRIES) {
+    devOTPLog.length = MAX_DEV_ENTRIES
+  }
+}
+
+// ===================== SMS PROVIDERS =====================
+
+export function isMockMode(): boolean {
+  return (process.env.SMS_PROVIDER || 'mock') !== 'eskiz'
 }
 
 export async function sendSMS(
@@ -17,7 +66,6 @@ export async function sendSMS(
     case 'eskiz':
       return sendEskizSMS(phoneNumber, message)
     case 'mock':
-      return sendMockSMS(phoneNumber, message)
     default:
       return sendMockSMS(phoneNumber, message)
   }
@@ -27,13 +75,12 @@ async function sendMockSMS(
   phoneNumber: string,
   message: string
 ): Promise<SMSResult> {
-  // In development, just log the message
   console.log(`📱 [MOCK SMS] To: ${phoneNumber}`)
   console.log(`📱 [MOCK SMS] Message: ${message}`)
 
   return {
     success: true,
-    messageId: `mock_${Date.now()}`
+    messageId: `mock_${Date.now()}`,
   }
 }
 
@@ -48,21 +95,24 @@ async function sendEskizSMS(
   }
 
   try {
-    // Remove + prefix for Eskiz API
+    // Eskiz API expects phone without + prefix
     const phone = phoneNumber.replace(/^\+/, '')
 
-    const response = await fetch('https://notify.eskiz.uz/api/message/sms/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        mobile_phone: phone,
-        message,
-        from: process.env.SMS_SENDER || '4210',
-      }),
-    })
+    const response = await fetch(
+      'https://notify.eskiz.uz/api/message/sms/send',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mobile_phone: phone,
+          message,
+          from: process.env.SMS_SENDER || '4210',
+        }),
+      }
+    )
 
     const data = await response.json()
 
@@ -70,6 +120,7 @@ async function sendEskizSMS(
       return { success: true, messageId: data.id?.toString() }
     }
 
+    console.error('Eskiz API error:', data)
     return { success: false, error: data.message || 'SMS sending failed' }
   } catch (error) {
     console.error('Eskiz SMS error:', error)
@@ -77,20 +128,42 @@ async function sendEskizSMS(
   }
 }
 
-// User OTP SMS (for customer auth)
+// ===================== SMS TEMPLATES =====================
+// All templates are Eskiz-compliant:
+// - Must include resource name ("4Event" / "platforma 4Event")
+// - Must include purpose of the code
+// - Must be in the exact format that will be sent (no variables/masks)
+
+/**
+ * Customer auth OTP (login/registration)
+ * Eskiz template: "Kod podtverzhdeniya dlya vhoda na platformu 4Event: XXXXXX. Nikomu ne soobshchayte etot kod."
+ */
 export async function sendOTPSMS(
   phoneNumber: string,
   code: string
 ): Promise<SMSResult> {
-  const message = `4Event: Ваш код подтверждения: ${code}. Не сообщайте его никому.`
+  const message = `Kod podtverzhdeniya dlya vhoda na platformu 4Event: ${code}. Nikomu ne soobshchayte etot kod.`
+
+  if (isMockMode()) {
+    addDevOTPEntry(phoneNumber, code, 'customer_auth', message)
+  }
+
   return sendSMS(phoneNumber, message)
 }
 
-// Admin password reset OTP SMS (Eskiz-compliant template)
+/**
+ * Admin password reset OTP
+ * Eskiz template: "Kod dlya vosstanovleniya parolya na platforme 4Event: XXXXXX. Nikomu ne soobshchayte etot kod."
+ */
 export async function sendAdminOTPSMS(
   phoneNumber: string,
   code: string
 ): Promise<SMSResult> {
   const message = `Kod dlya vosstanovleniya parolya na platforme 4Event: ${code}. Nikomu ne soobshchayte etot kod.`
+
+  if (isMockMode()) {
+    addDevOTPEntry(phoneNumber, code, 'admin_reset', message)
+  }
+
   return sendSMS(phoneNumber, message)
 }
