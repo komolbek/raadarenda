@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["cd RaadArenda && pnpm install"]
+cmds = ["cd 4event-server && pnpm install"]
 
 [phases.build]
-cmds = ["cd RaadArenda && pnpm run build"]
+cmds = ["cd 4event-server && pnpm run build"]
 
 [start]
-cmd = "cd RaadArenda && pnpm run start"
+cmd = "cd 4event-server && pnpm run start"
