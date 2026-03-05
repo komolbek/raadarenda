@@ -1,5 +1,5 @@
-// SMS Service — supports mock (dev) and Eskiz (prod) providers
-// Controlled by SMS_PROVIDER env var: "mock" | "eskiz"
+// SMS Service — supports mock (dev), eskiz (direct), and gateway (sms-gateway) providers
+// Controlled by SMS_PROVIDER env var: "mock" | "eskiz" | "gateway"
 
 export interface SMSResult {
   success: boolean
@@ -53,7 +53,8 @@ function addDevOTPEntry(
 // ===================== SMS PROVIDERS =====================
 
 export function isMockMode(): boolean {
-  return (process.env.SMS_PROVIDER || 'mock') !== 'eskiz'
+  const provider = process.env.SMS_PROVIDER || 'mock'
+  return provider === 'mock'
 }
 
 export async function sendSMS(
@@ -63,6 +64,8 @@ export async function sendSMS(
   const provider = process.env.SMS_PROVIDER || 'mock'
 
   switch (provider) {
+    case 'gateway':
+      return sendGatewaySMS(phoneNumber, message)
     case 'eskiz':
       return sendEskizSMS(phoneNumber, message)
     case 'mock':
@@ -81,6 +84,44 @@ async function sendMockSMS(
   return {
     success: true,
     messageId: `mock_${Date.now()}`,
+  }
+}
+
+async function sendGatewaySMS(
+  phoneNumber: string,
+  message: string
+): Promise<SMSResult> {
+  const gatewayUrl = process.env.SMS_GATEWAY_URL
+  const apiKey = process.env.SMS_GATEWAY_API_KEY
+
+  if (!gatewayUrl || !apiKey) {
+    console.error('SMS_GATEWAY_URL or SMS_GATEWAY_API_KEY not configured')
+    return { success: false, error: 'SMS gateway not configured' }
+  }
+
+  try {
+    const phone = phoneNumber.replace(/^\+/, '')
+
+    const response = await fetch(`${gatewayUrl}/sms/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify({ phone, message }),
+    })
+
+    const data = await response.json()
+
+    if (response.ok && data.status === 'sent') {
+      return { success: true, messageId: data.id }
+    }
+
+    console.error('SMS Gateway error:', data)
+    return { success: false, error: data.errorMessage || 'SMS sending failed' }
+  } catch (error) {
+    console.error('SMS Gateway error:', error)
+    return { success: false, error: 'SMS gateway request failed' }
   }
 }
 
