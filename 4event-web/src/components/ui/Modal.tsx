@@ -87,8 +87,9 @@ export function Modal({
                         type="button"
                         className="rounded-lg p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                         onClick={onClose}
+                        aria-label="Close"
                       >
-                        <X className="h-5 w-5" />
+                        <X className="h-5 w-5" aria-hidden="true" />
                       </button>
                     )}
                   </div>
