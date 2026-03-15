@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '@/lib/db'
 import { withAuth } from '@/lib/auth/middleware'
+import { ApiError } from '@/lib/api/error-handler'
 import { createTranslator } from '@/lib/i18n'
 import { z } from 'zod'
 
@@ -122,21 +123,21 @@ async function handler(
       })
 
       if (products.length !== productIds.length) {
-        throw new OrderError(t('productNotFound'), 400)
+        throw new ApiError(400, t('productNotFound'))
       }
 
       // Validate rental duration against product constraints
       for (const product of products) {
         if (rentalDays < product.minRentalDays) {
-          throw new OrderError(
-            `${product.name}: minimum rental is ${product.minRentalDays} day(s)`,
-            400
+          throw new ApiError(
+            400,
+            `${product.name}: minimum rental is ${product.minRentalDays} day(s)`
           )
         }
         if (rentalDays > product.maxRentalDays) {
-          throw new OrderError(
-            `${product.name}: maximum rental is ${product.maxRentalDays} day(s)`,
-            400
+          throw new ApiError(
+            400,
+            `${product.name}: maximum rental is ${product.maxRentalDays} day(s)`
           )
         }
       }
@@ -156,7 +157,7 @@ async function handler(
           endDate
         )
         if (product.totalStock - reservedQty < item.quantity) {
-          throw new OrderError(t('insufficientStock'), 400)
+          throw new ApiError(400, t('insufficientStock'))
         }
 
         const { totalPrice, savings } = calculateItemPrice(
@@ -232,24 +233,18 @@ async function handler(
       })
     }
 
-    if (error instanceof OrderError) {
+    if (error instanceof ApiError) {
       return res.status(error.statusCode).json({
         success: false,
         message: error.message,
       })
     }
 
-    console.error('Create order error:', error)
+    console.error('[API_ERROR] POST /api/orders:', error)
     return res.status(500).json({
       success: false,
       message: t('internalServerError'),
     })
-  }
-}
-
-class OrderError extends Error {
-  constructor(message: string, public statusCode: number) {
-    super(message)
   }
 }
 
