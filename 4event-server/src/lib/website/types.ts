@@ -31,19 +31,13 @@ export interface ProductSpecifications {
 }
 
 export interface PricingTier {
-  id: string;
-  productId: string;
-  minDays: number;
-  maxDays: number | null;
-  dailyPrice: number;
+  days: number;
+  totalPrice: number;
 }
 
 export interface QuantityPricing {
-  id: string;
-  productId: string;
-  minQuantity: number;
-  maxQuantity: number | null;
-  pricePerUnit: number;
+  quantity: number;
+  totalPrice: number;
 }
 
 export interface Product {
