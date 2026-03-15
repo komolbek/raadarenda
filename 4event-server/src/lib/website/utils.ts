@@ -120,45 +120,43 @@ export function getDeliveryTypeLabel(type: string): string {
 }
 
 // Calculate price based on pricing tiers
+// Must mirror server-side calculateItemPrice in /api/orders/index.ts
 export function calculatePrice(
   dailyPrice: number,
   rentalDays: number,
   quantity: number,
-  pricingTiers: { minDays: number; maxDays: number | null; dailyPrice: number }[],
-  quantityPricing: { minQuantity: number; maxQuantity: number | null; pricePerUnit: number }[]
+  pricingTiers: { days: number; totalPrice: number }[],
+  quantityPricing: { quantity: number; totalPrice: number }[]
 ): { totalPrice: number; dailyPriceUsed: number; savings: number } {
-  let effectiveDailyPrice = dailyPrice;
+  const fullPrice = dailyPrice * quantity * rentalDays;
 
-  // Check for quantity discount first (for single-day rentals)
   if (rentalDays === 1 && quantityPricing.length > 0) {
-    const qp = quantityPricing
-      .filter(q => quantity >= q.minQuantity && (q.maxQuantity === null || quantity <= q.maxQuantity))
-      .sort((a, b) => b.minQuantity - a.minQuantity)[0];
-
-    if (qp) {
-      effectiveDailyPrice = qp.pricePerUnit;
-    }
-  }
-
-  // Check for duration discount
-  if (rentalDays > 1 && pricingTiers.length > 0) {
-    const tier = pricingTiers
-      .filter(t => rentalDays >= t.minDays && (t.maxDays === null || rentalDays <= t.maxDays))
-      .sort((a, b) => b.minDays - a.minDays)[0];
-
+    // Use quantity pricing for single-day rentals (exact match)
+    const tier = quantityPricing.find(qp => qp.quantity === quantity);
     if (tier) {
-      effectiveDailyPrice = tier.dailyPrice;
+      return {
+        totalPrice: tier.totalPrice,
+        dailyPriceUsed: tier.totalPrice / quantity,
+        savings: Math.max(0, fullPrice - tier.totalPrice),
+      };
+    }
+  } else if (rentalDays > 1 && pricingTiers.length > 0) {
+    // Use duration pricing (exact match on days)
+    const tier = pricingTiers.find(pt => pt.days === rentalDays);
+    if (tier) {
+      const totalPrice = tier.totalPrice * quantity;
+      return {
+        totalPrice,
+        dailyPriceUsed: tier.totalPrice / rentalDays,
+        savings: Math.max(0, fullPrice - totalPrice),
+      };
     }
   }
-
-  const totalPrice = effectiveDailyPrice * rentalDays * quantity;
-  const fullPrice = dailyPrice * rentalDays * quantity;
-  const savings = fullPrice - totalPrice;
 
   return {
-    totalPrice,
-    dailyPriceUsed: effectiveDailyPrice,
-    savings: Math.max(0, savings),
+    totalPrice: fullPrice,
+    dailyPriceUsed: dailyPrice,
+    savings: 0,
   };
 }
 

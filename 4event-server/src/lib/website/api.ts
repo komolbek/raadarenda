@@ -113,8 +113,8 @@ export const productsApi = {
       photos: (p.photos || []) as string[],
       specifications: p.specifications || {},
       dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
-      pricingTiers: (p.pricing_tiers || p.pricingTiers || []) as Product['pricingTiers'],
-      quantityPricing: (p.quantity_pricing || p.quantityPricing || []) as Product['quantityPricing'],
+      pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
+      quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
@@ -140,20 +140,8 @@ export const productsApi = {
       photos: (p.photos || []) as string[],
       specifications: p.specifications || {},
       dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
-      pricingTiers: ((p.pricing_tiers || p.pricingTiers || []) as Array<{ days?: number; min_days?: number; minDays?: number; total_price?: number; totalPrice?: number; dailyPrice?: number; daily_price?: number }>).map((tier) => ({
-        id: '',
-        productId: p.id as string,
-        minDays: tier.days || tier.min_days || tier.minDays || 0,
-        maxDays: null,
-        dailyPrice: tier.total_price || tier.totalPrice || tier.dailyPrice || tier.daily_price || 0,
-      })),
-      quantityPricing: ((p.quantity_pricing || p.quantityPricing || []) as Array<{ quantity?: number; min_quantity?: number; minQuantity?: number; total_price?: number; totalPrice?: number; pricePerUnit?: number; price_per_unit?: number }>).map((qp) => ({
-        id: '',
-        productId: p.id as string,
-        minQuantity: qp.quantity || qp.min_quantity || qp.minQuantity || 0,
-        maxQuantity: null,
-        pricePerUnit: qp.total_price || qp.totalPrice || qp.pricePerUnit || qp.price_per_unit || 0,
-      })),
+      pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
+      quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
@@ -283,8 +271,8 @@ export const userApi = {
       photos: (p.photos || []) as string[],
       specifications: p.specifications || {},
       dailyPrice: (p.daily_price ?? p.dailyPrice ?? 0) as number,
-      pricingTiers: (p.pricing_tiers || p.pricingTiers || []) as Product['pricingTiers'],
-      quantityPricing: (p.quantity_pricing || p.quantityPricing || []) as Product['quantityPricing'],
+      pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
+      quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
@@ -488,5 +476,22 @@ export const settingsApi = {
     return Array.isArray(zones) ? zones : [];
   },
 };
+
+// Map API pricing tier response to client types
+function mapPricingTiers(tiers: unknown): Product['pricingTiers'] {
+  if (!Array.isArray(tiers)) return [];
+  return tiers.map((t: Record<string, unknown>) => ({
+    days: (t.days ?? t.min_days ?? t.minDays ?? 0) as number,
+    totalPrice: (t.total_price ?? t.totalPrice ?? 0) as number,
+  }));
+}
+
+function mapQuantityPricing(pricing: unknown): Product['quantityPricing'] {
+  if (!Array.isArray(pricing)) return [];
+  return pricing.map((qp: Record<string, unknown>) => ({
+    quantity: (qp.quantity ?? qp.min_quantity ?? qp.minQuantity ?? 0) as number,
+    totalPrice: (qp.total_price ?? qp.totalPrice ?? 0) as number,
+  }));
+}
 
 export default api;

@@ -388,10 +388,10 @@ export default function ProductDetailPage() {
                       className="flex justify-between text-sm"
                     >
                       <span className="text-slate-600 dark:text-slate-400">
-                        {tier.minDays}+ {t.product.daysOrMore}
+                        {tier.days} {t.product.days}
                       </span>
                       <span className="font-medium text-green-600 dark:text-green-400">
-                        {formatPrice(tier.dailyPrice)} UZS/{t.common.perDay}
+                        {formatPrice(tier.totalPrice)} UZS
                       </span>
                     </div>
                   ))}
@@ -410,10 +410,10 @@ export default function ProductDetailPage() {
                       className="flex justify-between text-sm"
                     >
                       <span className="text-slate-600 dark:text-slate-400">
-                        {qp.minQuantity}+ {t.product.unitsOrMore}
+                        {qp.quantity} {t.product.pcs}
                       </span>
                       <span className="font-medium text-green-600 dark:text-green-400">
-                        {formatPrice(qp.pricePerUnit)} UZS/{t.product.pcs}
+                        {formatPrice(qp.totalPrice)} UZS
                       </span>
                     </div>
                   ))}
