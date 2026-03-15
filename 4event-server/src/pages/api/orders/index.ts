@@ -39,10 +39,29 @@ async function handler(
     const startDate = new Date(body.rental_start_date)
     const endDate = new Date(body.rental_end_date)
 
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: t('invalidDates'),
+      })
+    }
+
     if (startDate >= endDate) {
       return res.status(400).json({
         success: false,
         message: t('invalidDates'),
+      })
+    }
+
+    // Start date must be today or in the future (compare date only, not time)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const startDateOnly = new Date(startDate)
+    startDateOnly.setHours(0, 0, 0, 0)
+    if (startDateOnly < today) {
+      return res.status(400).json({
+        success: false,
+        message: t('startDateInPast'),
       })
     }
 
@@ -91,17 +110,35 @@ async function handler(
       })
     }
 
+    // Hard cap at 365 days to prevent abuse
+    if (rentalDays > 365) {
+      return res.status(400).json({
+        success: false,
+        message: t('rentalTooLong'),
+      })
+    }
+
     // Calculate delivery fee (can be done outside transaction — read-only, no race)
     let deliveryFee = 0
     if (body.delivery_type === 'DELIVERY' && body.delivery_address_id) {
       const address = await prisma.address.findUnique({
         where: { id: body.delivery_address_id },
       })
-      if (address && address.city.toLowerCase() !== 'ташкент' && address.city.toLowerCase() !== 'tashkent') {
-        const zone = await prisma.deliveryZone.findFirst({
-          where: { name: address.city, isActive: true },
-        })
-        deliveryFee = zone?.price || 0
+      if (address) {
+        const cityLower = address.city.toLowerCase().trim()
+        const isTashkent = cityLower === 'ташкент' || cityLower === 'tashkent' || cityLower === 'тошкент'
+        if (!isTashkent) {
+          const zone = await prisma.deliveryZone.findFirst({
+            where: { name: address.city, isActive: true },
+          })
+          if (!zone) {
+            return res.status(400).json({
+              success: false,
+              message: t('deliveryNotAvailable'),
+            })
+          }
+          deliveryFee = zone.price
+        }
       }
     }
 

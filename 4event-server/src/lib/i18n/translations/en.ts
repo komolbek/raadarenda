@@ -68,6 +68,12 @@ export const en = {
   // Delivery
   deliveryFree: 'Free delivery',
   deliveryOnlyTashkent: 'Delivery is available only within Tashkent',
+  deliveryNotAvailable: 'Delivery to the specified city is not available',
+
+  // Rental validation
+  startDateInPast: 'Rental start date cannot be in the past',
+  rentalTooLong: 'Maximum rental duration exceeded',
+  invalidStatusTransition: 'Invalid order status transition',
 
   // Admin
   adminLoginSuccess: 'Login successful',

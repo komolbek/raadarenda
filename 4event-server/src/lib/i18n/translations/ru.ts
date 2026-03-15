@@ -68,6 +68,12 @@ export const ru = {
   // Delivery
   deliveryFree: 'Бесплатная доставка',
   deliveryOnlyTashkent: 'Доставка доступна только в пределах Ташкента',
+  deliveryNotAvailable: 'Доставка в указанный город недоступна',
+
+  // Rental validation
+  startDateInPast: 'Дата начала аренды не может быть в прошлом',
+  rentalTooLong: 'Превышен максимальный срок аренды',
+  invalidStatusTransition: 'Недопустимый переход статуса заказа',
 
   // Admin
   adminLoginSuccess: 'Вход выполнен',
