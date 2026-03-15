@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,7 +13,7 @@ interface QuantitySelectorProps {
   className?: string;
 }
 
-export function QuantitySelector({
+export const QuantitySelector = memo(function QuantitySelector({
   value,
   onChange,
   min = 1,
@@ -58,6 +59,8 @@ export function QuantitySelector({
         disabled && 'opacity-50',
         className
       )}
+      role="group"
+      aria-label="Quantity selector"
     >
       <motion.button
         whileHover={{ scale: disabled ? 1 : 1.05 }}
@@ -70,8 +73,9 @@ export function QuantitySelector({
         )}
         onClick={handleDecrement}
         disabled={disabled || value <= min}
+        aria-label="Decrease quantity"
       >
-        <Minus className={sizes[size].icon} />
+        <Minus className={sizes[size].icon} aria-hidden="true" />
       </motion.button>
 
       <span
@@ -79,6 +83,9 @@ export function QuantitySelector({
           'text-center font-semibold tabular-nums',
           sizes[size].text
         )}
+        aria-live="polite"
+        aria-atomic="true"
+        role="status"
       >
         {value}
       </span>
@@ -94,9 +101,10 @@ export function QuantitySelector({
         )}
         onClick={handleIncrement}
         disabled={disabled || value >= max}
+        aria-label="Increase quantity"
       >
-        <Plus className={sizes[size].icon} />
+        <Plus className={sizes[size].icon} aria-hidden="true" />
       </motion.button>
     </div>
   );
-}
+});

@@ -1,0 +1,51 @@
+# Dependencies
+**/node_modules
+**/.pnp
+**/.pnp.js
+
+# Build outputs
+4event-backend/4event-server/.next
+4event-backend/4event-web/dist
+
+# Testing
+**/tests
+**/coverage
+**/*.test.ts
+**/*.test.tsx
+**/vitest.config.ts
+
+# Development
+**/.env
+**/.env.local
+**/.env.development
+**/.env.test
+**/.git
+**/.gitignore
+
+# IDE
+**/.vscode
+**/.idea
+**/*.swp
+**/*.swo
+*~
+
+# iOS app (not needed for backend Docker image)
+4event-ios
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+
+# Docker
+**/Dockerfile
+**/docker-compose.yml
+**/.dockerignore
+
+# Documentation
+**/*.md
+**/LICENSE
