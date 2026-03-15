@@ -86,7 +86,12 @@ export default function Orders() {
     fetchOrders()
   }
 
+  const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [statusError, setStatusError] = useState('')
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(true)
+    setStatusError('')
     try {
       const res = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: 'POST',
@@ -95,11 +100,20 @@ export default function Orders() {
       })
       const json = await res.json()
       if (json.success) {
-        fetchOrders()
-        setSelectedOrder(null)
+        // Update selectedOrder locally so the UI reflects the change
+        setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : null)
+        // Also update the order in the list
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+        )
+      } else {
+        setStatusError(json.message || 'Ошибка при обновлении статуса')
       }
     } catch (err) {
       console.error('Failed to update order:', err)
+      setStatusError('Ошибка сети')
+    } finally {
+      setUpdatingStatus(false)
     }
   }
 
@@ -249,7 +263,7 @@ export default function Orders() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={() => { setStatusError(''); setSelectedOrder(order); }}
                             className="text-blue-600 hover:text-blue-800"
                           >
                             Управление
@@ -357,10 +371,11 @@ export default function Orders() {
                   </label>
                   <select
                     value={selectedOrder.status}
+                    disabled={updatingStatus}
                     onChange={(e) =>
                       updateOrderStatus(selectedOrder.id, e.target.value)
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
                   >
                     {statusOptions
                       .filter((s) => s.value)
@@ -370,6 +385,12 @@ export default function Orders() {
                         </option>
                       ))}
                   </select>
+                  {updatingStatus && (
+                    <p className="text-sm text-blue-600 mt-1">Обновление...</p>
+                  )}
+                  {statusError && (
+                    <p className="text-sm text-red-600 mt-1">{statusError}</p>
+                  )}
                 </div>
               </div>
 
