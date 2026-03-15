@@ -36,16 +36,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       })
     }
 
-    // Update order status
+    // Update order status with actual staff identity
+    const staffId = (req as any).staffId as string
     const updatedOrder = await prisma.order.update({
       where: { id: id as string },
       data: {
         status,
+        updatedBy: staffId,
         statusHistory: {
           create: {
             status,
             notes,
-            createdBy: 'admin',
+            createdBy: staffId,
           },
         },
       },
