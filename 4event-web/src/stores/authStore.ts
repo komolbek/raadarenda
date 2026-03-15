@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { authApi, userApi } from '@/lib/api';
+import { useCartStore } from './cartStore';
 
 interface AuthState {
   user: User | null;
@@ -63,6 +64,7 @@ export const useAuthStore = create<AuthState>()(
         } finally {
           localStorage.removeItem('auth_token');
           set({ user: null, token: null, isAuthenticated: false });
+          useCartStore.getState().clearCart();
         }
       },
 

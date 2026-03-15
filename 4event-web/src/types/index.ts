@@ -7,13 +7,27 @@ export interface User {
 }
 
 // Category types
+export interface CategoryChild {
+  id: string;
+  name: string;
+  image_url: string | null;
+  icon_name: string | null;
+  display_order: number;
+}
+
 export interface Category {
   id: string;
   name: string;
   icon: string | null;
   image: string | null;
+  icon_name?: string | null;
+  image_url?: string | null;
+  parent_category_id?: string | null;
   displayOrder: number;
   isActive: boolean;
+  children_count?: number;
+  products_count?: number;
+  children?: CategoryChild[];
   createdAt: string;
   _count?: {
     products: number;
@@ -208,4 +222,58 @@ export interface DeliveryZone {
   name: string;
   fee: number;
   isActive: boolean;
+}
+
+// Review types
+export interface Review {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  distribution: Record<number, number>; // { 1: 2, 2: 5, 3: 10, 4: 20, 5: 50 }
+}
+
+export interface CreateReviewInput {
+  productId: string;
+  rating: number;
+  comment: string;
+}
+
+// Return Request types
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  userId: string;
+  reason: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Rental Extension types
+export interface RentalExtension {
+  id: string;
+  orderId: string;
+  userId: string;
+  originalEndDate: string;
+  newEndDate: string;
+  additionalDays: number;
+  additionalCost: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+}
+
+// Product Availability by Date
+export interface DayAvailability {
+  date: string;
+  availableQuantity: number;
+  totalStock: number;
 }

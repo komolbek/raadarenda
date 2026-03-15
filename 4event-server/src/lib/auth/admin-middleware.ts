@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { parse } from 'cookie'
 import crypto from 'crypto'
 import prisma from '@/lib/db'
+import { validateCsrfToken } from '@/lib/csrf'
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
@@ -101,6 +102,17 @@ export function requireAdminAuth(handler: AdminApiHandler) {
         success: false,
         message: 'Admin authentication required',
       })
+    }
+
+    // CSRF validation for state-changing methods (POST, PUT, PATCH, DELETE)
+    const mutatingMethods = ['POST', 'PUT', 'PATCH', 'DELETE']
+    if (mutatingMethods.includes(req.method?.toUpperCase() || '')) {
+      if (!validateCsrfToken(req)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid or missing CSRF token',
+        })
+      }
     }
 
     // Block access if password change is required (except password-related endpoints)
