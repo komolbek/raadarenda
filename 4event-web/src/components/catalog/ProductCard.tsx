@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
@@ -9,39 +9,44 @@ import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface ProductCardProps {
   product: Product;
   className?: string;
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, className }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const { t } = useTranslation();
 
   const isFav = isFavorite(product.id);
   const hasDiscount = product.pricingTiers.length > 0 || product.quantityPricing.length > 0;
 
-  const handleFavoriteClick = async (e: React.MouseEvent) => {
+  const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error('Войдите в аккаунт для добавления в избранное');
+      toast.error(t('product_card.login_for_favorites'));
       return;
     }
 
     try {
       await toggleFavorite(product);
-      toast.success(isFav ? 'Удалено из избранного' : 'Добавлено в избранное');
+      toast.success(isFav ? t('product_card.removed_from_favorites') : t('product_card.added_to_favorites'));
     } catch (error) {
-      toast.error('Не удалось обновить избранное');
+      toast.error(t('product_card.favorites_error'));
     }
-  };
+  }, [isAuthenticated, isFav, product, toggleFavorite, t]);
 
   return (
-    <Link to={`/product/${product.id}`}>
+    <Link
+      to={`/product/${product.id}`}
+      aria-label={`${product.name} - ${formatPrice(product.dailyPrice)} UZS ${t('product_card.per_day')}`}
+    >
       <motion.div
         whileHover={{ y: -5 }}
         whileTap={{ scale: 0.98 }}
@@ -56,11 +61,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 src={product.photos[0]}
                 alt={product.name}
                 className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
                 animate={{ scale: isHovered ? 1.05 : 1 }}
                 transition={{ duration: 0.3 }}
               />
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50" role="img" aria-label={product.name}>
                 <span className="text-4xl font-bold text-muted-foreground/30">
                   {product.name.charAt(0)}
                 </span>
@@ -71,17 +78,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <div className="absolute top-3 left-3 flex flex-col gap-1">
               {hasDiscount && (
                 <Badge variant="success" size="sm">
-                  Скидка
+                  {t('product_card.discount')}
                 </Badge>
               )}
               {product.totalStock <= 3 && product.totalStock > 0 && (
                 <Badge variant="warning" size="sm">
-                  Осталось {product.totalStock}
+                  {t('product_card.remaining', { count: product.totalStock })}
                 </Badge>
               )}
               {product.totalStock === 0 && (
                 <Badge variant="destructive" size="sm">
-                  Нет в наличии
+                  {t('product_card.out_of_stock')}
                 </Badge>
               )}
             </div>
@@ -93,6 +100,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleFavoriteClick}
+              aria-label={isFav ? t('product_card.remove_from_favorites') : t('product_card.add_to_favorites')}
+              aria-pressed={isFav}
               className={cn(
                 'absolute top-3 right-3 h-9 w-9 rounded-full flex items-center justify-center transition-colors',
                 isFav
@@ -108,6 +117,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: isHovered ? 1 : 0 }}
               className="absolute inset-0 bg-black/20 flex items-center justify-center"
+              aria-hidden="true"
             >
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -132,13 +142,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 <p className="text-lg font-bold text-primary">
                   {formatPrice(product.dailyPrice)} UZS
                 </p>
-                <p className="text-xs text-muted-foreground">в день</p>
+                <p className="text-xs text-muted-foreground">{t('product_card.per_day')}</p>
               </div>
 
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors"
+                role="img"
+                aria-label={t('product_card.add_to_cart')}
               >
                 <ShoppingCart className="h-5 w-5" />
               </motion.div>
@@ -148,4 +160,4 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </motion.div>
     </Link>
   );
-}
+});
