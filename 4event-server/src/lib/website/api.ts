@@ -116,6 +116,9 @@ export const productsApi = {
       pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
       quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      minRentalDays: (p.min_rental_days ?? p.minRentalDays ?? 1) as number,
+      maxRentalDays: (p.max_rental_days ?? p.maxRentalDays ?? 30) as number,
+      depositAmount: (p.deposit_amount ?? p.depositAmount ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
     })) : [];
@@ -143,6 +146,9 @@ export const productsApi = {
       pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
       quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      minRentalDays: (p.min_rental_days ?? p.minRentalDays ?? 1) as number,
+      maxRentalDays: (p.max_rental_days ?? p.maxRentalDays ?? 30) as number,
+      depositAmount: (p.deposit_amount ?? p.depositAmount ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
     };
@@ -274,6 +280,9 @@ export const userApi = {
       pricingTiers: mapPricingTiers(p.pricing_tiers || p.pricingTiers || []),
       quantityPricing: mapQuantityPricing(p.quantity_pricing || p.quantityPricing || []),
       totalStock: (p.total_stock ?? p.totalStock ?? 0) as number,
+      minRentalDays: (p.min_rental_days ?? p.minRentalDays ?? 1) as number,
+      maxRentalDays: (p.max_rental_days ?? p.maxRentalDays ?? 30) as number,
+      depositAmount: (p.deposit_amount ?? p.depositAmount ?? 0) as number,
       isActive: (p.is_active ?? p.isActive ?? true) as boolean,
       createdAt: (p.created_at || p.createdAt || '') as string,
     })) : [];
@@ -434,6 +443,11 @@ export const ordersApi = {
       createdAt: order.created_at || order.createdAt || '',
       updatedAt: order.updated_at || order.updatedAt || '',
     } as Order;
+  },
+
+  cancel: async (id: string): Promise<{ cancellation_fee_percent: number; cancellation_fee: number }> => {
+    const { data } = await api.post(`/orders/${id}/cancel`);
+    return data.data;
   },
 };
 

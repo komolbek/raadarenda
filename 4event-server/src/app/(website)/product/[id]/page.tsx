@@ -109,6 +109,16 @@ export default function ProductDetailPage() {
       return;
     }
 
+    if (rentalDays < product.minRentalDays) {
+      toast.error(`${t.orders.minRentalDays}: ${product.minRentalDays} ${t.product.days}`);
+      return;
+    }
+
+    if (rentalDays > product.maxRentalDays) {
+      toast.error(`${t.orders.maxRentalDays}: ${product.maxRentalDays} ${t.product.days}`);
+      return;
+    }
+
     addItem(product, quantity, startDate, endDate);
     setShowSuccessModal(true);
   };
@@ -190,13 +200,15 @@ export default function ProductDetailPage() {
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/80 dark:bg-slate-800/80 flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                    aria-label="Previous image"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/80 dark:bg-slate-800/80 flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/80 dark:bg-slate-800/80 flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                    aria-label="Next image"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/80 dark:bg-slate-800/80 flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>
@@ -208,6 +220,7 @@ export default function ProductDetailPage() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleFavoriteClick}
+                aria-label={isFav ? t.favorites.removeFromFavorites : t.favorites.addToFavorites}
                 className={cn(
                   'absolute top-4 right-4 h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition-colors',
                   isFav
@@ -270,6 +283,25 @@ export default function ProductDetailPage() {
                   </>
                 )}
               </div>
+
+              {/* Rental constraints & deposit info */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {product.minRentalDays > 1 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-xs font-medium text-blue-700 dark:text-blue-300">
+                    {t.orders.minRentalDays}: {product.minRentalDays} {t.product.days}
+                  </span>
+                )}
+                {product.maxRentalDays < 30 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-xs font-medium text-blue-700 dark:text-blue-300">
+                    {t.orders.maxRentalDays}: {product.maxRentalDays} {t.product.days}
+                  </span>
+                )}
+                {product.depositAmount > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-xs font-medium text-amber-700 dark:text-amber-300">
+                    {t.orders.depositRequired}: {formatPrice(product.depositAmount)} UZS
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Date Selection */}
@@ -322,15 +354,17 @@ export default function ProductDetailPage() {
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
-                  className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Decrease quantity"
+                  className="h-11 w-11 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Minus className="h-4 w-4" />
                 </button>
-                <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
+                <span className="text-xl font-semibold w-12 text-center" aria-live="polite">{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => Math.min(product.totalStock, q + 1))}
                   disabled={quantity >= product.totalStock}
-                  className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Increase quantity"
+                  className="h-11 w-11 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -425,7 +459,7 @@ export default function ProductDetailPage() {
             {hasSpecs && (
               <Card className="p-4">
                 <h3 className="font-semibold mb-3">{t.product.specifications}</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {specs.width && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600 dark:text-slate-400">{t.product.width}</span>

@@ -108,8 +108,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleFavoriteClick}
+              aria-label={isFav ? t.favorites.removeFromFavorites : t.favorites.addToFavorites}
               className={cn(
-                'absolute top-3 right-3 h-9 w-9 rounded-full flex items-center justify-center transition-colors',
+                'absolute top-3 right-3 h-11 w-11 rounded-full flex items-center justify-center transition-colors',
                 isFav
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 hover:bg-white dark:hover:bg-slate-800'
@@ -153,7 +154,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 hover:bg-primary-500 hover:text-white transition-colors"
+                role="img"
+                aria-label={t.product.addToCart}
+                className="h-11 w-11 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 hover:bg-primary-500 hover:text-white transition-colors"
               >
                 <ShoppingCart className="h-5 w-5" />
               </motion.div>

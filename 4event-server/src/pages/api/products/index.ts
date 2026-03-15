@@ -143,6 +143,9 @@ function formatProduct(product: any) {
       total_price: qp.totalPrice,
     })) || [],
     total_stock: product.totalStock,
+    min_rental_days: product.minRentalDays,
+    max_rental_days: product.maxRentalDays,
+    deposit_amount: product.depositAmount,
     is_active: product.isActive,
     created_at: product.createdAt,
   }

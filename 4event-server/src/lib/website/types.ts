@@ -51,6 +51,9 @@ export interface Product {
   pricingTiers: PricingTier[];
   quantityPricing: QuantityPricing[];
   totalStock: number;
+  minRentalDays: number;
+  maxRentalDays: number;
+  depositAmount: number;
   isActive: boolean;
   createdAt: string;
 }
