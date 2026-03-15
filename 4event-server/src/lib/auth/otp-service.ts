@@ -76,7 +76,11 @@ export async function verifyOTP(
     return { valid: false, error: 'Превышено количество попыток' }
   }
 
-  if (otp.code !== code) {
+  // Use timing-safe comparison to prevent timing attacks
+  const codeMatch = otp.code.length === code.length &&
+    crypto.timingSafeEqual(Buffer.from(otp.code), Buffer.from(code))
+
+  if (!codeMatch) {
     await prisma.oTP.update({
       where: { id: otp.id },
       data: { attempts: { increment: 1 } }

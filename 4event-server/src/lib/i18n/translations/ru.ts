@@ -7,6 +7,8 @@ export const ru = {
   notFound: 'Не найдено',
   badRequest: 'Неверный запрос',
   validationError: 'Ошибка валидации',
+  tooManyRequests: 'Слишком много запросов. Попробуйте позже.',
+  invalidCardNumber: 'Неверный номер карты',
 
   // Auth
   otpSent: 'Код отправлен',

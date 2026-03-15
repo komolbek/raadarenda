@@ -103,6 +103,17 @@ export function requireAdminAuth(handler: AdminApiHandler) {
       })
     }
 
+    // Block access if password change is required (except password-related endpoints)
+    const url = req.url || ''
+    const isPasswordEndpoint = url.includes('/set-password') || url.includes('/forgot-password')
+    if (staff.mustChangePassword && !isPasswordEndpoint) {
+      return res.status(403).json({
+        success: false,
+        message: 'Password change required',
+        mustChangePassword: true,
+      })
+    }
+
     // Attach staff info to request
     ;(req as any).staffId = staff.id
     ;(req as any).staffRole = staff.role

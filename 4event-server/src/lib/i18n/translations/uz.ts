@@ -7,6 +7,8 @@ export const uz = {
   notFound: 'Topilmadi',
   badRequest: 'Noto\'g\'ri so\'rov',
   validationError: 'Tekshirish xatosi',
+  tooManyRequests: 'Juda ko\'p so\'rovlar. Keyinroq urinib ko\'ring.',
+  invalidCardNumber: 'Noto\'g\'ri karta raqami',
 
   // Auth
   otpSent: 'Kod yuborildi',
