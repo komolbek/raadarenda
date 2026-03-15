@@ -26,6 +26,7 @@ export function DateRangePicker({
   className,
 }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredDay, setHoveredDay] = useState<Date | null>(null);
   // Calculate rental days
   const rentalDays = value?.from && value?.to
     ? differenceInDays(value.to, value.from) + 1

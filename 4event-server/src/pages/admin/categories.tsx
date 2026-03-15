@@ -9,9 +9,12 @@ interface Category {
   name: string
   image_url: string | null
   icon_name: string | null
+  parent_category_id: string | null
+  parent: { id: string; name: string } | null
   display_order: number
   is_active: boolean
   products_count: number
+  children_count: number
   created_at: string
 }
 
@@ -34,6 +37,7 @@ export default function Categories() {
     name: '',
     image_url: '',
     icon_name: '' as string | null,
+    parent_category_id: null as string | null,
     is_active: true,
   })
 
@@ -56,9 +60,12 @@ export default function Categories() {
     }
   }
 
+  // Get top-level categories (for parent dropdown)
+  const topLevelCategories = categories.filter((c) => !c.parent_category_id)
+
   const openCreateModal = () => {
     setEditingCategory(null)
-    setForm({ name: '', image_url: '', icon_name: null, is_active: true })
+    setForm({ name: '', image_url: '', icon_name: null, parent_category_id: null, is_active: true })
     setError(null)
     setShowModal(true)
   }
@@ -69,6 +76,7 @@ export default function Categories() {
       name: category.name,
       image_url: category.image_url || '',
       icon_name: category.icon_name || null,
+      parent_category_id: category.parent_category_id || null,
       is_active: category.is_active,
     })
     setError(null)
@@ -127,6 +135,7 @@ export default function Categories() {
           name: form.name,
           image_url: form.image_url || null,
           icon_name: form.icon_name || null,
+          parent_category_id: form.parent_category_id || null,
           is_active: form.is_active,
         }),
       })
@@ -288,10 +297,18 @@ export default function Categories() {
                       <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center">
+                      <div className="flex items-center" style={{ paddingLeft: category.parent_category_id ? 24 : 0 }}>
+                        {category.parent_category_id && (
+                          <span className="text-gray-300 mr-2">└</span>
+                        )}
                         {renderCategoryIcon(category)}
                         <div>
                           <span className="font-medium">{category.name}</span>
+                          {category.parent && (
+                            <div className="text-xs text-gray-400 mt-0.5">
+                              в {category.parent.name}
+                            </div>
+                          )}
                           {incomplete && (
                             <div className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
                               <AlertTriangle className="h-3 w-3" />
@@ -359,6 +376,26 @@ export default function Categories() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Родительская категория
+                  </label>
+                  <select
+                    value={form.parent_category_id || ''}
+                    onChange={(e) => setForm({ ...form, parent_category_id: e.target.value || null })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">Нет (верхний уровень)</option>
+                    {topLevelCategories
+                      .filter((c) => c.id !== editingCategory?.id)
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
                 </div>
 
                 <div>

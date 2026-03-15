@@ -22,6 +22,7 @@ const categorySchema = z.object({
   name: z.string().min(1),
   image_url: z.string().optional().nullable(),
   icon_name: z.string().optional().nullable(),
+  parent_category_id: z.string().optional().nullable(),
   display_order: z.number().int().optional(),
   is_active: z.boolean().optional(),
 })
@@ -33,7 +34,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const categories = await prisma.category.findMany({
         include: {
-          _count: { select: { products: true } },
+          _count: { select: { products: true, children: true } },
+          parent: { select: { id: true, name: true } },
+          children: {
+            orderBy: { displayOrder: 'asc' },
+            select: { id: true, name: true, displayOrder: true, isActive: true },
+          },
         },
         orderBy: { displayOrder: 'asc' },
       })
@@ -45,9 +51,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           name: cat.name,
           image_url: cat.imageUrl,
           icon_name: cat.iconName,
+          parent_category_id: cat.parentCategoryId,
+          parent: cat.parent ? { id: cat.parent.id, name: cat.parent.name } : null,
           display_order: cat.displayOrder,
           is_active: cat.isActive,
           products_count: cat._count.products,
+          children_count: cat._count.children,
+          children: cat.children.map((child) => ({
+            id: child.id,
+            name: child.name,
+            display_order: child.displayOrder,
+            is_active: child.isActive,
+          })),
           created_at: cat.createdAt,
         })),
       })
@@ -74,6 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           name: body.name,
           imageUrl: body.image_url,
           iconName: body.icon_name,
+          parentCategoryId: body.parent_category_id ?? null,
           displayOrder: body.display_order ?? (maxOrder._max.displayOrder ?? 0) + 1,
           isActive: body.is_active ?? true,
         },
@@ -86,6 +102,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           name: category.name,
           image_url: category.imageUrl,
           icon_name: category.iconName,
+          parent_category_id: category.parentCategoryId,
           display_order: category.displayOrder,
           is_active: category.isActive,
           created_at: category.createdAt,
@@ -138,12 +155,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         })
       }
 
+      // Prevent setting parent to self or own children (circular reference)
+      if (body.parent_category_id === body.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Категория не может быть родителем самой себя',
+        })
+      }
+
       const category = await prisma.category.update({
         where: { id: body.id },
         data: {
           name: body.name,
           imageUrl: body.image_url,
           iconName: body.icon_name,
+          parentCategoryId: body.parent_category_id,
           displayOrder: body.display_order,
           isActive: body.is_active,
         },
@@ -156,6 +182,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           name: category.name,
           image_url: category.imageUrl,
           icon_name: category.iconName,
+          parent_category_id: category.parentCategoryId,
           display_order: category.displayOrder,
           is_active: category.isActive,
           created_at: category.createdAt,

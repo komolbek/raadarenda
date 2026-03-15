@@ -49,6 +49,9 @@ model User {
   orders    Order[]
   favorites Favorite[]
   cards     Card[]
+  reviews   Review[]
+  returnRequests ReturnRequest[]
+  rentalExtensions RentalExtension[]
 
   @@map("users")
 }
@@ -175,6 +178,7 @@ model Product {
   quantityPricing QuantityPricing[]
   orderItems      OrderItem[]
   favorites       Favorite[]
+  reviews         Review[]
 
   @@map("products")
 }
@@ -271,6 +275,8 @@ model Order {
   deliveryAddress Address?    @relation(fields: [deliveryAddressId], references: [id])
   items           OrderItem[]
   statusHistory   OrderStatusHistory[]
+  returnRequests  ReturnRequest[]
+  rentalExtensions RentalExtension[]
 
   @@index([userId])
   @@index([status])
@@ -362,4 +368,118 @@ model Notification {
 
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ==================== REVIEWS ====================
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  orderId   String?  @map("order_id")
+  rating    Int      // 1-5
+  comment   String?
+  photos    String[] @default([])
+  isVisible Boolean  @default(true) @map("is_visible")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, isVisible])
+  @@map("reviews")
+}
+
+// ==================== RETURNS ====================
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  PICKUP_SCHEDULED
+  PICKED_UP
+  INSPECTED
+  REFUND_ISSUED
+  COMPLETED
+  REJECTED
+}
+
+enum DamageLevel {
+  NONE
+  MINOR
+  MODERATE
+  SEVERE
+}
+
+model ReturnRequest {
+  id              String       @id @default(cuid())
+  orderId         String       @map("order_id")
+  userId          String       @map("user_id")
+  status          ReturnStatus @default(REQUESTED)
+  reason          String?
+  photos          String[]     @default([])
+  damageLevel     DamageLevel  @default(NONE) @map("damage_level")
+  damageNotes     String?      @map("damage_notes")
+  damageFee       Int          @default(0) @map("damage_fee")
+  refundAmount    Int          @default(0) @map("refund_amount")
+  pickupDate      DateTime?    @map("pickup_date")
+  inspectionNotes String?      @map("inspection_notes")
+  processedBy     String?      @map("processed_by")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+  @@map("return_requests")
+}
+
+// ==================== RENTAL EXTENSIONS ====================
+
+enum ExtensionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model RentalExtension {
+  id              String          @id @default(cuid())
+  orderId         String          @map("order_id")
+  userId          String          @map("user_id")
+  originalEndDate DateTime        @map("original_end_date")
+  newEndDate      DateTime        @map("new_end_date")
+  additionalDays  Int             @map("additional_days")
+  additionalCost  Int             @map("additional_cost")
+  status          ExtensionStatus @default(PENDING)
+  notes           String?
+  processedBy     String?         @map("processed_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@map("rental_extensions")
+}
+
+// ==================== SMS TEMPLATES ====================
+
+model SmsTemplate {
+  id        String   @id @default(cuid())
+  slug      String   @unique // e.g., "order_confirmed", "delivery_reminder"
+  name      String
+  bodyRu    String   @map("body_ru")
+  bodyUz    String?  @map("body_uz")
+  bodyEn    String?  @map("body_en")
+  variables String[] @default([]) // Available template variables like {order_number}
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("sms_templates")
 }

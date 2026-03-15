@@ -17,6 +17,7 @@ import {
 } from '@/pages';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import './index.css';
 
 // Create a client
@@ -55,11 +56,11 @@ function AppContent() {
           <Route path="product/:id" element={<ProductDetailPage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="cart" element={<CartPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="favorites" element={<FavoritesPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="orders/:id" element={<OrderDetailPage />} />
+          <Route path="checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+          <Route path="orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+          <Route path="orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

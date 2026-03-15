@@ -4,6 +4,7 @@ import type {
   Category,
   Product,
   ProductAvailability,
+  DayAvailability,
   Address,
   Card,
   Order,
@@ -12,6 +13,9 @@ import type {
   PaginatedResponse,
   BusinessSettings,
   DeliveryZone,
+  Review,
+  ReviewStats,
+  CreateReviewInput,
 } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -104,6 +108,40 @@ export const productsApi = {
       params: { start_date: startDate, end_date: endDate, quantity },
     });
     return data;
+  },
+
+  getAvailabilityCalendar: async (
+    id: string,
+    month: string // YYYY-MM format
+  ): Promise<DayAvailability[]> => {
+    const { data } = await api.get(`/products/${id}/availability`, {
+      params: { month },
+    });
+    return data.days || data;
+  },
+};
+
+// Reviews API
+export const reviewsApi = {
+  getByProduct: async (
+    productId: string,
+    params?: { page?: number; limit?: number }
+  ): Promise<PaginatedResponse<Review>> => {
+    const { data } = await api.get(`/products/${productId}/reviews`, { params });
+    return data;
+  },
+
+  getStats: async (productId: string): Promise<ReviewStats> => {
+    const { data } = await api.get(`/products/${productId}/reviews/stats`);
+    return data.stats || data;
+  },
+
+  create: async (input: CreateReviewInput): Promise<Review> => {
+    const { data } = await api.post(`/products/${input.productId}/reviews`, {
+      rating: input.rating,
+      comment: input.comment,
+    });
+    return data.review || data;
   },
 };
 
