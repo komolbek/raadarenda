@@ -25,20 +25,8 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  async headers() {
-    return [
-      {
-        // Allow CORS for API routes
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
-        ],
-      },
-    ];
-  },
+  // CORS is handled dynamically in src/middleware.ts
+  // to avoid the insecure Access-Control-Allow-Origin: * wildcard.
 }
 
 module.exports = nextConfig
