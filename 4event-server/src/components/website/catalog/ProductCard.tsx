@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -18,7 +18,7 @@ interface ProductCardProps {
   className?: string;
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, className }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -166,4 +166,4 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </motion.div>
     </Link>
   );
-}
+});

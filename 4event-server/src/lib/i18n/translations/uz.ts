@@ -68,6 +68,12 @@ export const uz = {
   // Delivery
   deliveryFree: 'Bepul yetkazib berish',
   deliveryOnlyTashkent: 'Yetkazib berish faqat Toshkent shahrida mavjud',
+  deliveryNotAvailable: 'Ko\'rsatilgan shaharga yetkazib berish mavjud emas',
+
+  // Rental validation
+  startDateInPast: 'Ijara boshlanish sanasi o\'tgan bo\'lishi mumkin emas',
+  rentalTooLong: 'Maksimal ijara muddati oshib ketdi',
+  invalidStatusTransition: 'Buyurtma holatining noto\'g\'ri o\'tishi',
 
   // Admin
   adminLoginSuccess: 'Kirish muvaffaqiyatli',

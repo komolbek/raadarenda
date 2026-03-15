@@ -4,6 +4,15 @@ import { requireAdminAuth } from '@/lib/auth/admin-middleware'
 import { createTranslator } from '@/lib/i18n'
 import { OrderStatus } from '@prisma/client'
 
+// Valid status transitions — only these are allowed
+const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  CONFIRMED: ['PREPARING', 'CANCELLED'],
+  PREPARING: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: ['RETURNED'],
+  RETURNED: [],
+  CANCELLED: [],
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const t = createTranslator(req)
   const { id } = req.query
@@ -33,6 +42,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({
         success: false,
         message: t('orderNotFound'),
+      })
+    }
+
+    // Validate status transition
+    const allowedNextStatuses = VALID_TRANSITIONS[order.status as OrderStatus] || []
+    if (!allowedNextStatuses.includes(status as OrderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: t('invalidStatusTransition'),
       })
     }
 
