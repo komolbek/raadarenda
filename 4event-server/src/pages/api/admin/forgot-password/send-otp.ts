@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '@/lib/db'
-import { generateOTP } from '@/lib/auth/otp-service'
-import { sendAdminOTPSMS, isMockMode } from '@/lib/auth/sms-service'
+import { generateOTP, isTestAuthEnabled } from '@/lib/auth/otp-service'
+import { sendAdminOTPSMS } from '@/lib/auth/sms-service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -42,6 +42,6 @@ export default async function handler(
   return res.status(200).json({
     success: true,
     message: 'Код отправлен на ваш номер',
-    ...(isMockMode() && { dev_code: code }),
+    ...(isTestAuthEnabled() && { dev_code: code }),
   })
 }
