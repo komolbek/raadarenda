@@ -8,6 +8,7 @@ import {
   clearAdminSession,
 } from '@/lib/auth/admin-middleware'
 import { createTranslator } from '@/lib/i18n'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,6 +29,19 @@ export default async function handler(
 
     // Normalize phone: ensure +998 prefix
     const normalizedPhone = phone.startsWith('+') ? phone : `+${phone}`
+
+    // Rate limit: max 5 login attempts per phone per 15 minutes
+    const limit = checkRateLimit(
+      { namespace: 'admin-login', maxRequests: 5, windowMs: 15 * 60 * 1000 },
+      normalizedPhone
+    )
+    if (!limit.allowed) {
+      return res.status(429).json({
+        success: false,
+        message: 'Слишком много попыток. Попробуйте позже.',
+        retry_after_seconds: Math.ceil(limit.retryAfterMs / 1000),
+      })
+    }
 
     const staff = await prisma.staff.findUnique({
       where: { phoneNumber: normalizedPhone },

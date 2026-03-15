@@ -7,6 +7,8 @@ export const en = {
   notFound: 'Not found',
   badRequest: 'Bad request',
   validationError: 'Validation error',
+  tooManyRequests: 'Too many requests. Please try again later.',
+  invalidCardNumber: 'Invalid card number',
 
   // Auth
   otpSent: 'Code sent',

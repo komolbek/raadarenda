@@ -45,8 +45,8 @@ export default async function handler(
   }
 
   // Generate a temporary reset token (valid for 10 minutes)
-  const resetToken = crypto.randomBytes(32).toString('hex')
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_API_KEY || 'fallback'
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_API_KEY
+  if (!secret) throw new Error('ADMIN_SESSION_SECRET or ADMIN_API_KEY must be configured')
   const payload = `reset:${staff.id}:${Date.now()}`
   const signature = crypto
     .createHmac('sha256', secret)

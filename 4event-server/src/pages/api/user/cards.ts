@@ -17,6 +17,22 @@ function maskCardNumber(cardNumber: string): string {
   return `**** **** **** ${last4}`
 }
 
+function isValidLuhn(cardNumber: string): boolean {
+  const digits = cardNumber.replace(/\s/g, '').split('').map(Number)
+  let sum = 0
+  let isSecond = false
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let d = digits[i]
+    if (isSecond) {
+      d *= 2
+      if (d > 9) d -= 9
+    }
+    sum += d
+    isSecond = !isSecond
+  }
+  return sum % 10 === 0
+}
+
 function detectCardType(cardNumber: string): string {
   const cleaned = cardNumber.replace(/\s/g, '')
 
@@ -73,6 +89,14 @@ async function handler(
   if (req.method === 'POST') {
     try {
       const body = cardSchema.parse(req.body)
+
+      // Validate card number with Luhn algorithm
+      if (!isValidLuhn(body.card_number)) {
+        return res.status(400).json({
+          success: false,
+          message: t('invalidCardNumber'),
+        })
+      }
 
       // Check max cards limit (5)
       const count = await prisma.card.count({ where: { userId } })

@@ -21,7 +21,8 @@ function validateResetToken(token: string): { valid: boolean; staffId?: string }
   if (Date.now() - timestamp > RESET_TOKEN_EXPIRY) return { valid: false }
 
   // Verify signature
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_API_KEY || 'fallback'
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_API_KEY
+  if (!secret) throw new Error('ADMIN_SESSION_SECRET or ADMIN_API_KEY must be configured')
   const payload = `${prefix}:${staffId}:${timestampStr}`
   const expectedSignature = crypto
     .createHmac('sha256', secret)
