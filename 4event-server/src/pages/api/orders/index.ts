@@ -125,6 +125,22 @@ async function handler(
         throw new OrderError(t('productNotFound'), 400)
       }
 
+      // Validate rental duration against product constraints
+      for (const product of products) {
+        if (rentalDays < product.minRentalDays) {
+          throw new OrderError(
+            `${product.name}: minimum rental is ${product.minRentalDays} day(s)`,
+            400
+          )
+        }
+        if (rentalDays > product.maxRentalDays) {
+          throw new OrderError(
+            `${product.name}: maximum rental is ${product.maxRentalDays} day(s)`,
+            400
+          )
+        }
+      }
+
       // Check availability and calculate prices
       let subtotal = 0
       let totalSavings = 0
@@ -297,18 +313,14 @@ async function generateOrderNumber(tx: TxClient): Promise<string> {
   const date = new Date()
   const prefix = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
 
-  const lastOrder = await tx.order.findFirst({
-    where: { orderNumber: { startsWith: prefix } },
-    orderBy: { orderNumber: 'desc' },
+  // Atomic increment via upsert — no race condition
+  const counter = await tx.orderCounter.upsert({
+    where: { id: prefix },
+    update: { counter: { increment: 1 } },
+    create: { id: prefix, counter: 1 },
   })
 
-  let sequence = 1
-  if (lastOrder) {
-    const lastSeq = parseInt(lastOrder.orderNumber.slice(-4), 10)
-    sequence = lastSeq + 1
-  }
-
-  return `${prefix}${String(sequence).padStart(4, '0')}`
+  return `${prefix}${String(counter.counter).padStart(4, '0')}`
 }
 
 function formatOrder(order: any) {
