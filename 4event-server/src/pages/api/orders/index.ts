@@ -76,27 +76,12 @@ async function handler(
       })
     }
 
-    // Get products and validate availability
     const productIds = body.items.map((item) => item.product_id)
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds }, isActive: true },
-      include: {
-        pricingTiers: true,
-        quantityPricing: true,
-      },
-    })
 
-    if (products.length !== productIds.length) {
-      return res.status(400).json({
-        success: false,
-        message: t('productNotFound'),
-      })
-    }
-
-    // Calculate rental days
+    // Calculate rental days (inclusive of both start and end dates)
     const rentalDays = Math.ceil(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    )
+    ) + 1
 
     if (rentalDays < 1) {
       return res.status(400).json({
@@ -105,57 +90,13 @@ async function handler(
       })
     }
 
-    // Calculate prices and check availability
-    let subtotal = 0
-    let totalSavings = 0
-    const orderItems: any[] = []
-
-    for (const item of body.items) {
-      const product = products.find((p) => p.id === item.product_id)!
-
-      // Check availability
-      const reservedQty = await getReservedQuantity(
-        item.product_id,
-        startDate,
-        endDate
-      )
-      if (product.totalStock - reservedQty < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: t('insufficientStock'),
-        })
-      }
-
-      // Calculate price
-      const { totalPrice, savings } = calculateItemPrice(
-        product,
-        item.quantity,
-        rentalDays
-      )
-
-      subtotal += totalPrice
-      totalSavings += savings
-
-      orderItems.push({
-        productId: item.product_id,
-        productName: product.name,
-        productPhoto: product.photos[0] || null,
-        quantity: item.quantity,
-        dailyPrice: product.dailyPrice,
-        totalPrice,
-        savings,
-      })
-    }
-
-    // Calculate delivery fee
+    // Calculate delivery fee (can be done outside transaction — read-only, no race)
     let deliveryFee = 0
     if (body.delivery_type === 'DELIVERY' && body.delivery_address_id) {
-      // Check if Tashkent (free) or region (paid)
       const address = await prisma.address.findUnique({
         where: { id: body.delivery_address_id },
       })
       if (address && address.city.toLowerCase() !== 'ташкент' && address.city.toLowerCase() !== 'tashkent') {
-        // Get regional delivery price
         const zone = await prisma.deliveryZone.findFirst({
           where: { name: address.city, isActive: true },
         })
@@ -163,40 +104,102 @@ async function handler(
       }
     }
 
-    // Generate order number
-    const orderNumber = await generateOrderNumber()
+    // Atomic transaction: lock products, check availability, create order
+    const order = await prisma.$transaction(async (tx) => {
+      // Lock product rows to prevent concurrent overbooking
+      await tx.$queryRawUnsafe(
+        `SELECT id FROM products WHERE id IN (${productIds.map((_, i) => `$${i + 1}`).join(',')}) FOR UPDATE`,
+        ...productIds
+      )
 
-    // Create order
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId,
-        status: 'CONFIRMED',
-        deliveryType: body.delivery_type,
-        deliveryAddressId: body.delivery_address_id,
-        deliveryFee,
-        subtotal,
-        totalAmount: subtotal + deliveryFee,
-        totalSavings,
-        rentalStartDate: startDate,
-        rentalEndDate: endDate,
-        paymentMethod: body.payment_method,
-        paymentStatus: 'PENDING', // Will be updated when payment is completed
-        notes: body.notes,
-        items: {
-          create: orderItems,
+      // Fetch products with pricing data inside the transaction
+      const products = await tx.product.findMany({
+        where: { id: { in: productIds }, isActive: true },
+        include: {
+          pricingTiers: true,
+          quantityPricing: true,
         },
-        statusHistory: {
-          create: {
-            status: 'CONFIRMED',
-            notes: 'Order created',
+      })
+
+      if (products.length !== productIds.length) {
+        throw new OrderError(t('productNotFound'), 400)
+      }
+
+      // Check availability and calculate prices
+      let subtotal = 0
+      let totalSavings = 0
+      const orderItems: any[] = []
+
+      for (const item of body.items) {
+        const product = products.find((p) => p.id === item.product_id)!
+
+        const reservedQty = await getReservedQuantity(
+          tx,
+          item.product_id,
+          startDate,
+          endDate
+        )
+        if (product.totalStock - reservedQty < item.quantity) {
+          throw new OrderError(t('insufficientStock'), 400)
+        }
+
+        const { totalPrice, savings } = calculateItemPrice(
+          product,
+          item.quantity,
+          rentalDays
+        )
+
+        subtotal += totalPrice
+        totalSavings += savings
+
+        orderItems.push({
+          productId: item.product_id,
+          productName: product.name,
+          productPhoto: product.photos[0] || null,
+          quantity: item.quantity,
+          dailyPrice: product.dailyPrice,
+          totalPrice,
+          savings,
+        })
+      }
+
+      // Generate order number inside transaction to prevent duplicates
+      const orderNumber = await generateOrderNumber(tx)
+
+      return tx.order.create({
+        data: {
+          orderNumber,
+          userId,
+          status: 'CONFIRMED',
+          deliveryType: body.delivery_type,
+          deliveryAddressId: body.delivery_address_id,
+          deliveryFee,
+          subtotal,
+          totalAmount: subtotal + deliveryFee,
+          totalSavings,
+          rentalStartDate: startDate,
+          rentalEndDate: endDate,
+          paymentMethod: body.payment_method,
+          paymentStatus: 'PENDING',
+          notes: body.notes,
+          items: {
+            create: orderItems,
+          },
+          statusHistory: {
+            create: {
+              status: 'CONFIRMED',
+              notes: 'Order created',
+            },
           },
         },
-      },
-      include: {
-        items: true,
-        deliveryAddress: true,
-      },
+        include: {
+          items: true,
+          deliveryAddress: true,
+        },
+      })
+    }, {
+      isolationLevel: 'Serializable',
+      timeout: 10000,
     })
 
     return res.status(201).json({
@@ -213,6 +216,13 @@ async function handler(
       })
     }
 
+    if (error instanceof OrderError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      })
+    }
+
     console.error('Create order error:', error)
     return res.status(500).json({
       success: false,
@@ -221,12 +231,21 @@ async function handler(
   }
 }
 
+class OrderError extends Error {
+  constructor(message: string, public statusCode: number) {
+    super(message)
+  }
+}
+
+type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+
 async function getReservedQuantity(
+  tx: TxClient,
   productId: string,
   startDate: Date,
   endDate: Date
 ): Promise<number> {
-  const overlappingOrders = await prisma.order.findMany({
+  const overlappingOrders = await tx.order.findMany({
     where: {
       status: { in: ['CONFIRMED', 'PREPARING', 'DELIVERED'] },
       rentalStartDate: { lte: endDate },
@@ -274,11 +293,11 @@ function calculateItemPrice(
   return { totalPrice: fullPrice, savings: 0 }
 }
 
-async function generateOrderNumber(): Promise<string> {
+async function generateOrderNumber(tx: TxClient): Promise<string> {
   const date = new Date()
   const prefix = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
 
-  const lastOrder = await prisma.order.findFirst({
+  const lastOrder = await tx.order.findFirst({
     where: { orderNumber: { startsWith: prefix } },
     orderBy: { orderNumber: 'desc' },
   })
