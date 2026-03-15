@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { t as translate, type TranslationKey, type Locale } from './index';
+import { t as translate, type TranslationKey } from './index';
 import { useLanguageStore } from '@/stores/languageStore';
 
 export function useTranslation() {
