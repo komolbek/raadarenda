@@ -4,23 +4,22 @@ import crypto from 'crypto'
 const OTP_EXPIRY_MINUTES = 5
 const MAX_ATTEMPTS = 3
 
-// Test phone numbers that always use fixed OTP code (for testing in production)
-// Store without + prefix for consistent comparison
-const TEST_PHONE_NUMBERS = [
-  '998111111111',
-  '998000000000',
-]
-const TEST_OTP_CODE = '123456'
-
 // Normalize phone number by removing + prefix and any spaces/dashes
 function normalizePhoneNumber(phone: string): string {
   return phone.replace(/^\+/, '').replace(/[\s-]/g, '')
 }
 
-// Check if a phone number is a test number
+// Check if test auth is explicitly enabled and phone is in the allow-list
 function isTestPhoneNumber(phone: string): boolean {
+  if (process.env.ENABLE_TEST_AUTH !== 'true') return false
+  const testPhones = process.env.TEST_PHONE_NUMBERS
+  if (!testPhones) return false
   const normalized = normalizePhoneNumber(phone)
-  return TEST_PHONE_NUMBERS.includes(normalized)
+  return testPhones.split(',').map(p => p.trim()).includes(normalized)
+}
+
+export function isTestAuthEnabled(): boolean {
+  return process.env.ENABLE_TEST_AUTH === 'true'
 }
 
 export async function generateOTP(phoneNumber: string): Promise<string> {
@@ -36,10 +35,10 @@ export async function generateOTP(phoneNumber: string): Promise<string> {
   })
 
   // Generate 6-digit code
-  // Use fixed code for test phone numbers or in development
-  const isTestPhone = isTestPhoneNumber(phoneNumber)
-  const code = (process.env.NODE_ENV === 'development' || isTestPhone)
-    ? TEST_OTP_CODE
+  // Use fixed code only when ENABLE_TEST_AUTH is true and phone is in allow-list
+  const testOtp = process.env.TEST_OTP_CODE || ''
+  const code = (isTestPhoneNumber(phoneNumber) && testOtp)
+    ? testOtp
     : crypto.randomInt(100000, 999999).toString()
 
   const expiresAt = new Date()
