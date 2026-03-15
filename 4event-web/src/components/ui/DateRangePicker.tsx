@@ -26,7 +26,6 @@ export function DateRangePicker({
   className,
 }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hoveredDay, setHoveredDay] = useState<Date | null>(null);
   // Calculate rental days
   const rentalDays = value?.from && value?.to
     ? differenceInDays(value.to, value.from) + 1
@@ -182,8 +181,6 @@ export function DateRangePicker({
                   disabled={{ before: minDate, after: maxDate }}
                   numberOfMonths={2}
                   showOutsideDays
-                  onDayMouseEnter={setHoveredDay}
-                  onDayMouseLeave={() => setHoveredDay(null)}
                   classNames={{
                     months: 'flex gap-6',
                     month: 'space-y-4',
