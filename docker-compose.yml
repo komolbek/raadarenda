@@ -1,24 +1,53 @@
 version: '3.8'
 
 services:
-  backend:
+  api:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '4000:4000'
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/4event
       - NODE_ENV=production
-      - ADMIN_SESSION_SECRET=${ADMIN_SESSION_SECRET:-change-me-in-production}
       - ADMIN_API_KEY=${ADMIN_API_KEY:-change-me-in-production}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
       - ENABLE_TEST_AUTH=${ENABLE_TEST_AUTH:-false}
+      - SMS_PROVIDER=${SMS_PROVIDER:-mock}
+      - SMS_GATEWAY_URL=${SMS_GATEWAY_URL:-}
+      - SMS_GATEWAY_API_KEY=${SMS_GATEWAY_API_KEY:-}
+      - ESKIZ_API_TOKEN=${ESKIZ_API_TOKEN:-}
+      - UPLOADTHING_TOKEN=${UPLOADTHING_TOKEN:-}
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000/api
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000/api
+    ports:
+      - '3001:3001'
+    depends_on:
+      - api
     restart: unless-stopped
     networks:
       - app-network

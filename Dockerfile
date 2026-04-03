@@ -4,17 +4,24 @@
 FROM node:20-alpine AS deps
 
 RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
+RUN npm i -g turbo
 
 WORKDIR /app
 
-# Copy package manifests for dependency installation
-COPY 4event-backend/4event-server/package.json 4event-backend/4event-server/pnpm-lock.yaml* ./
+# Copy root package files
+COPY package.json pnpm-workspace.yaml turbo.json ./
 
-# Install production + dev dependencies (dev needed for build step)
+# Copy all package.json files for dependency resolution
+COPY apps/api/package.json ./apps/api/
+COPY packages/db/package.json ./packages/db/
+COPY packages/types/package.json ./packages/types/
+COPY packages/validators/package.json ./packages/validators/
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # =============================================================================
-# Stage 2: Build the Next.js application
+# Stage 2: Build the API
 # =============================================================================
 FROM node:20-alpine AS builder
 
@@ -22,21 +29,23 @@ RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
+# Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /app/packages/validators/node_modules ./packages/validators/node_modules
 
-# Copy application source
-COPY 4event-backend/4event-server/ .
+# Copy source
+COPY package.json pnpm-workspace.yaml turbo.json ./
+COPY apps/api/ ./apps/api/
+COPY packages/ ./packages/
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN cd packages/db && npx prisma generate
 
-# Build Next.js app
-# DATABASE_URL is required at build time for Prisma but not used
+# Build API
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN pnpm build
+RUN cd apps/api && npx nest build
 
 # =============================================================================
 # Stage 3: Production image
@@ -48,30 +57,25 @@ RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+    adduser --system --uid 1001 nestjs
 
 # Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/db/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/packages/db/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/packages/db/prisma ./prisma
 
-# Copy Prisma schema for runtime migrations
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+RUN chown -R nestjs:nodejs /app
 
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
+USER nestjs
 
-USER nextjs
+EXPOSE 4000
 
-EXPOSE 3000
-
-ENV PORT=3000
+ENV PORT=4000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "dist/main.js"]
