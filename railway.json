@@ -1,15 +1,13 @@
 {
-  "$schema": "https://railway.app/railway.schema.json",
+  "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "cd 4event-server && pnpm install && pnpm run build",
-    "watchPatterns": ["4event-server/**"]
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "cd 4event-server && pnpm run start",
+    "startCommand": "node dist/main.js",
+    "healthcheckPath": "/api",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10,
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 300
+    "restartPolicyMaxRetries": 10
   }
 }
