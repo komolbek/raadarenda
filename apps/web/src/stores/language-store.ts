@@ -1,18 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type Language = 'ru' | 'uz' | 'en';
+type Locale = 'ru' | 'uz' | 'en';
 
 interface LanguageState {
-  language: Language;
-  setLanguage: (language: Language) => void;
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
 }
 
 export const useLanguageStore = create<LanguageState>()(
   persist(
     (set) => ({
-      language: 'ru',
-      setLanguage: (language) => set({ language }),
+      locale: 'ru',
+      setLocale: (locale) => set({ locale }),
     }),
     {
       name: 'language-storage',
