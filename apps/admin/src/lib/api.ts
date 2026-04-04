@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api",
   withCredentials: true,
   headers: {
@@ -11,7 +11,7 @@ const api = axios.create({
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const adminAuthApi = {
-  login: (data: { email: string; password: string; otp?: string }) =>
+  login: (data: { phone: string; password: string }) =>
     api.post("/admin/auth/login", data),
 
   logout: () => api.post("/admin/auth/logout"),
@@ -170,4 +170,3 @@ export const adminDevOtpApi = {
   list: () => api.get("/admin/dev/otp"),
 };
 
-export default api;

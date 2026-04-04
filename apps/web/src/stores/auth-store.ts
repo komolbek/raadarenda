@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { IUser } from '@4event/types';
 
+export function getDeviceId(): string {
+  if (typeof window === 'undefined') return 'server';
+  const stored = localStorage.getItem('device_id');
+  if (stored) return stored;
+  const id = crypto.randomUUID();
+  localStorage.setItem('device_id', id);
+  return id;
+}
+
 interface AuthState {
   token: string | null;
   user: IUser | null;
