@@ -52,7 +52,7 @@ function AdminLoginContent() {
 
     try {
       const res = await adminAuthApi.login({
-        email: `+998${digits}`,
+        phone: `+998${digits}`,
         password,
       });
 

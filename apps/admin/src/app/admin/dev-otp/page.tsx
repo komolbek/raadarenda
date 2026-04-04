@@ -13,7 +13,7 @@ import {
   Shield,
   User,
 } from 'lucide-react';
-import api, { adminDevOtpApi } from '@/lib/api';
+import { api, adminDevOtpApi } from '@/lib/api';
 
 interface OTPEntry {
   id: string;

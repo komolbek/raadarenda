@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   ShieldCheck,
 } from 'lucide-react';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 
 type Step = 'phone' | 'otp' | 'password';
 
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const res = await api.post('/admin/forgot-password/send-otp', {
+      const res = await api.post('/admin/auth/forgot-password/send-otp', {
         phone: `+998${digits}`,
       });
       const data = res.data;
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
     const digits = phoneNumber.replace(/\s/g, '');
 
     try {
-      const res = await api.post('/admin/forgot-password/verify-otp', {
+      const res = await api.post('/admin/auth/forgot-password/verify-otp', {
         phone: `+998${digits}`,
         code,
       });
@@ -169,7 +169,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const res = await api.post('/admin/forgot-password/reset-password', {
+      const res = await api.post('/admin/auth/forgot-password/reset-password', {
         resetToken,
         password,
         confirmPassword,
