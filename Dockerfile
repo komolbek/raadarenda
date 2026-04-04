@@ -54,7 +54,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 appuser
 COPY --from=builder /app ./
-RUN pnpm prune --prod --no-optional
+RUN CI=true pnpm prune --prod --no-optional
 RUN chown -R appuser:nodejs /app
 USER appuser
 ENV PORT=4000
