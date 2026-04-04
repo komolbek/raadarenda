@@ -171,8 +171,7 @@ export default function ForgotPasswordPage() {
     try {
       const res = await api.post('/admin/auth/forgot-password/reset-password', {
         resetToken,
-        password,
-        confirmPassword,
+        newPassword: password,
       });
       const data = res.data;
 
