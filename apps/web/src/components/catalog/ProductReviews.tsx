@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Star, MessageSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { reviewsApi } from '@/lib/api';
+import { reviewsApi, productsApi } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { useAuthStore } from '@/stores/auth-store';
 import { cn, formatDate } from '@/lib/utils';
@@ -104,7 +104,7 @@ function ReviewForm({
       toast.error(t('reviews.rating_required'));
       return;
     }
-    createReviewMutation.mutate({ productId, rating, comment });
+    createReviewMutation.mutate({ product_id: productId, rating, comment });
   };
 
   return (
@@ -145,15 +145,13 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
 
-  const { data: stats } = useQuery({
-    queryKey: ['review-stats', productId],
-    queryFn: () => reviewsApi.getStats(productId),
+  const { data: productReviewsData, isLoading } = useQuery({
+    queryKey: ['reviews', productId],
+    queryFn: () => productsApi.getReviews(productId, { limit: 10 }),
   });
 
-  const { data: reviewsData, isLoading } = useQuery({
-    queryKey: ['reviews', productId],
-    queryFn: () => reviewsApi.getByProduct(productId, { limit: 10 }),
-  });
+  const stats = productReviewsData?.stats;
+  const reviewsData = productReviewsData?.reviews;
 
   const handleReviewSuccess = useCallback(() => {
     setShowForm(false);
@@ -262,7 +260,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             <Card key={review.id} className="p-4" role="listitem">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <p className="font-medium">{review.userName}</p>
+                  <p className="font-medium">{review.user?.name || review.user?.phoneNumber}</p>
                   <StarRating rating={review.rating} size="sm" />
                 </div>
                 <time

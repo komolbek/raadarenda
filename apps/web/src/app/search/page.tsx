@@ -170,7 +170,7 @@ function SearchPageContent() {
             </h2>
             {products && (
               <span className="text-muted-foreground">
-                {products.total} товаров
+                {products.total_count} товаров
               </span>
             )}
           </motion.div>

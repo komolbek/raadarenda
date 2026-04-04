@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
     }
 
     try {
-      await toggleFavorite(product);
+      await toggleFavorite(product.id);
       toast.success(isFav ? 'Удалено из избранного' : 'Добавлено в избранное');
     } catch (error) {
       toast.error('Не удалось обновить избранное');
@@ -365,44 +365,44 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Specifications */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
+          {(product.specWidth || product.specHeight || product.specDepth || product.specWeight || product.specColor || product.specMaterial) && (
             <div>
               <h3 className="font-semibold mb-3">Характеристики</h3>
               <Card className="divide-y divide-border">
-                {product.specifications.width && (
+                {product.specWidth && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Ширина</span>
-                    <span>{product.specifications.width} см</span>
+                    <span>{product.specWidth} см</span>
                   </div>
                 )}
-                {product.specifications.height && (
+                {product.specHeight && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Высота</span>
-                    <span>{product.specifications.height} см</span>
+                    <span>{product.specHeight} см</span>
                   </div>
                 )}
-                {product.specifications.depth && (
+                {product.specDepth && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Глубина</span>
-                    <span>{product.specifications.depth} см</span>
+                    <span>{product.specDepth} см</span>
                   </div>
                 )}
-                {product.specifications.weight && (
+                {product.specWeight && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Вес</span>
-                    <span>{product.specifications.weight} кг</span>
+                    <span>{product.specWeight} кг</span>
                   </div>
                 )}
-                {product.specifications.color && (
+                {product.specColor && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Цвет</span>
-                    <span>{product.specifications.color}</span>
+                    <span>{product.specColor}</span>
                   </div>
                 )}
-                {product.specifications.material && (
+                {product.specMaterial && (
                   <div className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">Материал</span>
-                    <span>{product.specifications.material}</span>
+                    <span>{product.specMaterial}</span>
                   </div>
                 )}
               </Card>
@@ -417,10 +417,10 @@ export default function ProductDetailPage() {
                 {product.pricingTiers.map((tier) => (
                   <div key={tier.id} className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">
-                      {tier.minDays}+ дней
+                      {tier.days}+ дней
                     </span>
                     <span className="font-medium text-green-600 dark:text-green-400">
-                      {formatPrice(tier.dailyPrice)} UZS/день
+                      {formatPrice(tier.totalPrice / tier.days)} UZS/день
                     </span>
                   </div>
                 ))}

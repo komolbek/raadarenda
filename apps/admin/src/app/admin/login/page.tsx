@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Phone, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { adminAuthApi } from '@/lib/api';
+import { useAdminAuthStore } from '@/stores/admin-auth-store';
 
 function formatPhoneInput(value: string): string {
   const digits = value.replace(/\D/g, '');
@@ -18,6 +19,7 @@ function formatPhoneInput(value: string): string {
 function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setStaff } = useAdminAuthStore();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -59,6 +61,11 @@ function AdminLoginContent() {
       const data = res.data;
 
       if (data.success) {
+        // Set staff in auth store so layout doesn't flash blank
+        if (data.staff) {
+          setStaff(data.staff);
+        }
+
         if (data.mustChangePassword) {
           router.push('/admin/set-password');
         } else {

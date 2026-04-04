@@ -114,8 +114,7 @@ export default function AuthPage() {
     setIsLoading(true);
     try {
       const digits = phoneNumber.replace(/\s/g, '');
-      const response = await authApi.verifyOtp(`+998${digits}`, code, getDeviceId());
-      const { token, user } = response.data.data!;
+      const { token, user } = await authApi.verifyOtp(`+998${digits}`, code, getDeviceId());
       login(token, user);
       toast.success('Добро пожаловать!');
       router.replace('/');

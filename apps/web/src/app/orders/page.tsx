@@ -40,7 +40,7 @@ function OrdersPageContent() {
         <div>
           <h1 className="text-3xl font-bold">Мои заказы</h1>
           <p className="text-muted-foreground">
-            {ordersData?.total || 0} заказов
+            {ordersData?.total_count || 0} заказов
           </p>
         </div>
       </motion.div>
@@ -100,10 +100,10 @@ function OrdersPageContent() {
                         key={item.id}
                         className="shrink-0 h-16 w-16 rounded-lg overflow-hidden bg-muted"
                       >
-                        {item.product.photos[0] ? (
+                        {item.productPhoto ? (
                           <img
-                            src={item.product.photos[0]}
-                            alt={item.product.name}
+                            src={item.productPhoto}
+                            alt={item.productName}
                             className="h-full w-full object-cover"
                           />
                         ) : (

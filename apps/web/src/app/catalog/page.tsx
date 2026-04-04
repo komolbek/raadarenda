@@ -39,7 +39,7 @@ function CatalogPageContent() {
       productsApi.getAll({
         category_id: categoryId,
         search,
-        sort,
+        sort: sort as 'newest' | 'popular' | 'price_asc' | 'price_desc',
         page,
         limit: 12,
       }),
@@ -80,8 +80,8 @@ function CatalogPageContent() {
           transition={{ delay: 0.1 }}
           className="text-muted-foreground"
         >
-          {products?.total
-            ? `${products.total} товаров`
+          {products?.total_count
+            ? `${products.total_count} товаров`
             : 'Загрузка...'}
         </motion.p>
       </div>
@@ -121,7 +121,7 @@ function CatalogPageContent() {
                         : 'bg-muted hover:bg-muted/80'
                     )}
                   >
-                    {category.icon && <span>{category.icon}</span>}
+                    {category.iconName && <span>{category.iconName}</span>}
                     {category.name}
                   </button>
                 ))}
@@ -241,13 +241,13 @@ function CatalogPageContent() {
           </motion.div>
 
           {/* Pagination */}
-          {products && products.totalPages > 1 && (
+          {products && Math.ceil(products.total_count / 12) > 1 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="flex justify-center gap-2 mt-12"
             >
-              {[...Array(products.totalPages)].map((_, i) => (
+              {[...Array(Math.ceil(products.total_count / 12))].map((_, i) => (
                 <button
                   key={i}
                   onClick={() => updateParams({ page: String(i + 1) })}

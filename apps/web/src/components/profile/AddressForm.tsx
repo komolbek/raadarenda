@@ -29,8 +29,23 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
     isDefault: address?.isDefault || false,
   });
 
+  const toApiData = (data: typeof formData) => ({
+    title: data.title,
+    full_address: data.fullAddress,
+    city: data.city,
+    district: data.district || undefined,
+    street: data.street || undefined,
+    building: data.building || undefined,
+    apartment: data.apartment || undefined,
+    entrance: data.entrance || undefined,
+    floor: data.floor || undefined,
+    latitude: data.latitude ?? undefined,
+    longitude: data.longitude ?? undefined,
+    is_default: data.isDefault,
+  });
+
   const createMutation = useMutation({
-    mutationFn: (data: typeof formData) => userApi.createAddress(data as Parameters<typeof userApi.createAddress>[0]),
+    mutationFn: (data: typeof formData) => userApi.createAddress(toApiData(data)),
     onSuccess: () => {
       toast.success('Адрес добавлен');
       onSuccess();
@@ -41,7 +56,7 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: typeof formData) => userApi.updateAddress(address!.id, data),
+    mutationFn: (data: typeof formData) => userApi.createAddress(toApiData(data)),
     onSuccess: () => {
       toast.success('Адрес обновлён');
       onSuccess();

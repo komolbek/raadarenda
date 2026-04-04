@@ -42,8 +42,7 @@ export function Header() {
   const { t } = useTranslation();
 
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { getItemCount } = useCartStore();
-  const itemCount = getItemCount();
+  const itemCount = useCartStore((s) => s.itemCount);
   const { theme, setTheme, resolvedTheme } = useThemeStore();
   const { locale, setLocale } = useLanguageStore();
 
@@ -248,7 +247,7 @@ export function Header() {
                         <div className="px-4 py-3 border-b border-border">
                           <p className="font-medium truncate">{user?.name || t('header.user_default_name')}</p>
                           <p className="text-sm text-muted-foreground truncate">
-                            {user?.phone_number}
+                            {user?.phoneNumber}
                           </p>
                         </div>
                         <div className="py-1">

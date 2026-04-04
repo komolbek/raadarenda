@@ -191,10 +191,10 @@ function OrderDetailPageContent() {
                     className="flex gap-4 p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="h-20 w-20 rounded-xl overflow-hidden bg-muted shrink-0">
-                      {item.product.photos[0] ? (
+                      {item.productPhoto ? (
                         <img
-                          src={item.product.photos[0]}
-                          alt={item.product.name}
+                          src={item.productPhoto}
+                          alt={item.productName}
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -204,9 +204,9 @@ function OrderDetailPageContent() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium">{item.product.name}</p>
+                      <p className="font-medium">{item.productName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {item.quantity} × {item.rentalDays} дней
+                        {item.quantity} шт.
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {formatPrice(item.dailyPrice)} UZS/день
