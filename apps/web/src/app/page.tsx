@@ -48,7 +48,7 @@ const itemVariants = {
 export default function HomePage() {
   const { data: settings } = useQuery({
     queryKey: ['businessSettings'],
-    queryFn: () => settingsApi.getBusinessInfo().then((res) => res.settings),
+    queryFn: () => settingsApi.getBusinessInfo(),
   });
 
   const phoneNumber = settings?.phone || '+998901234567';
