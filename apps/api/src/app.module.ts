@@ -11,8 +11,10 @@ import { ReturnsModule } from './returns/returns.module';
 import { ExtensionsModule } from './extensions/extensions.module';
 import { UsersModule } from './users/users.module';
 import { BusinessSettingsModule } from './business-settings/business-settings.module';
+import { AppController } from './app.controller';
 
 @Module({
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
