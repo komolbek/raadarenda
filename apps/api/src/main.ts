@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { ResponseWrapperInterceptor } from './common/response-wrapper.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
   app.setGlobalPrefix('api');
 
   app.useGlobalInterceptors(new ResponseWrapperInterceptor());
