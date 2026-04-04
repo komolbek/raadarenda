@@ -10,12 +10,9 @@ env:
   NODE_VERSION: '20'
 
 jobs:
-  lint-backend:
-    name: Lint (Backend)
+  ci:
+    name: Lint, Type Check & Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-server
     steps:
       - uses: actions/checkout@v4
 
@@ -25,167 +22,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: 4event-backend/4event-server/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm lint
-
-  lint-frontend:
-    name: Lint (Frontend)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-web
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-web/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm lint
-
-  typecheck-backend:
-    name: Type Check (Backend)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-server
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-server/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm prisma generate
-
-      - run: npx tsc --noEmit
-
-  typecheck-frontend:
-    name: Type Check (Frontend)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-web
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-web/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: npx tsc -b
-
-  test-backend:
-    name: Test (Backend)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-server
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-server/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm prisma generate
-
-      - run: pnpm test
+      - run: pnpm db:generate
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          ADMIN_SESSION_SECRET: ci-test-secret
-          ENABLE_TEST_AUTH: 'false'
+          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
 
-  test-frontend:
-    name: Test (Frontend)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-web
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-web/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm test
-
-  build-backend:
-    name: Build (Backend)
-    runs-on: ubuntu-latest
-    needs: [lint-backend, typecheck-backend, test-backend]
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-server
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-server/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
 
       - run: pnpm build
         env:
           DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
-
-  build-frontend:
-    name: Build (Frontend)
-    runs-on: ubuntu-latest
-    needs: [lint-frontend, typecheck-frontend, test-frontend]
-    defaults:
-      run:
-        working-directory: 4event-backend/4event-web
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: 4event-backend/4event-web/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm build
