@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@4event/types": "workspace:*",
+    "@headlessui/react": "^2.2.0",
     "@4event/validators": "workspace:*",
     "@tanstack/react-query": "^5.90.0",
     "axios": "^1.13.0",
