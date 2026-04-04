@@ -70,8 +70,8 @@ export default function Orders() {
 
       const { data } = await adminOrdersApi.list(params)
       if (data.success) {
-        setOrders(data.data)
-        setTotalPages(data.pagination.total_pages)
+        setOrders(data.data.items)
+        setTotalPages(data.data.meta?.totalPages || 1)
       }
     } catch (err) {
       console.error('Failed to fetch orders:', err)

@@ -346,8 +346,10 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedResponse<T> {
   items: T[];
-  total_count: number;
-  page: number;
-  limit: number;
-  has_more: boolean;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }

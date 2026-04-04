@@ -63,8 +63,8 @@ export default function Customers() {
 
       const { data } = await adminCustomersApi.list(params)
       if (data.success) {
-        setCustomers(data.data)
-        setTotalPages(data.pagination.total_pages)
+        setCustomers(data.data.items)
+        setTotalPages(data.data.meta?.totalPages || 1)
       }
     } catch (err) {
       console.error('Failed to fetch customers:', err)

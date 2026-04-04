@@ -148,7 +148,7 @@ export default function Products() {
     try {
       const { data } = await adminCategoriesApi.list()
       if (data.success) {
-        setCategories(data.data)
+        setCategories(data.data.items || data.data)
       }
     } catch (err) {
       console.error('Failed to fetch categories:', err)
@@ -167,8 +167,8 @@ export default function Products() {
 
       const { data } = await adminProductsApi.list(params)
       if (data.success) {
-        setProducts(data.data)
-        setTotalPages(data.pagination.total_pages)
+        setProducts(data.data.items)
+        setTotalPages(data.data.meta?.totalPages || 1)
       }
     } catch (err) {
       console.error('Failed to fetch products:', err)

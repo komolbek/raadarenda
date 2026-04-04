@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ResponseWrapperInterceptor } from './common/response-wrapper.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
+
+  app.useGlobalInterceptors(new ResponseWrapperInterceptor());
 
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || [
