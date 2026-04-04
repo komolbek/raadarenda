@@ -4,7 +4,6 @@
 FROM node:20-alpine AS deps
 
 RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
-RUN npm i -g turbo
 
 WORKDIR /app
 
@@ -17,8 +16,11 @@ COPY packages/db/package.json ./packages/db/
 COPY packages/types/package.json ./packages/types/
 COPY packages/validators/package.json ./packages/validators/
 
+# Copy Prisma schema so postinstall can generate client
+COPY packages/db/prisma ./packages/db/prisma
+
 # Install dependencies
-RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm install --no-frozen-lockfile
 
 # =============================================================================
 # Stage 2: Build the API
@@ -31,9 +33,9 @@ WORKDIR /app
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=deps /app/packages/validators/node_modules ./packages/validators/node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules 2>/dev/null || true
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules 2>/dev/null || true
+COPY --from=deps /app/packages/validators/node_modules ./packages/validators/node_modules 2>/dev/null || true
 
 # Copy source
 COPY package.json pnpm-workspace.yaml turbo.json ./
@@ -51,8 +53,6 @@ RUN cd apps/api && npx nest build
 # Stage 3: Production image
 # =============================================================================
 FROM node:20-alpine AS runner
-
-RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
 
 WORKDIR /app
 
