@@ -58,7 +58,7 @@ function CheckoutPageContent() {
   // Fetch business settings for self-pickup address
   const { data: businessSettings } = useQuery({
     queryKey: ['businessSettings'],
-    queryFn: () => settingsApi.getBusinessInfo().then((res) => res.settings),
+    queryFn: () => settingsApi.getBusinessInfo(),
   });
 
   // Set default address

@@ -325,7 +325,7 @@ export const extensionsApi = {
 
 export const settingsApi = {
   getBusinessInfo() {
-    return api.get<{ settings: IBusinessSettings; deliveryZones: IDeliveryZone[] }>(
+    return api.get<IBusinessSettings & { deliveryZones: IDeliveryZone[] }>(
       '/business/info',
     );
   },
