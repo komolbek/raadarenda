@@ -53,14 +53,16 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: unwrap ApiResponse envelope and redirect on 401
+// Response interceptor: unwrap { success, data } envelope and redirect on 401
 axiosInstance.interceptors.response.use(
   (response) => {
-    // Unwrap ApiResponse { success, data } envelope
-    if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-      return response.data.data;
+    const body = response.data;
+    // Unwrap { success: true, data: ... } envelope from API
+    if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+      return body.data;
     }
-    return response.data;
+    // For responses without data field (e.g. { success: true, token, user })
+    return body;
   },
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {

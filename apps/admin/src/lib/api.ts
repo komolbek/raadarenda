@@ -40,10 +40,7 @@ export const adminAuthApi = {
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 export const adminDashboardApi = {
-  getStats: () => api.get("/admin/dashboard/stats"),
-  getRecentOrders: () => api.get("/admin/dashboard/recent-orders"),
-  getRevenueChart: (params?: { period?: string }) =>
-    api.get("/admin/dashboard/revenue", { params }),
+  getStats: () => api.get("/admin/dashboard"),
 };
 
 // ─── Products ────────────────────────────────────────────────────────────────

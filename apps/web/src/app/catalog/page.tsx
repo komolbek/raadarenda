@@ -80,8 +80,8 @@ function CatalogPageContent() {
           transition={{ delay: 0.1 }}
           className="text-muted-foreground"
         >
-          {products?.total_count
-            ? `${products.total_count} товаров`
+          {products?.meta.total
+            ? `${products.meta.total} товаров`
             : 'Загрузка...'}
         </motion.p>
       </div>
@@ -241,13 +241,13 @@ function CatalogPageContent() {
           </motion.div>
 
           {/* Pagination */}
-          {products && Math.ceil(products.total_count / 12) > 1 && (
+          {products && products.meta.totalPages > 1 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="flex justify-center gap-2 mt-12"
             >
-              {[...Array(Math.ceil(products.total_count / 12))].map((_, i) => (
+              {[...Array(products.meta.totalPages)].map((_, i) => (
                 <button
                   key={i}
                   onClick={() => updateParams({ page: String(i + 1) })}

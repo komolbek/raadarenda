@@ -40,7 +40,7 @@ function OrdersPageContent() {
         <div>
           <h1 className="text-3xl font-bold">Мои заказы</h1>
           <p className="text-muted-foreground">
-            {ordersData?.total_count || 0} заказов
+            {ordersData?.meta.total || 0} заказов
           </p>
         </div>
       </motion.div>

@@ -51,7 +51,7 @@ export default function Categories() {
     try {
       const { data } = await adminCategoriesApi.list()
       if (data.success) {
-        setCategories(data.data)
+        setCategories(data.data.items || data.data)
       }
     } catch (err) {
       console.error('Failed to fetch categories:', err)

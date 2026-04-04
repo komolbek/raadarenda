@@ -94,7 +94,7 @@ export default function StaffPage() {
     try {
       const { data } = await adminStaffApi.list()
       if (data.success) {
-        setStaff(data.staff)
+        setStaff(data.data.staff || data.data)
       }
     } catch (err) {
       console.error('Failed to fetch staff:', err)
@@ -157,7 +157,7 @@ export default function StaffPage() {
 
         if (data.success) {
           setStaff((prev) =>
-            prev.map((s) => (s.id === editingStaff.id ? data.staff : s))
+            prev.map((s) => (s.id === editingStaff.id ? (data.data.staff || data.data) : s))
           )
           setShowModal(false)
         } else {
@@ -172,7 +172,7 @@ export default function StaffPage() {
         })
 
         if (data.success) {
-          setStaff((prev) => [data.staff, ...prev])
+          setStaff((prev) => [data.data.staff || data.data, ...prev])
           setShowModal(false)
         } else {
           setFormError(data.message)
@@ -191,7 +191,7 @@ export default function StaffPage() {
 
       if (data.success) {
         setStaff((prev) =>
-          prev.map((s) => (s.id === member.id ? data.staff : s))
+          prev.map((s) => (s.id === member.id ? (data.data.staff || data.data) : s))
         )
       }
     } catch (err) {
