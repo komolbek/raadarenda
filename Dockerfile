@@ -49,18 +49,17 @@ RUN if [ "$SERVICE" = "api" ]; then \
 # Stage 3a: API runner
 # ============================================================
 FROM node:20-alpine AS runner-api
+RUN corepack enable && corepack prepare pnpm@10.16.1 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 appuser
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/db/prisma ./prisma
+COPY --from=builder /app ./
+RUN pnpm prune --prod --no-optional
 RUN chown -R appuser:nodejs /app
 USER appuser
 ENV PORT=4000
 EXPOSE 4000
-CMD ["node", "dist/main.js"]
+CMD ["node", "apps/api/dist/main.js"]
 
 # ============================================================
 # Stage 3b: Web runner
