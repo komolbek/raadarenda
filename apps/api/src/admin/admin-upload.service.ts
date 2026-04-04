@@ -5,7 +5,7 @@ export class AdminUploadService {
   async uploadImage(_file: any) {
     // TODO: Integrate UploadThing later
     return {
-      url: `https://placeholder.4event.uz/uploads/${Date.now()}.jpg`,
+      url: `https://utfs.io/placeholder/${Date.now()}.jpg`,
       placeholder: true,
       message: 'Upload integration pending. This is a placeholder response.',
     };
