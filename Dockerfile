@@ -38,8 +38,11 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="postgresql://p:p@localhost:5432/p"
 
+RUN cd packages/types && npx tsc && \
+    cd /app/packages/validators && npx tsc && \
+    cd /app/packages/db && npx prisma generate && npx tsc
+
 RUN if [ "$SERVICE" = "api" ]; then \
-      cd packages/db && npx prisma generate && \
       cd /app/apps/api && npx nest build; \
     else \
       cd /app/apps/${SERVICE} && npx next build; \
