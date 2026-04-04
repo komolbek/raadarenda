@@ -10,15 +10,18 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || [
       'http://localhost:3000',
-      'http://localhost:5173',
+      'http://localhost:3001',
       'https://rentevent.uz',
+      'https://www.rentevent.uz',
+      'https://admin.rentevent.uz',
+      'https://api.rentevent.uz',
     ],
     credentials: true,
   });
 
   const config = new DocumentBuilder()
-    .setTitle('4Event API')
-    .setDescription('RentEvent rental platform API')
+    .setTitle('RentEvent API')
+    .setDescription('RentEvent — rental platform API')
     .setVersion('2.0')
     .addBearerAuth()
     .addCookieAuth('admin_session')
