@@ -61,9 +61,14 @@ export default function AdminLayout({
     );
   }
 
-  // Redirect if not authenticated (effect handles it, but prevent flash)
+  // Redirect if not authenticated
   if (!isAuthenticated) {
-    return null;
+    router.replace("/admin/login");
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      </div>
+    );
   }
 
   return (
