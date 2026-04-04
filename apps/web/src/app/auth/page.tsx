@@ -63,7 +63,7 @@ export default function AuthPage() {
 
     setIsLoading(true);
     try {
-      await authApi.sendOTP(`+998${digits}`);
+      await authApi.sendOtp(`+998${digits}`);
       setStep('otp');
       setCountdown(60);
       toast.success('Код отправлен на ваш номер');
@@ -114,7 +114,7 @@ export default function AuthPage() {
     setIsLoading(true);
     try {
       const digits = phoneNumber.replace(/\s/g, '');
-      const response = await authApi.verifyOTP(`+998${digits}`, code, getDeviceId());
+      const response = await authApi.verifyOtp(`+998${digits}`, code, getDeviceId());
       login(response.token, response.user);
       toast.success('Добро пожаловать!');
       router.replace('/');
