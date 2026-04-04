@@ -32,7 +32,14 @@ export function AvailabilityCalendar({ productId, totalStock }: AvailabilityCale
 
   const { data: availability, isLoading } = useQuery({
     queryKey: ['product-availability', productId, monthKey],
-    queryFn: () => productsApi.getAvailabilityCalendar(productId, monthKey),
+    queryFn: () => {
+      const year = currentMonth.year;
+      const month = currentMonth.month;
+      const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      return productsApi.checkAvailability(productId, { start_date: startDate, end_date: endDate });
+    },
     staleTime: 1000 * 60 * 5,
   });
 

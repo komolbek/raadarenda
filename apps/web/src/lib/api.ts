@@ -1,6 +1,5 @@
 import axios from 'axios';
 import type {
-  ApiResponse,
   PaginatedResponse,
   IUser,
   ICategory,
@@ -21,13 +20,22 @@ import type {
 // Axios instance
 // ---------------------------------------------------------------------------
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+const getBaseURL = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  // Production fallback when env var not baked into build
+  if (typeof window !== 'undefined' && window.location.hostname === 'rentevent.uz') {
+    return 'https://api.rentevent.uz/api';
+  }
+  return 'http://localhost:4000';
+};
+
+const axiosInstance = axios.create({
+  baseURL: getBaseURL(),
   headers: { 'Content-Type': 'application/json' },
 });
 
 // Request interceptor: attach Bearer token
-api.interceptors.request.use((config) => {
+axiosInstance.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('auth-storage');
     if (stored) {
@@ -45,14 +53,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: redirect on 401
-api.interceptors.response.use(
-  (response) => response,
+// Response interceptor: unwrap ApiResponse envelope and redirect on 401
+axiosInstance.interceptors.response.use(
+  (response) => {
+    // Unwrap ApiResponse { success, data } envelope
+    if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+      return response.data.data;
+    }
+    return response.data;
+  },
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Clear auth state
       localStorage.removeItem('auth-storage');
-      // Redirect to auth if not already there
       if (!window.location.pathname.startsWith('/auth')) {
         window.location.href = '/auth';
       }
@@ -61,17 +73,36 @@ api.interceptors.response.use(
   },
 );
 
+// Typed request helpers — interceptor unwraps ApiResponse so callers get T directly
+const api = {
+  get<T>(url: string, config?: Parameters<typeof axiosInstance.get>[1]): Promise<T> {
+    return axiosInstance.get(url, config) as unknown as Promise<T>;
+  },
+  post<T>(url: string, data?: unknown, config?: Parameters<typeof axiosInstance.post>[2]): Promise<T> {
+    return axiosInstance.post(url, data, config) as unknown as Promise<T>;
+  },
+  put<T>(url: string, data?: unknown, config?: Parameters<typeof axiosInstance.put>[2]): Promise<T> {
+    return axiosInstance.put(url, data, config) as unknown as Promise<T>;
+  },
+  patch<T>(url: string, data?: unknown, config?: Parameters<typeof axiosInstance.patch>[2]): Promise<T> {
+    return axiosInstance.patch(url, data, config) as unknown as Promise<T>;
+  },
+  delete<T>(url: string, config?: Parameters<typeof axiosInstance.delete>[1]): Promise<T> {
+    return axiosInstance.delete(url, config) as unknown as Promise<T>;
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Auth API
 // ---------------------------------------------------------------------------
 
 export const authApi = {
   sendOtp(phone_number: string) {
-    return api.post<ApiResponse>('/auth/send-otp', { phone_number });
+    return api.post<void>('/auth/send-otp', { phone_number });
   },
 
   verifyOtp(phone_number: string, code: string, device_id: string) {
-    return api.post<ApiResponse<{ token: string; user: IUser }>>('/auth/verify-otp', {
+    return api.post<{ token: string; user: IUser }>('/auth/verify-otp', {
       phone_number,
       code,
       device_id,
@@ -79,7 +110,7 @@ export const authApi = {
   },
 
   logout() {
-    return api.post<ApiResponse>('/auth/logout');
+    return api.post<void>('/auth/logout');
   },
 };
 
@@ -89,7 +120,7 @@ export const authApi = {
 
 export const categoriesApi = {
   getAll() {
-    return api.get<ApiResponse<ICategory[]>>('/categories');
+    return api.get<ICategory[]>('/categories');
   },
 };
 
@@ -105,24 +136,25 @@ export const productsApi = {
     search?: string;
     sort?: 'newest' | 'popular' | 'price_asc' | 'price_desc';
   }) {
-    return api.get<ApiResponse<PaginatedResponse<IProduct>>>('/products', { params });
+    return api.get<PaginatedResponse<IProduct>>('/products', { params });
   },
 
   getById(id: string) {
-    return api.get<ApiResponse<IProduct>>(`/products/${id}`);
+    return api.get<IProduct>(`/products/${id}`);
   },
 
   checkAvailability(
     id: string,
     params: { start_date: string; end_date: string; quantity?: number },
   ) {
-    return api.get<ApiResponse<IDayAvailability[]>>(`/products/${id}/availability`, { params });
+    return api.get<IDayAvailability[]>(`/products/${id}/availability`, { params });
   },
 
   getReviews(id: string, params?: { page?: number; limit?: number }) {
-    return api.get<
-      ApiResponse<{ reviews: PaginatedResponse<IReview>; stats: IReviewStats }>
-    >(`/products/${id}/reviews`, { params });
+    return api.get<{ reviews: PaginatedResponse<IReview>; stats: IReviewStats }>(
+      `/products/${id}/reviews`,
+      { params },
+    );
   },
 };
 
@@ -132,15 +164,15 @@ export const productsApi = {
 
 export const reviewsApi = {
   create(data: { product_id: string; rating: number; comment?: string; photos?: string[] }) {
-    return api.post<ApiResponse<IReview>>('/reviews', data);
+    return api.post<IReview>('/reviews', data);
   },
 
   update(id: string, data: { rating?: number; comment?: string; photos?: string[] }) {
-    return api.put<ApiResponse<IReview>>(`/reviews/${id}`, data);
+    return api.put<IReview>(`/reviews/${id}`, data);
   },
 
   delete(id: string) {
-    return api.delete<ApiResponse>(`/reviews/${id}`);
+    return api.delete<void>(`/reviews/${id}`);
   },
 };
 
@@ -150,16 +182,16 @@ export const reviewsApi = {
 
 export const userApi = {
   getProfile() {
-    return api.get<ApiResponse<IUser>>('/user/profile');
+    return api.get<IUser>('/user/profile');
   },
 
   updateProfile(name: string) {
-    return api.post<ApiResponse<IUser>>('/user/profile', { name });
+    return api.post<IUser>('/user/profile', { name });
   },
 
   // Addresses
   getAddresses() {
-    return api.get<ApiResponse<IAddress[]>>('/user/addresses');
+    return api.get<IAddress[]>('/user/addresses');
   },
 
   createAddress(data: {
@@ -176,20 +208,20 @@ export const userApi = {
     longitude?: number;
     is_default?: boolean;
   }) {
-    return api.post<ApiResponse<IAddress>>('/user/addresses', data);
+    return api.post<IAddress>('/user/addresses', data);
   },
 
   deleteAddress(addressId: string) {
-    return api.delete<ApiResponse>(`/user/addresses/${addressId}`);
+    return api.delete<void>(`/user/addresses/${addressId}`);
   },
 
   setDefaultAddress(addressId: string) {
-    return api.post<ApiResponse>(`/user/addresses/${addressId}/default`);
+    return api.post<void>(`/user/addresses/${addressId}/default`);
   },
 
   // Cards
   getCards() {
-    return api.get<ApiResponse<ICard[]>>('/user/cards');
+    return api.get<ICard[]>('/user/cards');
   },
 
   addCard(data: {
@@ -198,28 +230,28 @@ export const userApi = {
     expiry_month: number;
     expiry_year: number;
   }) {
-    return api.post<ApiResponse<ICard>>('/user/cards', data);
+    return api.post<ICard>('/user/cards', data);
   },
 
   deleteCard(cardId: string) {
-    return api.delete<ApiResponse>(`/user/cards/${cardId}`);
+    return api.delete<void>(`/user/cards/${cardId}`);
   },
 
   setDefaultCard(cardId: string) {
-    return api.post<ApiResponse>(`/user/cards/${cardId}/default`);
+    return api.post<void>(`/user/cards/${cardId}/default`);
   },
 
   // Favorites
   getFavorites() {
-    return api.get<ApiResponse<IProduct[]>>('/user/favorites');
+    return api.get<IProduct[]>('/user/favorites');
   },
 
   addFavorite(product_id: string) {
-    return api.post<ApiResponse>('/user/favorites', { product_id });
+    return api.post<void>('/user/favorites', { product_id });
   },
 
   removeFavorite(productId: string) {
-    return api.delete<ApiResponse>(`/user/favorites/${productId}`);
+    return api.delete<void>(`/user/favorites/${productId}`);
   },
 };
 
@@ -237,19 +269,19 @@ export const ordersApi = {
     payment_method: string;
     notes?: string;
   }) {
-    return api.post<ApiResponse<IOrder>>('/orders', data);
+    return api.post<IOrder>('/orders', data);
   },
 
   getMyOrders(params?: { page?: number; limit?: number; status?: string }) {
-    return api.get<ApiResponse<PaginatedResponse<IOrder>>>('/orders/my-orders', { params });
+    return api.get<PaginatedResponse<IOrder>>('/orders/my-orders', { params });
   },
 
   getById(id: string) {
-    return api.get<ApiResponse<IOrder>>(`/orders/${id}`);
+    return api.get<IOrder>(`/orders/${id}`);
   },
 
   cancel(id: string) {
-    return api.post<ApiResponse>(`/orders/${id}/cancel`);
+    return api.post<void>(`/orders/${id}/cancel`);
   },
 };
 
@@ -259,17 +291,15 @@ export const ordersApi = {
 
 export const returnsApi = {
   create(data: { order_id: string; reason?: string; photos?: string[] }) {
-    return api.post<ApiResponse<IReturnRequest>>('/returns', data);
+    return api.post<IReturnRequest>('/returns', data);
   },
 
   getMyReturns(params?: { page?: number; limit?: number }) {
-    return api.get<ApiResponse<PaginatedResponse<IReturnRequest>>>('/returns/my-returns', {
-      params,
-    });
+    return api.get<PaginatedResponse<IReturnRequest>>('/returns/my-returns', { params });
   },
 
   getById(id: string) {
-    return api.get<ApiResponse<IReturnRequest>>(`/returns/${id}`);
+    return api.get<IReturnRequest>(`/returns/${id}`);
   },
 };
 
@@ -279,13 +309,11 @@ export const returnsApi = {
 
 export const extensionsApi = {
   create(data: { order_id: string; additional_days: number; notes?: string }) {
-    return api.post<ApiResponse<IRentalExtension>>('/extensions', data);
+    return api.post<IRentalExtension>('/extensions', data);
   },
 
   getMyExtensions(params?: { page?: number; limit?: number }) {
-    return api.get<ApiResponse<PaginatedResponse<IRentalExtension>>>('/extensions/my-extensions', {
-      params,
-    });
+    return api.get<PaginatedResponse<IRentalExtension>>('/extensions/my-extensions', { params });
   },
 };
 
@@ -295,9 +323,9 @@ export const extensionsApi = {
 
 export const settingsApi = {
   getBusinessInfo() {
-    return api.get<
-      ApiResponse<{ settings: IBusinessSettings; deliveryZones: IDeliveryZone[] }>
-    >('/business/info');
+    return api.get<{ settings: IBusinessSettings; deliveryZones: IDeliveryZone[] }>(
+      '/business/info',
+    );
   },
 };
 

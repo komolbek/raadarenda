@@ -58,7 +58,7 @@ function CheckoutPageContent() {
   // Fetch business settings for self-pickup address
   const { data: businessSettings } = useQuery({
     queryKey: ['businessSettings'],
-    queryFn: settingsApi.getBusinessSettings,
+    queryFn: () => settingsApi.getBusinessInfo().then((res) => res.settings),
   });
 
   // Set default address
@@ -110,7 +110,7 @@ function CheckoutPageContent() {
       rental_start_date: formatDateForAPI(new Date(firstItem.rentalStartDate)),
       rental_end_date: formatDateForAPI(new Date(firstItem.rentalEndDate)),
       delivery_type: deliveryType,
-      address_id: deliveryType === 'DELIVERY' ? selectedAddressId || undefined : undefined,
+      delivery_address_id: deliveryType === 'DELIVERY' ? selectedAddressId || undefined : undefined,
       payment_method: paymentMethod,
       notes: notes || undefined,
     });
@@ -278,7 +278,7 @@ function CheckoutPageContent() {
                       <Store className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">{businessSettings.businessName}</p>
+                      <p className="font-medium">{businessSettings.name}</p>
                       <p className="text-sm text-muted-foreground">{businessSettings.address}</p>
                       {businessSettings.phone && (
                         <p className="text-sm text-muted-foreground mt-1">

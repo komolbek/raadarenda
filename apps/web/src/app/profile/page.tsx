@@ -24,13 +24,14 @@ import { AddressForm } from '@/components/profile/AddressForm';
 import { AuthGuard } from '@/components/auth-guard';
 import { useAuthStore } from '@/stores/auth-store';
 import { userApi } from '@/lib/api';
+import type { IUser } from '@4event/types';
 import { formatPhoneNumber } from '@/lib/utils';
 import type { Address } from '@/types';
 
 function ProfilePageContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, updateProfile, logout } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(user?.name || '');
@@ -78,7 +79,8 @@ function ProfilePageContent() {
       return;
     }
     try {
-      await updateProfile(newName.trim());
+      const updatedUser = await userApi.updateProfile(newName.trim());
+      setUser(updatedUser);
       setIsEditingName(false);
       toast.success('Имя обновлено');
     } catch (error) {
@@ -168,7 +170,7 @@ function ProfilePageContent() {
                     </div>
                   )}
                   <p className="text-muted-foreground">
-                    {user?.phone_number ? formatPhoneNumber(user.phone_number) : ''}
+                    {user?.phoneNumber ? formatPhoneNumber(user.phoneNumber) : ''}
                   </p>
                 </div>
               </div>
