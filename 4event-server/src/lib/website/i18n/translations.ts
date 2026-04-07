@@ -78,6 +78,8 @@ export const translations = {
         priceAsc: 'Сначала дешевые',
         priceDesc: 'Сначала дорогие',
       },
+      // Category name overrides keyed by Russian DB name
+      categoryNames: {} as Record<string, string>,
     },
 
     // Auth page
@@ -500,6 +502,19 @@ export const translations = {
         priceAsc: 'Arzon',
         priceDesc: 'Qimmat',
       },
+      categoryNames: {
+        'Телевизоры': 'Televizorlar',
+        'Цветы': 'Gullar',
+        'Барный стул': 'Bar stuli',
+        'Диван': 'Divan',
+        'Журнальный': 'Jurnal stoli',
+        'Буклетница': 'Bukletnitsa',
+        'Стул': 'Stul',
+        'Стол': 'Stol',
+        'Стеллаж': 'Stellaj',
+        'прочий': 'Boshqa',
+        'Ковролин': 'Gilam',
+      } as Record<string, string>,
     },
 
     // Auth page
@@ -926,6 +941,19 @@ export const translations = {
         priceAsc: 'Price: Low to High',
         priceDesc: 'Price: High to Low',
       },
+      categoryNames: {
+        'Телевизоры': 'TVs',
+        'Цветы': 'Flowers',
+        'Барный стул': 'Bar Stool',
+        'Диван': 'Sofa',
+        'Журнальный': 'Coffee Table',
+        'Буклетница': 'Brochure Stand',
+        'Стул': 'Chair',
+        'Стол': 'Table',
+        'Стеллаж': 'Shelf',
+        'прочий': 'Other',
+        'Ковролин': 'Carpet',
+      } as Record<string, string>,
     },
 
     // Auth page

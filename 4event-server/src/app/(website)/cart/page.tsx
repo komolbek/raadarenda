@@ -26,7 +26,7 @@ export default function CartPage() {
   const router = useRouter();
   const { t } = useLanguageStore();
   const { items, subtotal, totalSavings, total, deliveryFee, removeItem, updateItem, clearCart } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -39,8 +39,10 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
+    // Wait for auth hydration before checking
+    if (!_hasHydrated) return;
     if (!isAuthenticated) {
-      router.push('/auth?from=/cart');
+      router.push('/auth?from=/checkout');
       return;
     }
     router.push('/checkout');

@@ -25,12 +25,23 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and language header
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('auth_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Add language header from stored locale
+    try {
+      const langRaw = localStorage.getItem('language-storage');
+      if (langRaw) {
+        const langState = JSON.parse(langRaw);
+        const locale = langState.state?.locale || 'ru';
+        config.headers['X-Language'] = locale;
+      }
+    } catch {
+      // ignore parse errors
     }
   }
   return config;
