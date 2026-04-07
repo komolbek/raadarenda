@@ -10,6 +10,7 @@ import { categoriesApi, productsApi } from '@/lib/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/ui';
 import { ProductCard } from '@/components/catalog/ProductCard';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const sortOptions = [
   { value: 'newest', label: 'Сначала новые' },
@@ -18,9 +19,16 @@ const sortOptions = [
   { value: 'price_desc', label: 'Сначала дорогие' },
 ];
 
+function getCategoryName(name: string, t: (key: string) => string): string {
+  const translated = t(`category_name.${name}` as any);
+  // If translation returns the key itself, fall back to original name
+  return translated.startsWith('category_name.') ? name : translated;
+}
+
 function CatalogPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, locale } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const categoryId = searchParams.get('category') || undefined;
@@ -29,7 +37,7 @@ function CatalogPageContent() {
   const page = parseInt(searchParams.get('page') || '1');
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', locale],
     queryFn: categoriesApi.getAll,
   });
 
@@ -72,7 +80,7 @@ function CatalogPageContent() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-bold mb-2"
         >
-          {selectedCategory ? selectedCategory.name : search ? `Поиск: "${search}"` : 'Каталог'}
+          {selectedCategory ? getCategoryName(selectedCategory.name, t) : search ? `Поиск: "${search}"` : 'Каталог'}
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -122,7 +130,7 @@ function CatalogPageContent() {
                     )}
                   >
                     {category.iconName && <span>{category.iconName}</span>}
-                    {category.name}
+                    {getCategoryName(category.name, t)}
                   </button>
                 ))}
           </div>
@@ -159,7 +167,7 @@ function CatalogPageContent() {
               onClick={() => updateParams({ category: undefined })}
               className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm"
             >
-              {selectedCategory.name}
+              {getCategoryName(selectedCategory.name, t)}
               <X className="h-3 w-3" />
             </button>
           )}
@@ -234,7 +242,7 @@ function CatalogPageContent() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} variant={viewMode} />
                 </motion.div>
               ))}
             </AnimatePresence>

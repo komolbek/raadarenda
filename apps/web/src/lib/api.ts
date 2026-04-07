@@ -34,7 +34,7 @@ const axiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Request interceptor: attach Bearer token
+// Request interceptor: attach Bearer token and language header
 axiosInstance.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('auth-storage');
@@ -48,6 +48,17 @@ axiosInstance.interceptors.request.use((config) => {
       } catch {
         // ignore parse errors
       }
+    }
+    // Add language header
+    try {
+      const langRaw = localStorage.getItem('language-storage');
+      if (langRaw) {
+        const langState = JSON.parse(langRaw);
+        const locale = langState.state?.locale || 'ru';
+        config.headers['X-Language'] = locale;
+      }
+    } catch {
+      // ignore parse errors
     }
   }
   return config;
