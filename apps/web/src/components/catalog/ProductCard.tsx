@@ -25,7 +25,7 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
   const { t } = useTranslation();
 
   const isFav = isFavorite(product.id);
-  const hasDiscount = product.pricingTiers.length > 0 || product.quantityPricing.length > 0;
+  const hasDiscount = (product.pricingTiers?.length ?? 0) > 0 || (product.quantityPricing?.length ?? 0) > 0;
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
