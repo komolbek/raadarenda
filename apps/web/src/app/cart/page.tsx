@@ -28,7 +28,18 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    if (!isAuthenticated) {
+    // Check localStorage directly to avoid hydration timing issues
+    let authed = isAuthenticated;
+    if (!authed && typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('auth-storage');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          authed = !!parsed?.state?.token;
+        }
+      } catch {}
+    }
+    if (!authed) {
       toast.error('Войдите в аккаунт для оформления заказа');
       router.push('/auth');
       return;

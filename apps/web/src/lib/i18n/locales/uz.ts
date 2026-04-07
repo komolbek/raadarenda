@@ -346,6 +346,19 @@ const uz: Record<TranslationKey, string> = {
 
   // Category Card
   'category.products_count': '{count} mahsulot',
+
+  // Category name translations
+  'category_name.Телевизоры': 'Televizorlar',
+  'category_name.Цветы': 'Gullar',
+  'category_name.Барный стул': 'Bar stuli',
+  'category_name.Диван': 'Divan',
+  'category_name.Журнальный': 'Jurnal stoli',
+  'category_name.Буклетница': 'Bukletnitsa',
+  'category_name.Стул': 'Stul',
+  'category_name.Стол': 'Stol',
+  'category_name.Стеллаж': 'Stellaj',
+  'category_name.прочий': 'Boshqa',
+  'category_name.Ковролин': 'Gilam',
 };
 
 export default uz;

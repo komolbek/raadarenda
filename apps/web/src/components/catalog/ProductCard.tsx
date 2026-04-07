@@ -16,9 +16,10 @@ import { useTranslation } from '@/lib/i18n/useTranslation';
 interface ProductCardProps {
   product: Product;
   className?: string;
+  variant?: 'grid' | 'list';
 }
 
-export const ProductCard = memo(function ProductCard({ product, className }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, className, variant = 'grid' }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { isFavorite, addFavorite, removeFavorite } = useFavoritesStore();
@@ -47,6 +48,55 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
       toast.error(t('product_card.favorites_error'));
     }
   }, [isAuthenticated, isFav, product.id, addFavorite, removeFavorite, t]);
+
+  if (variant === 'list') {
+    return (
+      <Link href={`/product/${product.id}`}>
+        <Card hover className={cn('overflow-hidden group', className)}>
+          <div className="flex gap-4 p-3">
+            <div className="relative h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
+              {product.photos[0] ? (
+                <img src={product.photos[0]} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <span className="text-xl font-bold text-muted-foreground/30">{product.name.charAt(0)}</span>
+                </div>
+              )}
+              {product.totalStock === 0 && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <Badge variant="destructive" size="sm">{t('product_card.out_of_stock')}</Badge>
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <h3 className="font-medium line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  {hasDiscount && <Badge variant="success" size="sm">{t('product_card.discount')}</Badge>}
+                  {product.totalStock <= 3 && product.totalStock > 0 && (
+                    <span className="text-xs text-amber-600 dark:text-amber-400">{t('product_card.remaining', { count: product.totalStock })}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <div>
+                  <span className="text-lg font-bold text-primary">{formatPrice(product.dailyPrice)} UZS</span>
+                  <span className="text-xs text-muted-foreground ml-1">/ {t('product_card.per_day')}</span>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleFavoriteClick}
+                  className={cn('h-9 w-9 rounded-full flex items-center justify-center transition-colors', isFav ? 'bg-red-500 text-white' : 'bg-muted')}
+                >
+                  <Heart className={cn('h-4 w-4', isFav && 'fill-current')} />
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </Link>
+    );
+  }
 
   return (
     <Link

@@ -76,8 +76,12 @@ export default function DashboardPage() {
       if (json.success) {
         setData(json.data);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch dashboard:', err);
+      if (err?.response?.status === 401) {
+        window.location.href = '/admin/login';
+        return;
+      }
     } finally {
       setLoading(false);
     }
@@ -138,25 +142,25 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Заказы сегодня"
-          value={data?.today.orders || 0}
+          value={data?.today?.orders || 0}
           icon={<ShoppingCart className="h-6 w-6 text-blue-600" />}
           color="blue"
         />
         <StatCard
           title="Выручка сегодня"
-          value={formatPrice(data?.today.revenue || 0)}
+          value={formatPrice(data?.today?.revenue || 0)}
           icon={<DollarSign className="h-6 w-6 text-green-600" />}
           color="green"
         />
         <StatCard
           title="Ожидают обработки"
-          value={data?.today.pending_orders || 0}
+          value={data?.today?.pending_orders || 0}
           icon={<Clock className="h-6 w-6 text-yellow-600" />}
           color="yellow"
         />
         <StatCard
           title="Возвраты сегодня"
-          value={data?.today.returns_due || 0}
+          value={data?.today?.returns_due || 0}
           icon={<RotateCcw className="h-6 w-6 text-purple-600" />}
           color="purple"
         />
@@ -173,13 +177,13 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center">
               <span className="text-gray-600">За неделю</span>
               <span className="font-semibold">
-                {formatPrice(data?.week.revenue || 0)}
+                {formatPrice(data?.week?.revenue || 0)}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">За месяц</span>
               <span className="font-semibold">
-                {formatPrice(data?.month.revenue || 0)}
+                {formatPrice(data?.month?.revenue || 0)}
               </span>
             </div>
           </div>
@@ -189,7 +193,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Заказы по статусам</h3>
           <div className="space-y-2">
-            {data?.orders_by_status.map((item) => (
+            {data?.orders_by_status?.map((item) => (
               <div
                 key={item.status}
                 className="flex justify-between items-center"
@@ -213,15 +217,15 @@ export default function DashboardPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Товаров</span>
-              <span className="font-semibold">{data?.totals.products}</span>
+              <span className="font-semibold">{data?.totals?.products}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Категорий</span>
-              <span className="font-semibold">{data?.totals.categories}</span>
+              <span className="font-semibold">{data?.totals?.categories}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Клиентов</span>
-              <span className="font-semibold">{data?.totals.customers}</span>
+              <span className="font-semibold">{data?.totals?.customers}</span>
             </div>
           </div>
         </div>
@@ -254,7 +258,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {data?.recent_orders.map((order) => (
+              {data?.recent_orders?.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-medium">#{order.order_number}</span>

@@ -344,6 +344,19 @@ const ru = {
 
   // Category Card
   'category.products_count': '{count} товаров',
+
+  // Category name translations (ru = identity, uz/en differ)
+  'category_name.Телевизоры': 'Телевизоры',
+  'category_name.Цветы': 'Цветы',
+  'category_name.Барный стул': 'Барный стул',
+  'category_name.Диван': 'Диван',
+  'category_name.Журнальный': 'Журнальный',
+  'category_name.Буклетница': 'Буклетница',
+  'category_name.Стул': 'Стул',
+  'category_name.Стол': 'Стол',
+  'category_name.Стеллаж': 'Стеллаж',
+  'category_name.прочий': 'прочий',
+  'category_name.Ковролин': 'Ковролин',
 } as const;
 
 export type TranslationKey = keyof typeof ru;
