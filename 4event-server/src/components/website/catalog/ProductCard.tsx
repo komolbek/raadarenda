@@ -16,9 +16,10 @@ import { toast } from 'react-hot-toast';
 interface ProductCardProps {
   product: Product;
   className?: string;
+  variant?: 'grid' | 'list';
 }
 
-export const ProductCard = memo(function ProductCard({ product, className }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, className, variant = 'grid' }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -48,6 +49,77 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
       toast.error(t.favorites.updateError);
     }
   };
+
+  if (variant === 'list') {
+    return (
+      <Link href={`/product/${product.id}`}>
+        <Card hover className={cn('overflow-hidden group', className)}>
+          <div className="flex gap-4 p-3">
+            {/* Compact Image */}
+            <div className="relative h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
+              {product.photos?.[0] ? (
+                <Image
+                  src={product.photos![0]}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <span className="text-xl font-bold text-slate-300 dark:text-slate-600">
+                    {product.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              {product.totalStock === 0 && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <Badge variant="destructive" size="sm">{t.common.notAvailable}</Badge>
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <h3 className="font-medium line-clamp-1 group-hover:text-primary-500 transition-colors">
+                  {product.name}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  {hasDiscount && (
+                    <Badge variant="success" size="sm">{t.common.discount}</Badge>
+                  )}
+                  {product.totalStock <= 3 && product.totalStock > 0 && (
+                    <span className="text-xs text-amber-600 dark:text-amber-400">
+                      {product.totalStock} {t.common.itemsLeft}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <div>
+                  <span className="text-lg font-bold text-primary-500">
+                    {formatPrice(product.dailyPrice)} UZS
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">/ {t.common.perDay}</span>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleFavoriteClick}
+                  className={cn(
+                    'h-9 w-9 rounded-full flex items-center justify-center transition-colors',
+                    isFav ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-700'
+                  )}
+                >
+                  <Heart className={cn('h-4 w-4', isFav && 'fill-current')} />
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </Link>
+    );
+  }
 
   return (
     <Link href={`/product/${product.id}`}>

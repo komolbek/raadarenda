@@ -118,9 +118,11 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // Set isAuthenticated based on whether we have a token
-          state.isAuthenticated = !!state.token;
-          state._hasHydrated = true;
+          // Use setState to properly trigger re-renders after hydration
+          useAuthStore.setState({
+            isAuthenticated: !!state.token,
+            _hasHydrated: true,
+          });
         }
       },
     }

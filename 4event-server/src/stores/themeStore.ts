@@ -39,9 +39,10 @@ export const useThemeStore = create<ThemeState>()(
       name: 'theme-storage',
       onRehydrateStorage: () => (state) => {
         if (state && typeof window !== 'undefined') {
-          const resolvedTheme = state.theme === 'system' ? getSystemTheme() : state.theme;
-          applyTheme(resolvedTheme);
-          state.resolvedTheme = resolvedTheme;
+          const resolved = state.theme === 'system' ? getSystemTheme() : state.theme;
+          applyTheme(resolved);
+          // Use setState to properly trigger re-renders
+          useThemeStore.setState({ resolvedTheme: resolved });
         }
       },
     }

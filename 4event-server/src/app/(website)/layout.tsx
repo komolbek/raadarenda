@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { Header, Footer } from '@/components/website/layout';
 import { useAuthStore } from '@/stores/authStore';
-import { useThemeStore } from '@/stores/themeStore';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -23,12 +22,6 @@ export default function WebsiteLayout({
   children: React.ReactNode;
 }) {
   const { token, fetchProfile } = useAuthStore();
-  const { theme, setTheme } = useThemeStore();
-
-  // Initialize theme
-  useEffect(() => {
-    setTheme(theme);
-  }, [theme, setTheme]);
 
   // Fetch profile on app load if token exists
   useEffect(() => {
