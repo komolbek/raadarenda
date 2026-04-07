@@ -16,7 +16,7 @@ const translations: Record<Locale, Record<string, string>> = {
  * Usage: t('cart.items_count', { count: 3 }) => "Товары (3)"
  */
 export function t(
-  key: TranslationKey,
+  key: string,
   params?: Record<string, string | number>,
   locale: Locale = 'ru'
 ): string {
