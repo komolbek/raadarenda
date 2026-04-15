@@ -58,14 +58,16 @@ export class AuthService {
 
     const token = await this.sessionService.create(user.id, deviceId);
 
+    // Return the user in the same camelCase shape as GET /user/profile so every
+    // client sees one consistent User payload across endpoints.
     return {
       success: true,
       token,
       user: {
         id: user.id,
-        phone_number: user.phoneNumber,
+        phoneNumber: user.phoneNumber,
         name: user.name,
-        created_at: user.createdAt.toISOString(),
+        createdAt: user.createdAt.toISOString(),
       },
     };
   }

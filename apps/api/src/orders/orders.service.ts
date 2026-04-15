@@ -287,12 +287,14 @@ export class OrdersService {
       this.prisma.order.count({ where }),
     ]);
 
+    // Use { items, meta } to match PaginatedResponse<T> from @4event/types —
+    // same envelope as /products, so the web client and mobile client share it.
     return {
-      data: orders,
+      items: orders,
       meta: {
-        total,
         page,
         limit,
+        total,
         totalPages: Math.ceil(total / limit),
       },
     };
