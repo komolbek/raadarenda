@@ -1,23 +1,25 @@
 import type { Metadata, Viewport } from 'next';
-import { Manrope, Unbounded } from 'next/font/google';
+import { Lora, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
 import { Header, Footer } from '@/components/layout';
 import './globals.css';
 
-// Body font — modern humanist sans with full Cyrillic support
-const manrope = Manrope({
+// Body serif — refined, readable, full Cyrillic support
+const bodySerif = Lora({
   subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   display: 'swap',
-  variable: '--font-manrope',
+  variable: '--font-body',
 });
 
-// Display font for headings — distinctive geometric, full Cyrillic
-const unbounded = Unbounded({
+// Display serif — high-contrast, serious, with a strong italic cut used on headings
+const displaySerif = Playfair_Display({
   subsets: ['latin', 'cyrillic'],
-  weight: ['500', '600', '700', '800'],
+  weight: ['500', '600', '700', '800', '900'],
+  style: ['normal', 'italic'],
   display: 'swap',
-  variable: '--font-unbounded',
+  variable: '--font-display',
 });
 
 export const metadata: Metadata = {
@@ -41,7 +43,7 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${manrope.variable} ${unbounded.variable}`}
+      className={`${bodySerif.variable} ${displaySerif.variable}`}
     >
       <head>
         <script
