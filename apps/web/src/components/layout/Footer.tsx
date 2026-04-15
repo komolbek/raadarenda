@@ -34,11 +34,17 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2" aria-label="4Event - Home">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">4</span>
-              </div>
-              <span className="font-bold text-xl">4Event</span>
+            <Link href="/" className="flex items-center" aria-label="rent event. — Home">
+              <img
+                src="/logo/rentevent-black.svg"
+                alt="rent event."
+                className="h-10 w-auto block dark:hidden"
+              />
+              <img
+                src="/logo/rentevent-orange.svg"
+                alt="rent event."
+                className="h-10 w-auto hidden dark:block"
+              />
             </Link>
             <p className="text-muted-foreground text-sm">
               {t('footer.description')}

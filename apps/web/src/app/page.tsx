@@ -6,29 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Sparkles, Truck, Shield, Clock, Phone } from 'lucide-react';
 import { Button, Card } from '@/components/ui';
 import { settingsApi } from '@/lib/api';
-
-const features = [
-  {
-    icon: Sparkles,
-    title: 'Широкий выбор',
-    description: 'Более 500 товаров для любых мероприятий',
-  },
-  {
-    icon: Truck,
-    title: 'Быстрая доставка',
-    description: 'Доставка по Ташкенту в день заказа',
-  },
-  {
-    icon: Shield,
-    title: 'Гарантия качества',
-    description: 'Все товары проходят проверку',
-  },
-  {
-    icon: Clock,
-    title: 'Гибкие сроки',
-    description: 'Аренда от 1 дня до месяца',
-  },
-];
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,12 +24,36 @@ const itemVariants = {
 };
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { data: settings } = useQuery({
     queryKey: ['businessSettings'],
     queryFn: () => settingsApi.getBusinessInfo(),
   });
 
   const phoneNumber = settings?.phone || '+998901234567';
+
+  const features = [
+    {
+      icon: Sparkles,
+      title: t('home.feature_wide_selection'),
+      description: t('home.feature_wide_selection_desc'),
+    },
+    {
+      icon: Truck,
+      title: t('home.feature_fast_delivery'),
+      description: t('home.feature_fast_delivery_desc'),
+    },
+    {
+      icon: Shield,
+      title: t('home.feature_quality'),
+      description: t('home.feature_quality_desc'),
+    },
+    {
+      icon: Clock,
+      title: t('home.feature_flexible'),
+      description: t('home.feature_flexible_desc'),
+    },
+  ];
 
   return (
     <div className="space-y-16 py-8">
@@ -76,7 +78,7 @@ export default function HomePage() {
               transition={{ delay: 0.2 }}
               className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm mb-4"
             >
-              Аренда для мероприятий
+              {t('home.hero_badge')}
             </motion.span>
 
             <motion.h1
@@ -85,7 +87,7 @@ export default function HomePage() {
               transition={{ delay: 0.3 }}
               className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
             >
-              Всё для вашего идеального мероприятия
+              {t('home.hero_title')}
             </motion.h1>
 
             <motion.p
@@ -94,8 +96,7 @@ export default function HomePage() {
               transition={{ delay: 0.4 }}
               className="text-lg text-white/80 mb-8 max-w-lg"
             >
-              Мебель, декор, свет, звук и многое другое. Арендуйте всё необходимое
-              для свадьбы, корпоратива или частной вечеринки.
+              {t('home.hero_description')}
             </motion.p>
 
             <motion.div
@@ -110,7 +111,7 @@ export default function HomePage() {
                   className="bg-white text-primary-600 hover:bg-white/90 shadow-xl"
                   rightIcon={<ArrowRight className="h-5 w-5" />}
                 >
-                  Смотреть каталог
+                  {t('home.view_catalog')}
                 </Button>
               </Link>
             </motion.div>
@@ -150,21 +151,20 @@ export default function HomePage() {
           className="rounded-3xl bg-muted p-8 md:p-12 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
-            Готовы организовать мероприятие?
+            {t('home.cta_title')}
           </h2>
           <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-            Выберите всё необходимое из нашего каталога или свяжитесь с нами
-            для индивидуального подбора.
+            {t('home.cta_description')}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/catalog">
               <Button size="lg" variant="gradient">
-                Перейти в каталог
+                {t('home.go_to_catalog')}
               </Button>
             </Link>
             <a href={`tel:${phoneNumber}`}>
               <Button size="lg" variant="outline" leftIcon={<Phone className="h-5 w-5" />}>
-                Позвонить
+                {t('home.call')}
               </Button>
             </a>
           </div>

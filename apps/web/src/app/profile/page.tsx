@@ -26,9 +26,11 @@ import { useAuthStore } from '@/stores/auth-store';
 import { userApi } from '@/lib/api';
 import type { IUser } from '@4event/types';
 import { formatPhoneNumber } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { Address } from '@/types';
 
 function ProfilePageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, setUser, logout } = useAuthStore();
@@ -56,11 +58,11 @@ function ProfilePageContent() {
     mutationFn: userApi.deleteAddress,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
-      toast.success('Адрес удалён');
+      toast.success(t('profile.address_deleted'));
       setDeletingAddressId(null);
     },
     onError: () => {
-      toast.error('Не удалось удалить адрес');
+      toast.error(t('profile.address_delete_error'));
     },
   });
 
@@ -69,22 +71,22 @@ function ProfilePageContent() {
     mutationFn: userApi.setDefaultAddress,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
-      toast.success('Адрес по умолчанию обновлён');
+      toast.success(t('profile.default_updated'));
     },
   });
 
   const handleSaveName = async () => {
     if (!newName.trim()) {
-      toast.error('Введите имя');
+      toast.error(t('profile.enter_name_error'));
       return;
     }
     try {
       const updatedUser = await userApi.updateProfile(newName.trim());
       setUser(updatedUser);
       setIsEditingName(false);
-      toast.success('Имя обновлено');
+      toast.success(t('profile.name_updated'));
     } catch (error) {
-      toast.error('Не удалось обновить имя');
+      toast.error(t('profile.name_error'));
     }
   };
 
@@ -96,15 +98,15 @@ function ProfilePageContent() {
   const menuItems = [
     {
       icon: Package,
-      label: 'Мои заказы',
+      label: t('profile.my_orders'),
       href: '/orders',
-      description: 'История и статус заказов',
+      description: t('profile.orders_description'),
     },
     {
       icon: Heart,
-      label: 'Избранное',
+      label: t('profile.favorites'),
       href: '/favorites',
-      description: 'Сохранённые товары',
+      description: t('profile.favorites_description'),
     },
   ];
 
@@ -115,7 +117,7 @@ function ProfilePageContent() {
         animate={{ opacity: 1, y: 0 }}
         className="text-3xl font-bold mb-8"
       >
-        Профиль
+        {t('profile.title')}
       </motion.h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -138,12 +140,12 @@ function ProfilePageContent() {
                       <Input
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
-                        placeholder="Ваше имя"
+                        placeholder={t('profile.your_name')}
                         className="max-w-xs"
                         autoFocus
                       />
                       <Button size="sm" onClick={handleSaveName}>
-                        Сохранить
+                        {t('profile.save')}
                       </Button>
                       <Button
                         size="sm"
@@ -153,13 +155,13 @@ function ProfilePageContent() {
                           setNewName(user?.name || '');
                         }}
                       >
-                        Отмена
+                        {t('profile.cancel')}
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold">
-                        {user?.name || 'Пользователь'}
+                        {user?.name || t('header.user_default_name')}
                       </h2>
                       <button
                         onClick={() => setIsEditingName(true)}
@@ -184,7 +186,7 @@ function ProfilePageContent() {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Адреса доставки</h3>
+              <h3 className="text-lg font-semibold">{t('profile.delivery_addresses')}</h3>
               <Button
                 size="sm"
                 variant="outline"
@@ -194,7 +196,7 @@ function ProfilePageContent() {
                   setShowAddressModal(true);
                 }}
               >
-                Добавить
+                {t('profile.add')}
               </Button>
             </div>
 
@@ -217,7 +219,7 @@ function ProfilePageContent() {
                           <p className="font-medium">{address.title}</p>
                           {address.isDefault && (
                             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                              По умолчанию
+                              {t('profile.default')}
                             </span>
                           )}
                         </div>
@@ -230,7 +232,7 @@ function ProfilePageContent() {
                           <button
                             onClick={() => setDefaultAddressMutation.mutate(address.id)}
                             className="p-2 rounded-lg hover:bg-muted transition-colors"
-                            title="Сделать по умолчанию"
+                            title={t('profile.set_default')}
                           >
                             <Check className="h-4 w-4 text-muted-foreground" />
                           </button>
@@ -258,14 +260,14 @@ function ProfilePageContent() {
             ) : (
               <Card className="p-6 text-center">
                 <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">Нет сохранённых адресов</p>
+                <p className="text-muted-foreground mb-4">{t('profile.no_addresses')}</p>
                 <Button
                   onClick={() => {
                     setEditingAddress(null);
                     setShowAddressModal(true);
                   }}
                 >
-                  Добавить адрес
+                  {t('profile.add_address')}
                 </Button>
               </Card>
             )}
@@ -278,7 +280,7 @@ function ProfilePageContent() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Способы оплаты</h3>
+              <h3 className="text-lg font-semibold">{t('profile.payment_methods')}</h3>
             </div>
 
             {cardsLoading ? (
@@ -301,7 +303,7 @@ function ProfilePageContent() {
                       </div>
                       {card.isDefault && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                          По умолчанию
+                          {t('profile.default')}
                         </span>
                       )}
                     </div>
@@ -312,7 +314,7 @@ function ProfilePageContent() {
               <Card className="p-6 text-center">
                 <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  Карты добавляются автоматически при оплате
+                  {t('profile.cards_auto_added')}
                 </p>
               </Card>
             )}
@@ -349,7 +351,7 @@ function ProfilePageContent() {
                 <div className="h-10 w-10 rounded-xl bg-destructive/10 flex items-center justify-center">
                   <LogOut className="h-5 w-5" />
                 </div>
-                <span className="font-medium">Выйти из аккаунта</span>
+                <span className="font-medium">{t('profile.logout')}</span>
               </div>
             </Card>
           </button>
@@ -363,7 +365,7 @@ function ProfilePageContent() {
           setShowAddressModal(false);
           setEditingAddress(null);
         }}
-        title={editingAddress ? 'Редактировать адрес' : 'Новый адрес'}
+        title={editingAddress ? t('profile.edit_address') : t('profile.new_address')}
         size="lg"
       >
         <AddressForm
@@ -385,9 +387,9 @@ function ProfilePageContent() {
         isOpen={!!deletingAddressId}
         onClose={() => setDeletingAddressId(null)}
         onConfirm={() => deletingAddressId && deleteAddressMutation.mutate(deletingAddressId)}
-        title="Удалить адрес?"
-        message="Вы уверены, что хотите удалить этот адрес? Это действие нельзя отменить."
-        confirmText="Удалить"
+        title={t('profile.delete_address_title')}
+        message={t('profile.delete_address_message')}
+        confirmText={t('profile.delete')}
         variant="destructive"
         isLoading={deleteAddressMutation.isPending}
       />

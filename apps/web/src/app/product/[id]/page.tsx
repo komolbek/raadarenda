@@ -37,8 +37,10 @@ import {
 import { useCartStore } from '@/stores/cart-store';
 import { useFavoritesStore } from '@/stores/favorites-store';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -89,27 +91,27 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product || !dateRange?.from || !dateRange?.to) {
-      toast.error('Выберите даты аренды');
+      toast.error(t('product.select_dates'));
       return;
     }
 
     addItem(product, quantity, dateRange.from, dateRange.to);
-    toast.success('Добавлено в корзину');
+    toast.success(t('product.added_to_cart'));
   };
 
   const handleFavoriteToggle = async () => {
     if (!product) return;
 
     if (!isAuthenticated) {
-      toast.error('Войдите в аккаунт для добавления в избранное');
+      toast.error(t('product_card.login_for_favorites'));
       return;
     }
 
     try {
       await toggleFavorite(product.id);
-      toast.success(isFav ? 'Удалено из избранного' : 'Добавлено в избранное');
+      toast.success(isFav ? t('product_card.removed_from_favorites') : t('product_card.added_to_favorites'));
     } catch (error) {
-      toast.error('Не удалось обновить избранное');
+      toast.error(t('product_card.favorites_error'));
     }
   };
 
@@ -122,7 +124,7 @@ export default function ProductDetailPage() {
     } catch (error) {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(window.location.href);
-      toast.success('Ссылка скопирована');
+      toast.success(t('product.link_copied'));
     }
   };
 
@@ -137,8 +139,8 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Товар не найден</h1>
-        <Button onClick={() => router.push('/catalog')}>Вернуться в каталог</Button>
+        <h1 className="text-2xl font-bold mb-4">{t('product.not_found')}</h1>
+        <Button onClick={() => router.push('/catalog')}>{t('product.back_to_catalog')}</Button>
       </div>
     );
   }
@@ -152,7 +154,7 @@ export default function ProductDetailPage() {
         className="flex items-center gap-2 text-sm text-muted-foreground mb-6"
       >
         <Link href="/catalog" className="hover:text-primary transition-colors">
-          Каталог
+          {t('product.catalog')}
         </Link>
         <span>/</span>
         {product.category && (
@@ -219,10 +221,10 @@ export default function ProductDetailPage() {
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {product.totalStock === 0 && (
-                <Badge variant="destructive">Нет в наличии</Badge>
+                <Badge variant="destructive">{t('product_card.out_of_stock')}</Badge>
               )}
               {product.totalStock > 0 && product.totalStock <= 3 && (
-                <Badge variant="warning">Осталось {product.totalStock}</Badge>
+                <Badge variant="warning">{t('product_card.remaining', { count: product.totalStock })}</Badge>
               )}
             </div>
           </div>
@@ -309,18 +311,18 @@ export default function ProductDetailPage() {
               )}
             </div>
             <p className="text-muted-foreground">
-              {formatPrice(priceInfo.dailyPriceUsed)} UZS/день × {rentalDays} дней × {quantity} шт.
+              {t('product.price_breakdown', { price: formatPrice(priceInfo.dailyPriceUsed), days: rentalDays, qty: quantity })}
             </p>
             {priceInfo.savings > 0 && (
               <p className="text-green-600 dark:text-green-400 font-medium mt-1">
-                Экономия: {formatPrice(priceInfo.savings)} UZS
+                {t('product.savings', { amount: formatPrice(priceInfo.savings) })}
               </p>
             )}
           </Card>
 
           {/* Date Range */}
           <div>
-            <label className="block text-sm font-medium mb-2">Даты аренды</label>
+            <label className="block text-sm font-medium mb-2">{t('product.rental_dates')}</label>
             <DateRangePicker
               value={dateRange}
               onChange={setDateRange}
@@ -330,7 +332,7 @@ export default function ProductDetailPage() {
 
           {/* Quantity */}
           <div>
-            <label className="block text-sm font-medium mb-2">Количество</label>
+            <label className="block text-sm font-medium mb-2">{t('product.quantity')}</label>
             <QuantitySelector
               value={quantity}
               onChange={setQuantity}
@@ -349,59 +351,59 @@ export default function ProductDetailPage() {
             className="w-full h-14"
             leftIcon={<ShoppingCart className="h-5 w-5" />}
           >
-            {product.totalStock === 0 ? 'Нет в наличии' : 'Добавить в корзину'}
+            {product.totalStock === 0 ? t('product_card.out_of_stock') : t('product.add_to_cart')}
           </Button>
 
           {/* Benefits */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted">
               <Truck className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-sm">Доставка по Ташкенту</span>
+              <span className="text-sm">{t('product.delivery_tashkent')}</span>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted">
               <Shield className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-sm">Гарантия качества</span>
+              <span className="text-sm">{t('product.quality_guarantee')}</span>
             </div>
           </div>
 
           {/* Specifications */}
           {(product.specWidth || product.specHeight || product.specDepth || product.specWeight || product.specColor || product.specMaterial) && (
             <div>
-              <h3 className="font-semibold mb-3">Характеристики</h3>
+              <h3 className="font-semibold mb-3">{t('product.specifications')}</h3>
               <Card className="divide-y divide-border">
                 {product.specWidth && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Ширина</span>
-                    <span>{product.specWidth} см</span>
+                    <span className="text-muted-foreground">{t('product.width')}</span>
+                    <span>{product.specWidth} {t('product.cm')}</span>
                   </div>
                 )}
                 {product.specHeight && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Высота</span>
-                    <span>{product.specHeight} см</span>
+                    <span className="text-muted-foreground">{t('product.height')}</span>
+                    <span>{product.specHeight} {t('product.cm')}</span>
                   </div>
                 )}
                 {product.specDepth && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Глубина</span>
-                    <span>{product.specDepth} см</span>
+                    <span className="text-muted-foreground">{t('product.depth')}</span>
+                    <span>{product.specDepth} {t('product.cm')}</span>
                   </div>
                 )}
                 {product.specWeight && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Вес</span>
-                    <span>{product.specWeight} кг</span>
+                    <span className="text-muted-foreground">{t('product.weight')}</span>
+                    <span>{product.specWeight} {t('product.kg')}</span>
                   </div>
                 )}
                 {product.specColor && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Цвет</span>
+                    <span className="text-muted-foreground">{t('product.color')}</span>
                     <span>{product.specColor}</span>
                   </div>
                 )}
                 {product.specMaterial && (
                   <div className="flex justify-between py-3 px-4">
-                    <span className="text-muted-foreground">Материал</span>
+                    <span className="text-muted-foreground">{t('product.material')}</span>
                     <span>{product.specMaterial}</span>
                   </div>
                 )}
@@ -412,15 +414,15 @@ export default function ProductDetailPage() {
           {/* Pricing Tiers */}
           {product.pricingTiers.length > 0 && (
             <div>
-              <h3 className="font-semibold mb-3">Скидки за длительную аренду</h3>
+              <h3 className="font-semibold mb-3">{t('product.discount_tiers')}</h3>
               <Card className="divide-y divide-border">
                 {product.pricingTiers.map((tier) => (
                   <div key={tier.id} className="flex justify-between py-3 px-4">
                     <span className="text-muted-foreground">
-                      {tier.days}+ дней
+                      {t('product.days_plus', { count: tier.days })}
                     </span>
                     <span className="font-medium text-green-600 dark:text-green-400">
-                      {formatPrice(tier.totalPrice / tier.days)} UZS/день
+                      {formatPrice(tier.totalPrice / tier.days)} {t('product.per_day')}
                     </span>
                   </div>
                 ))}
@@ -438,7 +440,7 @@ export default function ProductDetailPage() {
           transition={{ delay: 0.3 }}
           className="mt-16"
         >
-          <h2 className="text-2xl font-bold mb-6">Похожие товары</h2>
+          <h2 className="text-2xl font-bold mb-6">{t('product.related')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.items
               .filter((p) => p.id !== product.id)

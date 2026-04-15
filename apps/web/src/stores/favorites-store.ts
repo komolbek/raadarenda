@@ -54,7 +54,14 @@ export const useFavoritesStore = create<FavoritesState>()(
       fetchFavorites: async () => {
         set({ isLoading: true });
         try {
-          const products = await userApi.getFavorites();
+          // /user/favorites returns [{ id, createdAt, product }] — a row wrapper,
+          // not a flat Product[]. Unwrap to the embedded product.
+          const rows = (await userApi.getFavorites()) as unknown as Array<
+            { id: string; createdAt: string; product: IProduct } | IProduct
+          >;
+          const products: IProduct[] = rows.map((row) =>
+            'product' in row && row.product ? row.product : (row as IProduct),
+          );
           set({
             favorites: products,
             favoriteIds: products.map((p) => p.id),

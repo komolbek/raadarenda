@@ -99,15 +99,20 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="4Event - Home">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center"
-            >
-              <span className="text-white font-bold text-lg">4</span>
-            </motion.div>
-            <span className="font-bold text-xl hidden sm:block">4Event</span>
+          {/* Wordmark — "rent event." lockup; SVG swaps between light/dark for contrast */}
+          <Link href="/" className="flex items-center shrink-0" aria-label="rent event. — Home">
+            <motion.span whileHover={{ scale: 1.03 }} className="flex">
+              <img
+                src="/logo/rentevent-black.svg"
+                alt="rent event."
+                className="h-8 sm:h-9 w-auto block dark:hidden"
+              />
+              <img
+                src="/logo/rentevent-orange.svg"
+                alt="rent event."
+                className="h-8 sm:h-9 w-auto hidden dark:block"
+              />
+            </motion.span>
           </Link>
 
           {/* Desktop Navigation */}

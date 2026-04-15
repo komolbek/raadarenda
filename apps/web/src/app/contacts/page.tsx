@@ -5,8 +5,10 @@ import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
 import { Card, Button, Input } from '@/components/ui';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function ContactsPage() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -17,14 +19,14 @@ export default function ContactsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.phone.trim() || !formData.message.trim()) {
-      toast.error('Заполните все поля');
+      toast.error(t('contacts.form_fill_all'));
       return;
     }
 
     setSending(true);
     // Simulate sending
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success('Сообщение отправлено!');
+    toast.success(t('contacts.form_sent'));
     setFormData({ name: '', phone: '', message: '' });
     setSending(false);
   };
@@ -32,26 +34,26 @@ export default function ContactsPage() {
   const contactInfo = [
     {
       icon: Phone,
-      title: 'Телефон',
+      title: t('contacts.phone'),
       value: '+998 90 123 45 67',
       href: 'tel:+998901234567',
     },
     {
       icon: Mail,
-      title: 'Email',
+      title: t('contacts.email'),
       value: 'info@4event.uz',
       href: 'mailto:info@4event.uz',
     },
     {
       icon: MessageCircle,
-      title: 'Telegram',
+      title: t('contacts.telegram'),
       value: '@4event_uz',
       href: 'https://t.me/4event_uz',
     },
     {
       icon: Clock,
-      title: 'Режим работы',
-      value: '09:00 - 21:00',
+      title: t('contacts.hours'),
+      value: t('contacts.hours_value'),
       href: null,
     },
   ];
@@ -64,9 +66,9 @@ export default function ContactsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold mb-4">Контакты</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('contacts.title')}</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Свяжитесь с нами любым удобным способом
+          {t('contacts.subtitle')}
         </p>
       </motion.div>
 
@@ -124,10 +126,10 @@ export default function ContactsPage() {
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 dark:text-slate-400">
-                    Адрес
+                    {t('contacts.address_label')}
                   </div>
                   <div className="font-semibold">
-                    Ташкент, ул. Амира Темура, 1
+                    {t('contacts.address_value')}
                   </div>
                 </div>
               </div>
@@ -143,27 +145,27 @@ export default function ContactsPage() {
         >
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">
-              Напишите нам
+              {t('contacts.write_to_us')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                label="Ваше имя"
-                placeholder="Введите имя"
+                label={t('contacts.form_name')}
+                placeholder={t('contacts.form_name_placeholder')}
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               />
               <Input
-                label="Телефон"
-                placeholder="+998 90 123 45 67"
+                label={t('contacts.form_phone')}
+                placeholder={t('contacts.form_phone_placeholder')}
                 value={formData.phone}
                 onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
               />
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
-                  Сообщение
+                  {t('contacts.form_message')}
                 </label>
                 <textarea
-                  placeholder="Введите сообщение"
+                  placeholder={t('contacts.form_message_placeholder')}
                   value={formData.message}
                   onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
                   rows={4}
@@ -172,11 +174,11 @@ export default function ContactsPage() {
               </div>
               <Button type="submit" className="w-full" disabled={sending}>
                 {sending ? (
-                  'Отправка...'
+                  t('contacts.form_sending')
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Отправить
+                    {t('contacts.form_send')}
                   </>
                 )}
               </Button>

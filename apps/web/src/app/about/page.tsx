@@ -3,15 +3,18 @@
 import { motion } from 'framer-motion';
 import { Building2, Users, Award, Clock } from 'lucide-react';
 import { Card } from '@/components/ui';
-
-const stats = [
-  { icon: Building2, value: '5+', label: 'Лет опыта' },
-  { icon: Users, value: '1000+', label: 'Довольных клиентов' },
-  { icon: Award, value: '500+', label: 'Мероприятий' },
-  { icon: Clock, value: '24/7', label: 'Поддержка' },
-];
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function AboutPage() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { icon: Building2, value: '5+', label: t('about.stat_experience') },
+    { icon: Users, value: '1000+', label: t('about.stat_clients') },
+    { icon: Award, value: '500+', label: t('about.stat_events') },
+    { icon: Clock, value: '24/7', label: t('about.stat_support') },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
@@ -20,9 +23,9 @@ export default function AboutPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold mb-4">О нас</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('about.title')}</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          4Event - ваш надежный партнер в организации мероприятий в Ташкенте
+          {t('about.subtitle')}
         </p>
       </motion.div>
 
@@ -54,9 +57,9 @@ export default function AboutPage() {
           transition={{ delay: 0.2 }}
         >
           <Card className="p-6 h-full">
-            <h2 className="text-2xl font-semibold mb-4">Кто мы</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('about.who_we_title')}</h2>
             <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-              4Event - это сервис аренды инвентаря для мероприятий в Ташкенте. Мы предоставляем широкий выбор оборудования для свадеб, корпоративов, дней рождения и других торжеств. Наша миссия - сделать каждое ваше мероприятие незабываемым.
+              {t('about.who_we_text')}
             </p>
           </Card>
         </motion.div>
@@ -67,23 +70,23 @@ export default function AboutPage() {
           transition={{ delay: 0.3 }}
         >
           <Card className="p-6 h-full">
-            <h2 className="text-2xl font-semibold mb-4">Почему мы</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('about.why_us_title')}</h2>
             <ul className="space-y-3 text-slate-600 dark:text-slate-400">
               <li className="flex items-start gap-2">
                 <span className="text-primary-500 mt-1">✓</span>
-                Широкий ассортимент качественного оборудования
+                {t('about.why_us_1')}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary-500 mt-1">✓</span>
-                Доступные цены и гибкая система скидок
+                {t('about.why_us_2')}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary-500 mt-1">✓</span>
-                Быстрая доставка по всему Ташкенту
+                {t('about.why_us_3')}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary-500 mt-1">✓</span>
-                Профессиональная консультация и поддержка
+                {t('about.why_us_4')}
               </li>
             </ul>
           </Card>

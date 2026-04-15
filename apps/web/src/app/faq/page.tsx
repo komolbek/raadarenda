@@ -5,54 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface FAQItem {
   question: string;
   answer: string;
 }
-
-const faqData: FAQItem[] = [
-  {
-    question: 'Как оформить заказ?',
-    answer:
-      'Выберите нужные товары в каталоге, укажите даты аренды и добавьте в корзину. После этого перейдите в корзину и оформите заказ, указав адрес доставки и способ оплаты.',
-  },
-  {
-    question: 'Какой минимальный срок аренды?',
-    answer:
-      'Минимальный срок аренды составляет 1 день. Для некоторых товаров может действовать минимальный срок 2-3 дня.',
-  },
-  {
-    question: 'Как осуществляется доставка?',
-    answer:
-      'Мы доставляем по всему Ташкенту. Доставка бесплатная при заказе от 500 000 сум. Вы можете выбрать удобное время доставки при оформлении заказа.',
-  },
-  {
-    question: 'Нужен ли залог?',
-    answer:
-      'Да, при получении товара вносится залог, который возвращается после возврата оборудования в надлежащем состоянии. Размер залога зависит от стоимости арендуемого оборудования.',
-  },
-  {
-    question: 'Какие способы оплаты доступны?',
-    answer:
-      'Мы принимаем оплату через Payme, Click, Uzum Bank, а также наличными при получении.',
-  },
-  {
-    question: 'Что делать, если оборудование повреждено?',
-    answer:
-      'В случае повреждения оборудования, пожалуйста, свяжитесь с нами сразу. Стоимость ремонта или замены будет удержана из залога.',
-  },
-  {
-    question: 'Можно ли продлить срок аренды?',
-    answer:
-      'Да, вы можете продлить аренду, связавшись с нами не позднее чем за 24 часа до окончания срока. Продление возможно при наличии свободного оборудования.',
-  },
-  {
-    question: 'Как отменить заказ?',
-    answer:
-      'Вы можете отменить заказ бесплатно не позднее чем за 48 часов до доставки. При более поздней отмене может взиматься штраф.',
-  },
-];
 
 function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boolean; onToggle: () => void }) {
   return (
@@ -83,7 +41,19 @@ function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boole
 }
 
 export default function FAQPage() {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  const faqData: FAQItem[] = [
+    { question: t('faq.q1'), answer: t('faq.a1') },
+    { question: t('faq.q2'), answer: t('faq.a2') },
+    { question: t('faq.q3'), answer: t('faq.a3') },
+    { question: t('faq.q4'), answer: t('faq.a4') },
+    { question: t('faq.q5'), answer: t('faq.a5') },
+    { question: t('faq.q6'), answer: t('faq.a6') },
+    { question: t('faq.q7'), answer: t('faq.a7') },
+    { question: t('faq.q8'), answer: t('faq.a8') },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -96,9 +66,9 @@ export default function FAQPage() {
         <div className="h-16 w-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto mb-4">
           <HelpCircle className="h-8 w-8 text-primary-500" />
         </div>
-        <h1 className="text-4xl font-bold mb-4">Часто задаваемые вопросы</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('faq.title')}</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400">
-          Ответы на популярные вопросы о нашем сервисе
+          {t('faq.subtitle')}
         </p>
       </motion.div>
 
@@ -129,16 +99,16 @@ export default function FAQPage() {
       >
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-2">
-            Остались вопросы?
+            {t('faq.still_questions')}
           </h2>
           <p className="text-slate-600 dark:text-slate-400 mb-4">
-            Свяжитесь с нами, и мы с радостью поможем
+            {t('faq.still_questions_desc')}
           </p>
           <a
             href="/contacts"
             className="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors"
           >
-            Связаться с нами
+            {t('faq.contact_us')}
           </a>
         </Card>
       </motion.div>

@@ -9,10 +9,12 @@ import { Button, Card } from '@/components/ui';
 import { authApi } from '@/lib/api';
 import { useAuthStore, getDeviceId } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 type AuthStep = 'phone' | 'otp';
 
 export default function AuthPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
 
@@ -57,7 +59,7 @@ export default function AuthPage() {
   const handleSendOTP = async () => {
     const digits = phoneNumber.replace(/\s/g, '');
     if (digits.length !== 9) {
-      toast.error('Введите корректный номер телефона');
+      toast.error(t('auth.error_invalid_phone'));
       return;
     }
 
@@ -66,11 +68,11 @@ export default function AuthPage() {
       await authApi.sendOtp(`+998${digits}`);
       setStep('otp');
       setCountdown(60);
-      toast.success('Код отправлен на ваш номер');
+      toast.success(t('auth.code_sent'));
       // Focus first OTP input
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     } catch (error) {
-      toast.error('Не удалось отправить код. Попробуйте позже.');
+      toast.error(t('auth.error_send_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -116,10 +118,10 @@ export default function AuthPage() {
       const digits = phoneNumber.replace(/\s/g, '');
       const { token, user } = await authApi.verifyOtp(`+998${digits}`, code, getDeviceId());
       login(token, user);
-      toast.success('Добро пожаловать!');
+      toast.success(t('auth.welcome'));
       router.replace('/');
     } catch (error) {
-      toast.error('Неверный код. Попробуйте ещё раз.');
+      toast.error(t('auth.error_invalid_code'));
       setOtpCode(['', '', '', '', '', '']);
       otpInputRefs.current[0]?.focus();
     } finally {
@@ -159,9 +161,9 @@ export default function AuthPage() {
                   >
                     <Phone className="h-8 w-8 text-primary" />
                   </motion.div>
-                  <h1 className="text-2xl font-bold">Вход в аккаунт</h1>
+                  <h1 className="text-2xl font-bold">{t('auth.login_title')}</h1>
                   <p className="text-muted-foreground">
-                    Введите номер телефона для входа
+                    {t('auth.login_description')}
                   </p>
                 </div>
 
@@ -175,7 +177,7 @@ export default function AuthPage() {
                       type="tel"
                       value={phoneNumber}
                       onChange={handlePhoneChange}
-                      placeholder="90 123 45 67"
+                      placeholder={t('auth.phone_placeholder')}
                       className="w-full h-14 rounded-xl border-2 border-input bg-card pl-16 pr-4 text-lg font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                       autoFocus
                     />
@@ -188,15 +190,15 @@ export default function AuthPage() {
                     className="w-full h-14"
                     variant="gradient"
                   >
-                    Получить код
+                    {t('auth.get_code')}
                   </Button>
                 </div>
 
                 {/* Terms */}
                 <p className="text-center text-xs text-muted-foreground">
-                  Нажимая «Получить код», вы соглашаетесь с{' '}
+                  {t('auth.terms_agreement')}{' '}
                   <a href="/terms" className="text-primary hover:underline">
-                    условиями использования
+                    {t('auth.terms_link')}
                   </a>
                 </p>
               </motion.div>
@@ -217,14 +219,14 @@ export default function AuthPage() {
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Изменить номер
+                  {t('auth.change_number')}
                 </button>
 
                 {/* Header */}
                 <div className="text-center space-y-2">
-                  <h1 className="text-2xl font-bold">Введите код</h1>
+                  <h1 className="text-2xl font-bold">{t('auth.enter_code')}</h1>
                   <p className="text-muted-foreground">
-                    Мы отправили SMS на номер{' '}
+                    {t('auth.sms_sent')}{' '}
                     <span className="font-medium text-foreground">+998 {phoneNumber}</span>
                   </p>
                 </div>
@@ -265,8 +267,8 @@ export default function AuthPage() {
                 <div className="text-center">
                   {countdown > 0 ? (
                     <p className="text-muted-foreground">
-                      Отправить код повторно через{' '}
-                      <span className="font-medium text-foreground">{countdown}с</span>
+                      {t('auth.resend_timer')}{' '}
+                      <span className="font-medium text-foreground">{countdown}{t('auth.seconds_suffix')}</span>
                     </p>
                   ) : (
                     <button
@@ -274,7 +276,7 @@ export default function AuthPage() {
                       disabled={isLoading}
                       className="text-primary hover:underline font-medium"
                     >
-                      Отправить код повторно
+                      {t('auth.resend')}
                     </button>
                   )}
                 </div>

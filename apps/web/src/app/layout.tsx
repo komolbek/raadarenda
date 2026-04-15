@@ -22,6 +22,7 @@ const displaySerif = Playfair_Display({
   variable: '--font-display',
 });
 
+
 export const metadata: Metadata = {
   title: '4Event - Event Equipment Rental',
   description: 'Rent event equipment easily with 4Event',

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import type { Category } from '@/types';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface CategoryCardProps {
   category: Category;
@@ -12,6 +13,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, className }: CategoryCardProps) {
+  const { t } = useTranslation();
   return (
     <Link href={`/catalog?category=${category.id}`}>
       <motion.div whileHover={{ y: -5 }} whileTap={{ scale: 0.98 }}>
@@ -45,7 +47,7 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
             <h3 className="font-medium text-sm">{category.name}</h3>
             {category._count?.products !== undefined && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {category._count.products} товаров
+                {t('category.products_count', { count: category._count.products })}
               </p>
             )}
           </div>

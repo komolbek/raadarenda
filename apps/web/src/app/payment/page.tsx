@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Banknote, Shield, HelpCircle, Wallet } from 'lucide-react';
 import Image from 'next/image';
 import { Card } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 type PaymentMethod = {
   id: string;
@@ -14,29 +15,31 @@ type PaymentMethod = {
 };
 
 export default function PaymentPage() {
+  const { t } = useTranslation();
+
   const paymentMethods: PaymentMethod[] = [
     {
       id: 'payme',
       title: 'Payme',
-      description: 'Оплата через приложение Payme',
+      description: t('payment.payme_desc'),
       logo: '/images/payments/payme.svg',
     },
     {
       id: 'click',
       title: 'Click',
-      description: 'Оплата через приложение Click',
+      description: t('payment.click_desc'),
       logo: '/images/payments/click.svg',
     },
     {
       id: 'uzum',
       title: 'Uzum',
-      description: 'Оплата через Uzum Bank',
+      description: t('payment.uzum_desc'),
       logo: '/images/payments/uzum.svg',
     },
     {
       id: 'cash',
-      title: 'Наличные',
-      description: 'Оплата при получении',
+      title: t('payment.cash_title'),
+      description: t('payment.cash_desc'),
       icon: <Wallet className="h-10 w-10 text-primary-500" />,
     },
   ];
@@ -49,9 +52,9 @@ export default function PaymentPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold mb-4">Оплата</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('payment.title')}</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Удобные способы оплаты для вашего удобства
+          {t('payment.subtitle')}
         </p>
       </motion.div>
 
@@ -97,15 +100,15 @@ export default function PaymentPage() {
               <div className="h-12 w-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                 <Banknote className="h-6 w-6 text-primary-500" />
               </div>
-              <h2 className="text-xl font-semibold">Залог</h2>
+              <h2 className="text-xl font-semibold">{t('payment.deposit_title')}</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              При получении товара вносится залог, который возвращается после возврата оборудования в надлежащем состоянии.
+              {t('payment.deposit_desc')}
             </p>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
-              <li>Размер залога зависит от стоимости товара</li>
-              <li>Залог возвращается в течение 24 часов</li>
-              <li>Возможен безналичный залог</li>
+              <li>{t('payment.deposit_1')}</li>
+              <li>{t('payment.deposit_2')}</li>
+              <li>{t('payment.deposit_3')}</li>
             </ul>
           </Card>
         </motion.div>
@@ -120,15 +123,15 @@ export default function PaymentPage() {
               <div className="h-12 w-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                 <Shield className="h-6 w-6 text-primary-500" />
               </div>
-              <h2 className="text-xl font-semibold">Безопасность</h2>
+              <h2 className="text-xl font-semibold">{t('payment.security_title')}</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Все платежи защищены и обрабатываются через официальные платежные системы Узбекистана.
+              {t('payment.security_desc')}
             </p>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
-              <li>Шифрование всех транзакций</li>
-              <li>Мгновенные уведомления об оплате</li>
-              <li>Чеки и квитанции об оплате</li>
+              <li>{t('payment.security_1')}</li>
+              <li>{t('payment.security_2')}</li>
+              <li>{t('payment.security_3')}</li>
             </ul>
           </Card>
         </motion.div>
@@ -143,25 +146,25 @@ export default function PaymentPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <HelpCircle className="h-6 w-6 text-primary-500" />
-            <h2 className="text-xl font-semibold">Часто задаваемые вопросы</h2>
+            <h2 className="text-xl font-semibold">{t('payment.faq_title')}</h2>
           </div>
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-1">Когда нужно оплатить?</h3>
+              <h3 className="font-medium mb-1">{t('payment.faq_q1')}</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Оплата производится при получении товара или онлайн при оформлении заказа.
+                {t('payment.faq_a1')}
               </p>
             </div>
             <div>
-              <h3 className="font-medium mb-1">Можно ли оплатить частями?</h3>
+              <h3 className="font-medium mb-1">{t('payment.faq_q2')}</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Да, для крупных заказов возможна оплата в рассрочку.
+                {t('payment.faq_a2')}
               </p>
             </div>
             <div>
-              <h3 className="font-medium mb-1">Как вернуть залог?</h3>
+              <h3 className="font-medium mb-1">{t('payment.faq_q3')}</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Залог возвращается автоматически после приемки возвращенного оборудования.
+                {t('payment.faq_a3')}
               </p>
             </div>
           </div>

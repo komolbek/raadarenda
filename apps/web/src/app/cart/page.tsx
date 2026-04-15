@@ -11,8 +11,10 @@ import { Button, Card, EmptyState, QuantitySelector } from '@/components/ui';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { formatPrice } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function CartPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { items, subtotal, totalSavings, deliveryFee, total, removeItem, updateItem, clearCart } =
@@ -24,7 +26,7 @@ export default function CartPage() {
 
   const handleRemoveItem = (productId: string, productName: string) => {
     removeItem(productId);
-    toast.success(`${productName} удалён из корзины`);
+    toast.success(t('cart.removed', { name: productName }));
   };
 
   const handleCheckout = () => {
@@ -40,7 +42,7 @@ export default function CartPage() {
       } catch {}
     }
     if (!authed) {
-      toast.error('Войдите в аккаунт для оформления заказа');
+      toast.error(t('cart.login_for_checkout'));
       router.push('/auth');
       return;
     }
@@ -52,12 +54,12 @@ export default function CartPage() {
       <div className="container mx-auto px-4 py-16">
         <EmptyState
           icon={<ShoppingCart className="h-16 w-16" />}
-          title="Корзина пуста"
-          description="Добавьте товары из каталога, чтобы оформить заказ"
+          title={t('cart.empty_title')}
+          description={t('cart.empty_description')}
           action={
             <Link href="/catalog">
               <Button size="lg" variant="gradient">
-                Перейти в каталог
+                {t('cart.go_to_catalog')}
               </Button>
             </Link>
           }
@@ -73,7 +75,7 @@ export default function CartPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-3xl font-bold mb-8"
       >
-        Корзина
+        {t('cart.title')}
       </motion.h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -120,7 +122,7 @@ export default function CartPage() {
                       <div className="mt-1 text-sm text-muted-foreground">
                         {format(new Date(item.rentalStartDate), 'd MMM', { locale: ru })} —{' '}
                         {format(new Date(item.rentalEndDate), 'd MMM', { locale: ru })} •{' '}
-                        {item.rentalDays} дней
+                        {item.rentalDays} {t('cart.days')}
                       </div>
 
                       <div className="mt-3 flex flex-wrap items-center gap-4">
@@ -166,7 +168,7 @@ export default function CartPage() {
               onClick={clearCart}
               className="text-sm text-muted-foreground hover:text-destructive transition-colors"
             >
-              Очистить корзину
+              {t('cart.clear')}
             </button>
           </div>
         </div>
@@ -179,28 +181,28 @@ export default function CartPage() {
           className="lg:col-span-1"
         >
           <Card className="p-6 sticky top-24">
-            <h2 className="font-semibold text-lg mb-4">Сумма заказа</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('cart.order_summary')}</h2>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Товары ({items.length})</span>
+                <span className="text-muted-foreground">{t('cart.items_count', { count: items.length })}</span>
                 <span>{formatPrice(subtotal)} UZS</span>
               </div>
 
               {totalSavings > 0 && (
                 <div className="flex justify-between text-green-600 dark:text-green-400">
-                  <span>Скидка</span>
+                  <span>{t('cart.discount')}</span>
                   <span>-{formatPrice(totalSavings)} UZS</span>
                 </div>
               )}
 
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Доставка</span>
-                <span>{deliveryFee > 0 ? `${formatPrice(deliveryFee)} UZS` : 'Бесплатно'}</span>
+                <span className="text-muted-foreground">{t('cart.delivery')}</span>
+                <span>{deliveryFee > 0 ? `${formatPrice(deliveryFee)} UZS` : t('cart.free')}</span>
               </div>
 
               <div className="border-t border-border pt-3 flex justify-between text-lg font-bold">
-                <span>Итого</span>
+                <span>{t('cart.total')}</span>
                 <span className="text-primary">{formatPrice(total)} UZS</span>
               </div>
             </div>
@@ -212,11 +214,11 @@ export default function CartPage() {
               className="w-full"
               rightIcon={<ArrowRight className="h-5 w-5" />}
             >
-              Оформить заказ
+              {t('cart.checkout')}
             </Button>
 
             <p className="mt-4 text-xs text-center text-muted-foreground">
-              Доставка по Ташкенту бесплатно
+              {t('cart.free_delivery_note')}
             </p>
           </Card>
         </motion.div>

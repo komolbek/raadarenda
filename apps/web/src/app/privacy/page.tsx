@@ -3,66 +3,19 @@
 import { motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
 import { Card } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function PrivacyPage() {
+  const { t } = useTranslation();
+
   const sections = [
-    {
-      title: '1. Сбор информации',
-      content: `Мы собираем следующую информацию:
-• Контактные данные (имя, номер телефона)
-• Адреса доставки
-• История заказов
-• Данные об использовании сайта
-
-Мы не собираем и не храним данные банковских карт. Все платежи обрабатываются через защищенные платежные системы.`,
-    },
-    {
-      title: '2. Использование информации',
-      content: `Собранная информация используется для:
-• Обработки и выполнения заказов
-• Связи с клиентами по вопросам заказов
-• Улучшения качества обслуживания
-• Отправки уведомлений о статусе заказа
-• Персонализации пользовательского опыта`,
-    },
-    {
-      title: '3. Защита информации',
-      content: `Мы принимаем меры для защиты ваших данных:
-• Шифрование данных при передаче
-• Ограниченный доступ к персональным данным
-• Регулярное обновление систем безопасности
-• Соблюдение стандартов защиты данных`,
-    },
-    {
-      title: '4. Передача данных третьим лицам',
-      content: `Мы не продаем и не передаем ваши персональные данные третьим лицам, за исключением:
-• Служб доставки для выполнения заказа
-• Платежных систем для обработки оплаты
-• По требованию законодательства`,
-    },
-    {
-      title: '5. Cookies и аналитика',
-      content: `Наш сайт использует cookies для:
-• Сохранения настроек пользователя
-• Анализа посещаемости сайта
-• Улучшения работы сайта
-
-Вы можете отключить cookies в настройках браузера, но это может повлиять на функциональность сайта.`,
-    },
-    {
-      title: '6. Ваши права',
-      content: `Вы имеете право:
-• Запросить информацию о своих данных
-• Исправить неточные данные
-• Удалить свои данные
-• Отозвать согласие на обработку данных
-
-Для реализации этих прав свяжитесь с нами по контактам, указанным на сайте.`,
-    },
-    {
-      title: '7. Изменения в политике',
-      content: `Мы можем обновлять данную политику конфиденциальности. Актуальная версия всегда доступна на этой странице. Продолжая использовать сайт после изменений, вы принимаете обновленную политику.`,
-    },
+    { title: t('privacy.s1_title'), content: t('privacy.s1_content') },
+    { title: t('privacy.s2_title'), content: t('privacy.s2_content') },
+    { title: t('privacy.s3_title'), content: t('privacy.s3_content') },
+    { title: t('privacy.s4_title'), content: t('privacy.s4_content') },
+    { title: t('privacy.s5_title'), content: t('privacy.s5_content') },
+    { title: t('privacy.s6_title'), content: t('privacy.s6_content') },
+    { title: t('privacy.s7_title'), content: t('privacy.s7_content') },
   ];
 
   return (
@@ -76,9 +29,9 @@ export default function PrivacyPage() {
         <div className="h-16 w-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto mb-4">
           <Shield className="h-8 w-8 text-primary-500" />
         </div>
-        <h1 className="text-4xl font-bold mb-4">Политика конфиденциальности</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('privacy.title')}</h1>
         <p className="text-slate-600 dark:text-slate-400">
-          Последнее обновление: 01.01.2024
+          {t('privacy.last_updated')}
         </p>
       </motion.div>
 

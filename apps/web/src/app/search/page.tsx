@@ -8,17 +8,18 @@ import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { productsApi } from '@/lib/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/ui';
 import { ProductCard } from '@/components/catalog/ProductCard';
-
-const popularSearches = [
-  'Стулья',
-  'Столы',
-  'Свадьба',
-  'Посуда',
-  'Декор',
-  'Освещение',
-];
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 function SearchPageContent() {
+  const { t } = useTranslation();
+  const popularSearches = [
+    t('search.popular_chairs'),
+    t('search.popular_tables'),
+    t('search.popular_wedding'),
+    t('search.popular_dishes'),
+    t('search.popular_decor'),
+    t('search.popular_lighting'),
+  ];
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') || '';
@@ -84,7 +85,7 @@ function SearchPageContent() {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Поиск товаров..."
+            placeholder={t('search.placeholder')}
             className="w-full h-14 rounded-2xl border-2 border-border bg-card pl-12 pr-12 text-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
             autoFocus
           />
@@ -113,13 +114,13 @@ function SearchPageContent() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <h3 className="font-medium">Недавние поиски</h3>
+                  <h3 className="font-medium">{t('search.recent')}</h3>
                 </div>
                 <button
                   onClick={clearRecentSearches}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Очистить
+                  {t('search.clear')}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -140,7 +141,7 @@ function SearchPageContent() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <h3 className="font-medium">Популярные запросы</h3>
+              <h3 className="font-medium">{t('search.popular')}</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {popularSearches.map((term) => (
@@ -166,11 +167,11 @@ function SearchPageContent() {
             className="flex items-center justify-between mb-6"
           >
             <h2 className="text-xl font-bold">
-              Результаты поиска: &quot;{query}&quot;
+              {t('search.results', { query })}
             </h2>
             {products && (
               <span className="text-muted-foreground">
-                {products.meta.total} товаров
+                {t('catalog.products_count', { count: products.meta.total })}
               </span>
             )}
           </motion.div>
@@ -184,11 +185,11 @@ function SearchPageContent() {
           ) : products?.items.length === 0 ? (
             <EmptyState
               icon={<Search className="h-12 w-12" />}
-              title="Ничего не найдено"
-              description={`По запросу "${query}" ничего не найдено. Попробуйте изменить запрос.`}
+              title={t('search.nothing_found')}
+              description={t('search.nothing_found_desc', { query })}
               action={
                 <Button onClick={() => router.push('/catalog')}>
-                  Перейти в каталог
+                  {t('search.go_to_catalog')}
                 </Button>
               }
             />
