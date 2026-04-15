@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Instagram, Facebook, Send } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { Logo } from './Logo';
 
 export function Footer() {
   const { t } = useTranslation();
@@ -35,16 +36,8 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center" aria-label="rent event. — Home">
-              <img
-                src="/logo/rentevent-black.svg"
-                alt="rent event."
-                className="h-10 w-auto block dark:hidden"
-              />
-              <img
-                src="/logo/rentevent-orange.svg"
-                alt="rent event."
-                className="h-10 w-auto hidden dark:block"
-              />
+              <Logo className="h-10 w-auto block dark:hidden" />
+              <Logo inverted className="h-10 w-auto hidden dark:block" />
             </Link>
             <p className="text-muted-foreground text-sm">
               {t('footer.description')}
