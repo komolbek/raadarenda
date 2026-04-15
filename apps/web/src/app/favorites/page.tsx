@@ -10,8 +10,10 @@ import { ProductCard } from '@/components/catalog/ProductCard';
 import { AuthGuard } from '@/components/auth-guard';
 import { useFavoritesStore } from '@/stores/favorites-store';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 function FavoritesPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { favorites, isLoading, fetchFavorites } = useFavoritesStore();
@@ -37,9 +39,9 @@ function FavoritesPageContent() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold">Избранное</h1>
+          <h1 className="text-3xl font-bold">{t('favorites.title')}</h1>
           <p className="text-muted-foreground">
-            {favorites.length} товаров
+            {t('favorites.products_count', { count: favorites.length })}
           </p>
         </div>
       </motion.div>
@@ -53,12 +55,12 @@ function FavoritesPageContent() {
       ) : favorites.length === 0 ? (
         <EmptyState
           icon={<Heart className="h-16 w-16" />}
-          title="Нет избранных товаров"
-          description="Добавляйте понравившиеся товары в избранное, чтобы быстро их найти"
+          title={t('favorites.empty_title')}
+          description={t('favorites.empty_description')}
           action={
             <Link href="/catalog">
               <Button size="lg" variant="gradient">
-                Перейти в каталог
+                {t('favorites.go_to_catalog')}
               </Button>
             </Link>
           }

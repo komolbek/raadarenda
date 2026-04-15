@@ -19,6 +19,7 @@ import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { userApi, ordersApi, settingsApi } from '@/lib/api';
 import { formatPrice, formatDateForAPI, cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { DeliveryType, PaymentMethod } from '@/types';
 
 const paymentMethods: { value: PaymentMethod; label: string; icon: string }[] = [
@@ -28,6 +29,7 @@ const paymentMethods: { value: PaymentMethod; label: string; icon: string }[] = 
 ];
 
 function CheckoutPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { items, subtotal, totalSavings, deliveryFee, total, setDeliveryFee, clearCart } =
@@ -84,17 +86,17 @@ function CheckoutPageContent() {
     mutationFn: ordersApi.create,
     onSuccess: (order) => {
       clearCart();
-      toast.success('Заказ успешно оформлен!');
+      toast.success(t('checkout.order_success'));
       router.push(`/orders/${order.id}`);
     },
     onError: () => {
-      toast.error('Не удалось оформить заказ. Попробуйте позже.');
+      toast.error(t('checkout.order_error'));
     },
   });
 
   const handleSubmit = () => {
     if (deliveryType === 'DELIVERY' && !selectedAddressId) {
-      toast.error('Выберите адрес доставки');
+      toast.error(t('checkout.select_address'));
       return;
     }
 
@@ -132,7 +134,7 @@ function CheckoutPageContent() {
         animate={{ opacity: 1, y: 0 }}
         className="text-3xl font-bold mb-8"
       >
-        Оформление заказа
+        {t('checkout.title')}
       </motion.h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -144,7 +146,7 @@ function CheckoutPageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h2 className="font-semibold text-lg mb-4">Способ получения</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('checkout.delivery_method')}</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <button
                 onClick={() => setDeliveryType('DELIVERY')}
@@ -164,8 +166,8 @@ function CheckoutPageContent() {
                   <Truck className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-medium">Доставка</p>
-                  <p className="text-sm text-muted-foreground">Курьером на адрес</p>
+                  <p className="font-medium">{t('checkout.delivery')}</p>
+                  <p className="text-sm text-muted-foreground">{t('checkout.delivery_desc')}</p>
                 </div>
                 {deliveryType === 'DELIVERY' && (
                   <Check className="h-5 w-5 text-primary ml-auto" />
@@ -190,8 +192,8 @@ function CheckoutPageContent() {
                   <Store className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-medium">Самовывоз</p>
-                  <p className="text-sm text-muted-foreground">Из нашего офиса</p>
+                  <p className="font-medium">{t('checkout.self_pickup')}</p>
+                  <p className="text-sm text-muted-foreground">{t('checkout.self_pickup_desc')}</p>
                 </div>
                 {deliveryType === 'SELF_PICKUP' && (
                   <Check className="h-5 w-5 text-primary ml-auto" />
@@ -209,7 +211,7 @@ function CheckoutPageContent() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <h2 className="font-semibold text-lg mb-4">Адрес доставки</h2>
+                <h2 className="font-semibold text-lg mb-4">{t('checkout.delivery_address')}</h2>
 
                 {addresses && addresses.length > 0 ? (
                   <div className="space-y-3">
@@ -249,15 +251,15 @@ function CheckoutPageContent() {
                       className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-border w-full hover:border-primary/50 transition-colors"
                     >
                       <Plus className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Добавить новый адрес</span>
+                      <span className="text-muted-foreground">{t('checkout.add_new_address')}</span>
                     </button>
                   </div>
                 ) : (
                   <Card className="p-6 text-center">
                     <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="mb-4">У вас пока нет сохранённых адресов</p>
+                    <p className="mb-4">{t('checkout.no_addresses')}</p>
                     <Button onClick={() => setShowAddressModal(true)}>
-                      Добавить адрес
+                      {t('checkout.add_address')}
                     </Button>
                   </Card>
                 )}
@@ -271,7 +273,7 @@ function CheckoutPageContent() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <h2 className="font-semibold text-lg mb-4">Адрес самовывоза</h2>
+                <h2 className="font-semibold text-lg mb-4">{t('checkout.pickup_address')}</h2>
                 <Card className="p-4">
                   <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -298,7 +300,7 @@ function CheckoutPageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="font-semibold text-lg mb-4">Способ оплаты</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('checkout.payment_method')}</h2>
             <div className="grid sm:grid-cols-3 gap-3">
               {paymentMethods.map((method) => (
                 <button
@@ -327,11 +329,11 @@ function CheckoutPageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="font-semibold text-lg mb-4">Комментарий к заказу</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('checkout.order_notes')}</h2>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Пожелания к заказу, время доставки и т.д."
+              placeholder={t('checkout.notes_placeholder')}
               className="w-full h-24 rounded-xl border-2 border-input bg-card px-4 py-3 text-sm resize-none focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
             />
           </motion.div>
@@ -345,7 +347,7 @@ function CheckoutPageContent() {
           className="lg:col-span-1"
         >
           <Card className="p-6 sticky top-24">
-            <h2 className="font-semibold text-lg mb-4">Ваш заказ</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('checkout.your_order')}</h2>
 
             {/* Items Preview */}
             <div className="space-y-3 mb-4 max-h-48 overflow-y-auto scrollbar-thin">
@@ -363,7 +365,7 @@ function CheckoutPageContent() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.product.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {item.quantity} × {item.rentalDays} дней
+                      {item.quantity} × {item.rentalDays} {t('cart.days')}
                     </p>
                   </div>
                   <span className="text-sm font-medium shrink-0">
@@ -375,24 +377,24 @@ function CheckoutPageContent() {
 
             <div className="border-t border-border pt-4 space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Товары</span>
+                <span className="text-muted-foreground">{t('checkout.items')}</span>
                 <span>{formatPrice(subtotal)} UZS</span>
               </div>
 
               {totalSavings > 0 && (
                 <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                  <span>Скидка</span>
+                  <span>{t('cart.discount')}</span>
                   <span>-{formatPrice(totalSavings)} UZS</span>
                 </div>
               )}
 
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Доставка</span>
-                <span>{deliveryFee > 0 ? `${formatPrice(deliveryFee)} UZS` : 'Бесплатно'}</span>
+                <span className="text-muted-foreground">{t('cart.delivery')}</span>
+                <span>{deliveryFee > 0 ? `${formatPrice(deliveryFee)} UZS` : t('cart.free')}</span>
               </div>
 
               <div className="border-t border-border pt-3 flex justify-between text-lg font-bold">
-                <span>Итого</span>
+                <span>{t('cart.total')}</span>
                 <span className="text-primary">{formatPrice(total)} UZS</span>
               </div>
             </div>
@@ -405,11 +407,11 @@ function CheckoutPageContent() {
               variant="gradient"
               className="w-full"
             >
-              Оформить заказ
+              {t('checkout.place_order')}
             </Button>
 
             <p className="mt-4 text-xs text-center text-muted-foreground">
-              Нажимая «Оформить заказ», вы соглашаетесь с условиями аренды
+              {t('checkout.terms_agreement')}
             </p>
           </Card>
         </motion.div>
@@ -419,7 +421,7 @@ function CheckoutPageContent() {
       <Modal
         isOpen={showAddressModal}
         onClose={() => setShowAddressModal(false)}
-        title="Новый адрес"
+        title={t('checkout.new_address')}
         size="lg"
       >
         <AddressForm

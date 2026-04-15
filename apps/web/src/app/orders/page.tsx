@@ -12,8 +12,10 @@ import { AuthGuard } from '@/components/auth-guard';
 import { ordersApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { formatPrice, getOrderStatusLabel, getOrderStatusColor, getDeliveryTypeLabel } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 function OrdersPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
@@ -38,9 +40,9 @@ function OrdersPageContent() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold">Мои заказы</h1>
+          <h1 className="text-3xl font-bold">{t('orders.title')}</h1>
           <p className="text-muted-foreground">
-            {ordersData?.meta.total || 0} заказов
+            {t('orders.count', { count: ordersData?.meta.total || 0 })}
           </p>
         </div>
       </motion.div>
@@ -54,12 +56,12 @@ function OrdersPageContent() {
       ) : !ordersData?.items.length ? (
         <EmptyState
           icon={<Package className="h-16 w-16" />}
-          title="Нет заказов"
-          description="Ваши заказы появятся здесь после оформления"
+          title={t('orders.empty_title')}
+          description={t('orders.empty_description')}
           action={
             <Link href="/catalog">
               <Button size="lg" variant="gradient">
-                Перейти в каталог
+                {t('orders.go_to_catalog')}
               </Button>
             </Link>
           }
@@ -80,7 +82,7 @@ function OrdersPageContent() {
                     <div>
                       <div className="flex items-center gap-3">
                         <h3 className="font-semibold text-lg">
-                          Заказ #{order.orderNumber}
+                          {t('orders.order_number', { number: order.orderNumber })}
                         </h3>
                         <Badge className={getOrderStatusColor(order.status)}>
                           {getOrderStatusLabel(order.status)}
@@ -142,7 +144,7 @@ function OrdersPageContent() {
                   {/* Footer */}
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                     <span className="text-muted-foreground">
-                      {order.items.length} товаров
+                      {t('orders.items_count', { count: order.items.length })}
                     </span>
                     <span className="text-lg font-bold text-primary">
                       {formatPrice(order.totalAmount)} UZS

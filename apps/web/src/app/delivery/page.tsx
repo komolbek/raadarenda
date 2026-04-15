@@ -3,28 +3,31 @@
 import { motion } from 'framer-motion';
 import { Truck, Clock, MapPin, Package, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function DeliveryPage() {
+  const { t } = useTranslation();
+
   const deliverySteps = [
     {
       icon: Package,
-      title: 'Оформите заказ',
-      description: 'Выберите товары и укажите даты аренды',
+      title: t('delivery_page.step1_title'),
+      description: t('delivery_page.step1_desc'),
     },
     {
       icon: CheckCircle,
-      title: 'Подтверждение',
-      description: 'Мы свяжемся с вами для подтверждения',
+      title: t('delivery_page.step2_title'),
+      description: t('delivery_page.step2_desc'),
     },
     {
       icon: Truck,
-      title: 'Доставка',
-      description: 'Привезем в удобное для вас время',
+      title: t('delivery_page.step3_title'),
+      description: t('delivery_page.step3_desc'),
     },
     {
       icon: Clock,
-      title: 'Возврат',
-      description: 'Заберем после окончания аренды',
+      title: t('delivery_page.step4_title'),
+      description: t('delivery_page.step4_desc'),
     },
   ];
 
@@ -36,9 +39,9 @@ export default function DeliveryPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold mb-4">Доставка</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('delivery_page.title')}</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Мы доставляем оборудование по всему Ташкенту
+          {t('delivery_page.subtitle')}
         </p>
       </motion.div>
 
@@ -54,15 +57,15 @@ export default function DeliveryPage() {
               <div className="h-12 w-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                 <MapPin className="h-6 w-6 text-primary-500" />
               </div>
-              <h2 className="text-xl font-semibold">Зона доставки</h2>
+              <h2 className="text-xl font-semibold">{t('delivery_page.zone_title')}</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Мы осуществляем доставку по всему Ташкенту. Доставка бесплатная при заказе от 500 000 сум.
+              {t('delivery_page.zone_desc')}
             </p>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
-              <li>Центр города - бесплатно</li>
-              <li>Спальные районы - от 30 000 сум</li>
-              <li>Пригород - договорная</li>
+              <li>{t('delivery_page.zone_1')}</li>
+              <li>{t('delivery_page.zone_2')}</li>
+              <li>{t('delivery_page.zone_3')}</li>
             </ul>
           </Card>
         </motion.div>
@@ -77,15 +80,15 @@ export default function DeliveryPage() {
               <div className="h-12 w-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                 <Clock className="h-6 w-6 text-primary-500" />
               </div>
-              <h2 className="text-xl font-semibold">Время доставки</h2>
+              <h2 className="text-xl font-semibold">{t('delivery_page.time_title')}</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Доставляем в удобное для вас время. Рекомендуем заказывать за 1-2 дня до мероприятия.
+              {t('delivery_page.time_desc')}
             </p>
             <ul className="space-y-2 text-slate-600 dark:text-slate-400">
-              <li>Стандартная доставка: 09:00 - 21:00</li>
-              <li>Срочная доставка: в течение 3 часов</li>
-              <li>Ночная доставка: по договоренности</li>
+              <li>{t('delivery_page.time_1')}</li>
+              <li>{t('delivery_page.time_2')}</li>
+              <li>{t('delivery_page.time_3')}</li>
             </ul>
           </Card>
         </motion.div>
@@ -93,7 +96,7 @@ export default function DeliveryPage() {
 
       {/* Process Steps */}
       <h2 className="text-2xl font-bold text-center mb-8">
-        Как это работает
+        {t('delivery_page.how_it_works')}
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {deliverySteps.map((step, index) => (
@@ -108,7 +111,7 @@ export default function DeliveryPage() {
                 <step.icon className="h-6 w-6 text-primary-500" />
               </div>
               <div className="text-sm font-medium text-primary-500 mb-2">
-                {'Шаг'} {index + 1}
+                {t('delivery_page.step')} {index + 1}
               </div>
               <h3 className="font-semibold mb-2">{step.title}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">{step.description}</p>

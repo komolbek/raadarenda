@@ -32,19 +32,21 @@ import {
   getPaymentMethodLabel,
   cn,
 } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { OrderStatus } from '@/types';
 
-const statusSteps: { status: OrderStatus; label: string; icon: typeof CheckCircle2 }[] = [
-  { status: 'CONFIRMED', label: 'Подтверждён', icon: CheckCircle2 },
-  { status: 'PREPARING', label: 'Готовится', icon: Clock },
-  { status: 'DELIVERED', label: 'Доставлен', icon: Box },
-  { status: 'RETURNED', label: 'Возвращён', icon: RotateCcw },
-];
-
 function OrderDetailPageContent() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+
+  const statusSteps: { status: OrderStatus; label: string; icon: typeof CheckCircle2 }[] = [
+    { status: 'CONFIRMED', label: t('status.confirmed'), icon: CheckCircle2 },
+    { status: 'PREPARING', label: t('status.preparing'), icon: Clock },
+    { status: 'DELIVERED', label: t('status.delivered'), icon: Box },
+    { status: 'RETURNED', label: t('status.returned'), icon: RotateCcw },
+  ];
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
@@ -68,8 +70,8 @@ function OrderDetailPageContent() {
   if (!order) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Заказ не найден</h1>
-        <Button onClick={() => router.push('/orders')}>Вернуться к заказам</Button>
+        <h1 className="text-2xl font-bold mb-4">{t('order_detail.not_found')}</h1>
+        <Button onClick={() => router.push('/orders')}>{t('order_detail.back_to_orders')}</Button>
       </div>
     );
   }
@@ -93,7 +95,7 @@ function OrderDetailPageContent() {
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Заказ #{order.orderNumber}</h1>
+            <h1 className="text-2xl font-bold">{t('order_detail.order_number', { number: order.orderNumber })}</h1>
             <Badge className={getOrderStatusColor(order.status)}>
               {getOrderStatusLabel(order.status)}
             </Badge>
@@ -114,7 +116,7 @@ function OrderDetailPageContent() {
               transition={{ delay: 0.1 }}
             >
               <Card className="p-6">
-                <h2 className="font-semibold mb-6">Статус заказа</h2>
+                <h2 className="font-semibold mb-6">{t('order_detail.order_status')}</h2>
                 <div className="flex items-center justify-between relative">
                   {/* Progress Line */}
                   <div className="absolute top-5 left-0 right-0 h-0.5 bg-muted">
@@ -167,7 +169,7 @@ function OrderDetailPageContent() {
               <Card className="p-6 border-destructive bg-destructive/5">
                 <div className="flex items-center gap-3 text-destructive">
                   <XCircle className="h-6 w-6" />
-                  <span className="font-medium">Заказ отменён</span>
+                  <span className="font-medium">{t('order_detail.order_cancelled')}</span>
                 </div>
               </Card>
             </motion.div>
@@ -181,7 +183,7 @@ function OrderDetailPageContent() {
           >
             <Card className="overflow-hidden">
               <div className="p-6 border-b border-border">
-                <h2 className="font-semibold">Товары</h2>
+                <h2 className="font-semibold">{t('order_detail.items')}</h2>
               </div>
               <div className="divide-y divide-border">
                 {order.items.map((item) => (
@@ -206,10 +208,10 @@ function OrderDetailPageContent() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{item.productName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {item.quantity} шт.
+                        {item.quantity} {t('availability.units')}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {formatPrice(item.dailyPrice)} UZS/день
+                        {formatPrice(item.dailyPrice)} {t('product.per_day')}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
@@ -228,7 +230,7 @@ function OrderDetailPageContent() {
             transition={{ delay: 0.3 }}
           >
             <Card className="p-6">
-              <h2 className="font-semibold mb-4">Доставка</h2>
+              <h2 className="font-semibold mb-4">{t('order_detail.delivery')}</h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -253,7 +255,7 @@ function OrderDetailPageContent() {
                     <Calendar className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">Период аренды</p>
+                    <p className="font-medium">{t('order_detail.rental_period')}</p>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(order.rentalStartDate), 'd MMMM', { locale: ru })} —{' '}
                       {format(new Date(order.rentalEndDate), 'd MMMM yyyy', { locale: ru })}
@@ -277,7 +279,7 @@ function OrderDetailPageContent() {
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">Комментарий</p>
+                    <p className="font-medium">{t('order_detail.comment')}</p>
                     <p className="text-sm text-muted-foreground">{order.notes}</p>
                   </div>
                 </div>
@@ -293,30 +295,30 @@ function OrderDetailPageContent() {
           transition={{ delay: 0.3 }}
         >
           <Card className="p-6 sticky top-24">
-            <h2 className="font-semibold mb-4">Сумма заказа</h2>
+            <h2 className="font-semibold mb-4">{t('order_detail.order_total')}</h2>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Товары</span>
+                <span className="text-muted-foreground">{t('checkout.items')}</span>
                 <span>{formatPrice(order.subtotal)} UZS</span>
               </div>
 
               {order.totalSavings > 0 && (
                 <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                  <span>Скидка</span>
+                  <span>{t('cart.discount')}</span>
                   <span>-{formatPrice(order.totalSavings)} UZS</span>
                 </div>
               )}
 
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Доставка</span>
+                <span className="text-muted-foreground">{t('cart.delivery')}</span>
                 <span>
-                  {order.deliveryFee > 0 ? `${formatPrice(order.deliveryFee)} UZS` : 'Бесплатно'}
+                  {order.deliveryFee > 0 ? `${formatPrice(order.deliveryFee)} UZS` : t('cart.free')}
                 </span>
               </div>
 
               <div className="border-t border-border pt-3 flex justify-between text-lg font-bold">
-                <span>Итого</span>
+                <span>{t('cart.total')}</span>
                 <span className="text-primary">{formatPrice(order.totalAmount)} UZS</span>
               </div>
             </div>
@@ -330,7 +332,7 @@ function OrderDetailPageContent() {
                     {getPaymentMethodLabel(order.paymentMethod)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {order.paymentStatus === 'PAID' ? 'Оплачено' : 'Ожидает оплаты'}
+                    {order.paymentStatus === 'PAID' ? t('order_detail.paid') : t('order_detail.awaiting_payment')}
                   </p>
                 </div>
               </div>
@@ -338,7 +340,7 @@ function OrderDetailPageContent() {
 
             <Link href="/catalog">
               <Button variant="outline" className="w-full">
-                Продолжить покупки
+                {t('order_detail.continue_shopping')}
               </Button>
             </Link>
           </Card>

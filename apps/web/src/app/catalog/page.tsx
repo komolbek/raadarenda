@@ -34,12 +34,14 @@ import { ProductCard } from '@/components/catalog/ProductCard';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
-const sortOptions = [
-  { value: 'newest', label: 'Сначала новые' },
-  { value: 'popular', label: 'По популярности' },
-  { value: 'price_asc', label: 'Сначала дешёвые' },
-  { value: 'price_desc', label: 'Сначала дорогие' },
-];
+function getSortOptions(t: (key: string) => string) {
+  return [
+    { value: 'newest', label: t('catalog.sort_newest') },
+    { value: 'popular', label: t('catalog.sort_popular') },
+    { value: 'price_asc', label: t('catalog.sort_price_asc') },
+    { value: 'price_desc', label: t('catalog.sort_price_desc') },
+  ];
+}
 
 // Map of category iconName → lucide icon component.
 // Keeps icon names stored as strings in the DB but renders them as real icons.
@@ -97,6 +99,7 @@ function CatalogPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, locale } = useTranslation();
+  const sortOptions = getSortOptions(t);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const categoryId = searchParams.get('category') || undefined;
@@ -148,7 +151,7 @@ function CatalogPageContent() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-bold mb-2"
         >
-          {selectedCategory ? getCategoryName(selectedCategory.name, t) : search ? `Поиск: "${search}"` : 'Каталог'}
+          {selectedCategory ? getCategoryName(selectedCategory.name, t) : search ? t('catalog.search_prefix', { query: search }) : t('catalog.title')}
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -157,8 +160,8 @@ function CatalogPageContent() {
           className="text-muted-foreground"
         >
           {products?.meta.total
-            ? `${products.meta.total} товаров`
-            : 'Загрузка...'}
+            ? t('catalog.products_count', { count: products.meta.total })
+            : t('catalog.loading')}
         </motion.p>
       </div>
 
@@ -180,7 +183,7 @@ function CatalogPageContent() {
                   : 'bg-muted hover:bg-muted/80'
               )}
             >
-              Все
+              {t('catalog.all')}
             </button>
             {categoriesLoading
               ? [...Array(6)].map((_, i) => (
@@ -281,11 +284,11 @@ function CatalogPageContent() {
       ) : products?.items.length === 0 ? (
         <EmptyState
           icon={<Search className="h-12 w-12" />}
-          title="Ничего не найдено"
-          description="Попробуйте изменить параметры поиска или выбрать другую категорию"
+          title={t('catalog.nothing_found')}
+          description={t('catalog.nothing_found_desc')}
           action={
             <Button onClick={() => router.replace('/catalog')}>
-              Сбросить фильтры
+              {t('catalog.reset_filters')}
             </Button>
           }
         />

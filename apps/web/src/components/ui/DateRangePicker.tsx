@@ -7,6 +7,7 @@ import { ru } from 'date-fns/locale';
 import { Calendar, ChevronLeft, ChevronRight, X, CalendarDays, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface DateRangePickerProps {
   value: DateRange | undefined;
@@ -27,6 +28,7 @@ export function DateRangePicker({
   error,
   className,
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   // Calculate rental days
   const rentalDays = value?.from && value?.to
@@ -45,7 +47,7 @@ export function DateRangePicker({
   };
 
   const formatDisplayDate = () => {
-    if (!value?.from) return 'Выберите даты';
+    if (!value?.from) return t('date_picker.select_dates');
     if (!value.to) return format(value.from, 'd MMM yyyy', { locale: ru });
     return `${format(value.from, 'd MMM', { locale: ru })} - ${format(value.to, 'd MMM yyyy', { locale: ru })}`;
   };
@@ -91,7 +93,7 @@ export function DateRangePicker({
           </span>
           {rentalDays > 0 && (
             <span className="text-xs text-muted-foreground mt-0.5 block">
-              {rentalDays} {rentalDays === 1 ? 'день' : rentalDays < 5 ? 'дня' : 'дней'}
+              {rentalDays} {rentalDays === 1 ? t('date_picker.day_one') : rentalDays < 5 ? t('date_picker.day_few') : t('date_picker.day_many')}
             </span>
           )}
         </div>
@@ -135,10 +137,10 @@ export function DateRangePicker({
                       <CalendarDays className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm">Выберите период аренды</h3>
+                      <h3 className="font-semibold text-sm">{t('date_picker.select_period')}</h3>
                       {rentalDays > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          Выбрано дней: {rentalDays}
+                          {t('date_picker.selected_days', { count: rentalDays })}
                         </p>
                       )}
                     </div>
@@ -159,12 +161,12 @@ export function DateRangePicker({
                     className="mt-4 flex items-center gap-2 text-sm"
                   >
                     <div className="flex-1 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
-                      <p className="text-xs text-muted-foreground mb-0.5">Начало</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">{t('date_picker.start')}</p>
                       <p className="font-medium">{format(value.from, 'd MMMM yyyy', { locale: ru })}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="flex-1 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
-                      <p className="text-xs text-muted-foreground mb-0.5">Конец</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">{t('date_picker.end')}</p>
                       <p className="font-medium">
                         {value.to ? format(value.to, 'd MMMM yyyy', { locale: ru }) : '—'}
                       </p>
@@ -234,7 +236,7 @@ export function DateRangePicker({
                   onClick={handleClearDates}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Очистить
+                  {t('date_picker.clear')}
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -246,7 +248,7 @@ export function DateRangePicker({
                       : 'bg-muted text-muted-foreground cursor-not-allowed'
                   )}
                 >
-                  Применить
+                  {t('date_picker.apply')}
                 </button>
               </div>
             </motion.div>

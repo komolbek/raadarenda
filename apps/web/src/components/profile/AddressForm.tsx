@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { Button, Input } from '@/components/ui';
 import { userApi } from '@/lib/api';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { Address } from '@/types';
 
 interface AddressFormProps {
@@ -14,6 +15,7 @@ interface AddressFormProps {
 }
 
 export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: address?.title || '',
     fullAddress: address?.fullAddress || '',
@@ -47,22 +49,22 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
   const createMutation = useMutation({
     mutationFn: (data: typeof formData) => userApi.createAddress(toApiData(data)),
     onSuccess: () => {
-      toast.success('Адрес добавлен');
+      toast.success(t('address_form.added'));
       onSuccess();
     },
     onError: () => {
-      toast.error('Не удалось добавить адрес');
+      toast.error(t('address_form.add_error'));
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: typeof formData) => userApi.createAddress(toApiData(data)),
     onSuccess: () => {
-      toast.success('Адрес обновлён');
+      toast.success(t('address_form.updated'));
       onSuccess();
     },
     onError: () => {
-      toast.error('Не удалось обновить адрес');
+      toast.error(t('address_form.update_error'));
     },
   });
 
@@ -70,11 +72,11 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      toast.error('Введите название адреса');
+      toast.error(t('address_form.name_required'));
       return;
     }
     if (!formData.fullAddress.trim()) {
-      toast.error('Введите полный адрес');
+      toast.error(t('address_form.address_required'));
       return;
     }
 
@@ -94,41 +96,41 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Название *"
+        label={t('address_form.name_label')}
         value={formData.title}
         onChange={(e) => handleChange('title', e.target.value)}
-        placeholder="Дом, Офис, и т.д."
+        placeholder={t('address_form.name_placeholder')}
       />
 
       <Input
-        label="Полный адрес *"
+        label={t('address_form.full_address_label')}
         value={formData.fullAddress}
         onChange={(e) => handleChange('fullAddress', e.target.value)}
-        placeholder="ул. Амир Темур, д. 1, кв. 10"
+        placeholder={t('address_form.full_address_placeholder')}
       />
 
       <div className="grid grid-cols-2 gap-4">
         <Input
-          label="Город"
+          label={t('address_form.city')}
           value={formData.city}
           onChange={(e) => handleChange('city', e.target.value)}
         />
         <Input
-          label="Район"
+          label={t('address_form.district')}
           value={formData.district}
           onChange={(e) => handleChange('district', e.target.value)}
-          placeholder="Мирзо-Улугбекский"
+          placeholder={t('address_form.district_placeholder')}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Input
-          label="Улица"
+          label={t('address_form.street')}
           value={formData.street}
           onChange={(e) => handleChange('street', e.target.value)}
         />
         <Input
-          label="Дом"
+          label={t('address_form.building')}
           value={formData.building}
           onChange={(e) => handleChange('building', e.target.value)}
         />
@@ -136,17 +138,17 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
 
       <div className="grid grid-cols-3 gap-4">
         <Input
-          label="Квартира"
+          label={t('address_form.apartment')}
           value={formData.apartment}
           onChange={(e) => handleChange('apartment', e.target.value)}
         />
         <Input
-          label="Подъезд"
+          label={t('address_form.entrance')}
           value={formData.entrance}
           onChange={(e) => handleChange('entrance', e.target.value)}
         />
         <Input
-          label="Этаж"
+          label={t('address_form.floor')}
           value={formData.floor}
           onChange={(e) => handleChange('floor', e.target.value)}
         />
@@ -159,7 +161,7 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
           onChange={(e) => handleChange('isDefault', e.target.checked)}
           className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
         />
-        <span>Сделать адресом по умолчанию</span>
+        <span>{t('address_form.set_default')}</span>
       </label>
 
       <div className="flex gap-3 pt-4">
@@ -170,10 +172,10 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
           className="flex-1"
           disabled={isLoading}
         >
-          Отмена
+          {t('address_form.cancel')}
         </Button>
         <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>
-          {address ? 'Сохранить' : 'Добавить'}
+          {address ? t('address_form.save') : t('address_form.add')}
         </Button>
       </div>
     </form>

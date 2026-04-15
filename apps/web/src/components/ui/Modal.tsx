@@ -4,6 +4,8 @@ import { Fragment, type ReactNode } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { t as translate } from '@/lib/i18n';
+import { useLanguageStore } from '@/stores/language-store';
 
 interface ModalProps {
   isOpen: boolean;
@@ -124,11 +126,14 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = 'Подтвердить',
-  cancelText = 'Отмена',
+  confirmText,
+  cancelText,
   variant = 'default',
   isLoading = false,
 }: ConfirmModalProps) {
+  const locale = useLanguageStore((s) => s.locale);
+  const confirmLabel = confirmText ?? translate('common.confirm', undefined, locale);
+  const cancelLabel = cancelText ?? translate('common.cancel', undefined, locale);
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <p className="text-muted-foreground mb-6">{message}</p>
@@ -139,7 +144,7 @@ export function ConfirmModal({
           onClick={onClose}
           disabled={isLoading}
         >
-          {cancelText}
+          {cancelLabel}
         </button>
         <button
           type="button"
@@ -152,7 +157,7 @@ export function ConfirmModal({
           onClick={onConfirm}
           disabled={isLoading}
         >
-          {isLoading ? 'Загрузка...' : confirmText}
+          {isLoading ? translate('common.loading', undefined, locale) : confirmLabel}
         </button>
       </div>
     </Modal>
