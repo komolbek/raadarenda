@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
+/* Tailwind v4: opt in to a class-based dark variant. The theme-store toggles
+   `class="dark"` on <html>; this maps that to the `dark:` utilities. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Fonts — --font-body (Lora) and --font-display (Playfair Display) injected
-     on <html> by next/font. Use the display serif in italic for headings for a
-     serious editorial feel. */
-  --font-sans: var(--font-body), Georgia, "Times New Roman", serif;
+     on <html> by next/font. The display font is reserved for promo / hero
+     sections via the `font-display` utility — see the rule below. */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-display), var(--font-body), Georgia, serif;
 
   --color-primary: #F2562B;
@@ -36,11 +40,25 @@
   --color-card: #ffffff;
 }
 
-/* Headings use a high-contrast serif in italic for a serious editorial voice */
-h1, h2, h3 {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+/* Dark theme overrides — applied when <html> has class="dark" */
+.dark {
+  --color-background: #0b0b0f;
+  --color-foreground: #f8fafc;
+  --color-card: #16161c;
+  --color-border: #27272f;
+  --color-input: #27272f;
+  --color-muted: #1c1c24;
+  --color-muted-foreground: #94a3b8;
+  --color-secondary: #1c1c24;
+  --color-secondary-foreground: #f8fafc;
+  --color-accent-foreground: #f8fafc;
+  --color-primary-foreground: #ffffff;
 }
 
+/* Display serif — applied only via the `font-display` utility (e.g. on hero /
+   promo headings). Headings without the utility keep the body sans/serif. */
+.font-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
