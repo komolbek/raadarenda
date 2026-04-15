@@ -83,7 +83,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
+              className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
             >
               Всё для вашего идеального мероприятия
             </motion.h1>
@@ -149,7 +149,7 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="rounded-3xl bg-muted p-8 md:p-12 text-center"
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
             Готовы организовать мероприятие?
           </h2>
           <p className="text-muted-foreground max-w-lg mx-auto mb-6">
