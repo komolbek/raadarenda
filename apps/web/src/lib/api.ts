@@ -78,6 +78,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('auth-storage');
+      // Also clear the auth-token cookie read by the Next.js middleware
+      document.cookie = 'auth-token=; path=/; max-age=0; SameSite=Lax';
       if (!window.location.pathname.startsWith('/auth')) {
         window.location.href = '/auth';
       }
