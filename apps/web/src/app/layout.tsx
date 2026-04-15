@@ -1,7 +1,24 @@
 import type { Metadata, Viewport } from 'next';
+import { Manrope, Unbounded } from 'next/font/google';
 import { Providers } from './providers';
 import { Header, Footer } from '@/components/layout';
 import './globals.css';
+
+// Body font — modern humanist sans with full Cyrillic support
+const manrope = Manrope({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-manrope',
+});
+
+// Display font for headings — distinctive geometric, full Cyrillic
+const unbounded = Unbounded({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-unbounded',
+});
 
 export const metadata: Metadata = {
   title: '4Event - Event Equipment Rental',
@@ -21,7 +38,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html
+      lang="ru"
+      suppressHydrationWarning
+      className={`${manrope.variable} ${unbounded.variable}`}
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -46,7 +67,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased font-sans">
         <Providers>
           <Header />
           {children}
