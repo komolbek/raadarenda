@@ -27,9 +27,13 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 # Ship the public/ folder — logo SVGs, payment provider logos, etc.
-# Without this the runtime has an empty public dir and every /logo/*,
-# /images/* request 404s.
+# Next.js standalone serves static assets relative to the server.js cwd.
+# Railway's startCommand in apps/web/railway.json is `node server.js`,
+# so the process CWD ends up at /app/apps/web; without a public/ dir
+# beside server.js every /logo/*, /images/* request 404s.
+# Also mirror public/ at the repo root in case the CMD path is used.
 COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/public ./public
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 EXPOSE 3000
