@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Fonts — --font-manrope and --font-unbounded are injected on <html> by next/font */
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-unbounded), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* Fonts — --font-body (Lora) and --font-display (Playfair Display) injected
+     on <html> by next/font. Use the display serif in italic for headings for a
+     serious editorial feel. */
+  --font-sans: var(--font-body), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-display), var(--font-body), Georgia, serif;
 
   --color-primary: #F2562B;
   --color-primary-50: #fff7ed;
@@ -34,9 +36,11 @@
   --color-card: #ffffff;
 }
 
-/* Headings use the display font for a stronger brand voice */
+/* Headings use a high-contrast serif in italic for a serious editorial voice */
 h1, h2, h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
