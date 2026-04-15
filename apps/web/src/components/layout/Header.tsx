@@ -25,6 +25,7 @@ import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
+import { Logo } from './Logo';
 import type { Locale } from '@/lib/i18n';
 
 const LOCALE_LABELS: Record<Locale, string> = {
@@ -99,19 +100,11 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          {/* Wordmark — "rent event." lockup; SVG swaps between light/dark for contrast */}
+          {/* Wordmark — inlined SVG so it doesn't depend on public/ at runtime */}
           <Link href="/" className="flex items-center shrink-0" aria-label="rent event. — Home">
             <motion.span whileHover={{ scale: 1.03 }} className="flex">
-              <img
-                src="/logo/rentevent-black.svg"
-                alt="rent event."
-                className="h-8 sm:h-9 w-auto block dark:hidden"
-              />
-              <img
-                src="/logo/rentevent-orange.svg"
-                alt="rent event."
-                className="h-8 sm:h-9 w-auto hidden dark:block"
-              />
+              <Logo className="h-8 sm:h-9 w-auto block dark:hidden" />
+              <Logo inverted className="h-8 sm:h-9 w-auto hidden dark:block" />
             </motion.span>
           </Link>
 
