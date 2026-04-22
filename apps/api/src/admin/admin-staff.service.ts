@@ -152,7 +152,7 @@ export class AdminStaffService {
 
     await this.prisma.staff.update({
       where: { id: targetId },
-      data: { isActive: false },
+      data: { isActive: false, deletedAt: new Date() },
     });
 
     return { success: true };
