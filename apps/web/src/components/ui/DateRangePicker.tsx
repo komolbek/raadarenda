@@ -37,14 +37,9 @@ export function DateRangePicker({
     : 0;
 
   const handleSelect = (range: DateRange | undefined) => {
-    // Always trigger onChange to update parent component immediately
+    // Update parent immediately; keep the picker open so the user can adjust
+    // either endpoint and explicitly confirm with the Apply button.
     onChange(range);
-
-    // Close calendar only when both dates are selected
-    if (range?.from && range?.to) {
-      // Small delay for visual feedback
-      setTimeout(() => setIsOpen(false), 150);
-    }
   };
 
   const formatDisplayDate = () => {

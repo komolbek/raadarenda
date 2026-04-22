@@ -104,6 +104,7 @@ export function getPaymentMethodLabel(method: string): string {
     RAHMAT: 'Rahmat',
     CASH: 'Cash',
     UZUM: 'Uzum',
+    BANK_TRANSFER: 'Bank transfer',
   };
   return labels[method] || method;
 }

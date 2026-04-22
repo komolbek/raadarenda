@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   MapPin,
-  Truck,
-  Store,
   Check,
   Plus,
+  CreditCard,
+  Banknote,
+  FileText,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Button, Card, Modal } from '@/components/ui';
 import { AddressForm } from '@/components/profile/AddressForm';
@@ -22,9 +24,10 @@ import { formatPrice, formatDateForAPI, cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { DeliveryType, PaymentMethod } from '@/types';
 
-const paymentMethods: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'RAHMAT', label: 'Rahmat', icon: '💳' },
-  { value: 'CASH', label: 'Cash', icon: '💵' },
+const paymentMethods: { value: PaymentMethod; labelKey: string; Icon: LucideIcon }[] = [
+  { value: 'RAHMAT', labelKey: 'checkout.method_rahmat', Icon: CreditCard },
+  { value: 'CASH', labelKey: 'checkout.method_cash', Icon: Banknote },
+  { value: 'BANK_TRANSFER', labelKey: 'checkout.method_bank_transfer', Icon: FileText },
 ];
 
 function CheckoutPageContent() {
@@ -34,9 +37,11 @@ function CheckoutPageContent() {
   const { items, subtotal, totalSavings, deliveryFee, total, setDeliveryFee, clearCart } =
     useCartStore();
 
-  const [deliveryType, setDeliveryType] = useState<DeliveryType>('DELIVERY');
+  const deliveryType: DeliveryType = 'DELIVERY';
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('RAHMAT');
+  const [companyName, setCompanyName] = useState('');
+  const [companyInn, setCompanyInn] = useState('');
   const [notes, setNotes] = useState('');
   const [showAddressModal, setShowAddressModal] = useState(false);
 
@@ -70,15 +75,10 @@ function CheckoutPageContent() {
     }
   }, [addresses, selectedAddressId]);
 
-  // Update delivery fee based on delivery type
+  // Delivery fee — free in Tashkent for now; keep zone calc as a follow-up.
   useEffect(() => {
-    if (deliveryType === 'SELF_PICKUP') {
-      setDeliveryFee(0);
-    } else {
-      // TODO: Calculate based on address zone
-      setDeliveryFee(0); // Free delivery in Tashkent
-    }
-  }, [deliveryType, setDeliveryFee]);
+    setDeliveryFee(0);
+  }, [setDeliveryFee]);
 
   // Create order mutation
   const createOrderMutation = useMutation({
@@ -112,6 +112,17 @@ function CheckoutPageContent() {
       return;
     }
 
+    if (paymentMethod === 'BANK_TRANSFER') {
+      if (!companyName.trim()) {
+        toast.error(t('checkout.company_name_required'));
+        return;
+      }
+      if (!/^\d{9}$/.test(companyInn.trim())) {
+        toast.error(t('checkout.inn_invalid'));
+        return;
+      }
+    }
+
     // Get rental dates from first cart item (assuming all items have same dates)
     const firstItem = items[0];
     if (!firstItem) return;
@@ -126,6 +137,8 @@ function CheckoutPageContent() {
       delivery_type: deliveryType,
       delivery_address_id: deliveryType === 'DELIVERY' ? selectedAddressId || undefined : undefined,
       payment_method: paymentMethod,
+      company_name: paymentMethod === 'BANK_TRANSFER' ? companyName.trim() : undefined,
+      company_inn: paymentMethod === 'BANK_TRANSFER' ? companyInn.trim() : undefined,
       notes: notes || undefined,
     });
   };
@@ -152,71 +165,9 @@ function CheckoutPageContent() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Checkout Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Delivery Type */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h2 className="font-semibold text-lg mb-4">{t('checkout.delivery_method')}</h2>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <button
-                onClick={() => setDeliveryType('DELIVERY')}
-                className={cn(
-                  'flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
-                  deliveryType === 'DELIVERY'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                )}
-              >
-                <div
-                  className={cn(
-                    'h-12 w-12 rounded-xl flex items-center justify-center',
-                    deliveryType === 'DELIVERY' ? 'bg-primary text-white' : 'bg-muted'
-                  )}
-                >
-                  <Truck className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-medium">{t('checkout.delivery')}</p>
-                  <p className="text-sm text-muted-foreground">{t('checkout.delivery_desc')}</p>
-                </div>
-                {deliveryType === 'DELIVERY' && (
-                  <Check className="h-5 w-5 text-primary ml-auto" />
-                )}
-              </button>
-
-              <button
-                onClick={() => setDeliveryType('SELF_PICKUP')}
-                className={cn(
-                  'flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
-                  deliveryType === 'SELF_PICKUP'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                )}
-              >
-                <div
-                  className={cn(
-                    'h-12 w-12 rounded-xl flex items-center justify-center',
-                    deliveryType === 'SELF_PICKUP' ? 'bg-primary text-white' : 'bg-muted'
-                  )}
-                >
-                  <Store className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-medium">{t('checkout.self_pickup')}</p>
-                  <p className="text-sm text-muted-foreground">{t('checkout.self_pickup_desc')}</p>
-                </div>
-                {deliveryType === 'SELF_PICKUP' && (
-                  <Check className="h-5 w-5 text-primary ml-auto" />
-                )}
-              </button>
-            </div>
-          </motion.div>
-
           {/* Delivery Address */}
           <AnimatePresence mode="wait">
-            {deliveryType === 'DELIVERY' && (
+            {true && (
               <motion.div
                 key="delivery-address"
                 initial={{ opacity: 0, height: 0 }}
@@ -278,32 +229,6 @@ function CheckoutPageContent() {
               </motion.div>
             )}
 
-            {deliveryType === 'SELF_PICKUP' && businessSettings && (
-              <motion.div
-                key="pickup-address"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-              >
-                <h2 className="font-semibold text-lg mb-4">{t('checkout.pickup_address')}</h2>
-                <Card className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Store className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{businessSettings.name}</p>
-                      <p className="text-sm text-muted-foreground">{businessSettings.address}</p>
-                      {businessSettings.phone && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {businessSettings.phone}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
           </AnimatePresence>
 
           {/* Payment Method */}
@@ -314,25 +239,68 @@ function CheckoutPageContent() {
           >
             <h2 className="font-semibold text-lg mb-4">{t('checkout.payment_method')}</h2>
             <div className="grid sm:grid-cols-3 gap-3">
-              {paymentMethods.map((method) => (
-                <button
-                  key={method.value}
-                  onClick={() => setPaymentMethod(method.value)}
-                  className={cn(
-                    'flex items-center gap-3 p-4 rounded-xl border-2 transition-all',
-                    paymentMethod === method.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                  )}
-                >
-                  <span className="text-2xl">{method.icon}</span>
-                  <span className="font-medium">{method.label}</span>
-                  {paymentMethod === method.value && (
-                    <Check className="h-5 w-5 text-primary ml-auto" />
-                  )}
-                </button>
-              ))}
+              {paymentMethods.map((method) => {
+                const { Icon } = method;
+                const isActive = paymentMethod === method.value;
+                return (
+                  <button
+                    key={method.value}
+                    onClick={() => setPaymentMethod(method.value)}
+                    className={cn(
+                      'flex items-center gap-3 p-4 rounded-xl border-2 transition-all',
+                      isActive
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'h-10 w-10 rounded-xl flex items-center justify-center',
+                        isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground',
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="font-medium">{t(method.labelKey)}</span>
+                    {isActive && <Check className="h-5 w-5 text-primary ml-auto" />}
+                  </button>
+                );
+              })}
             </div>
+
+            {paymentMethod === 'BANK_TRANSFER' && (
+              <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-sm text-muted-foreground">
+                  {t('checkout.bank_transfer_hint')}
+                </p>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    {t('checkout.company_name')}
+                  </label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder={t('checkout.company_name_placeholder')}
+                    className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    {t('checkout.company_inn')}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={9}
+                    value={companyInn}
+                    onChange={(e) => setCompanyInn(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456789"
+                    className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Notes */}

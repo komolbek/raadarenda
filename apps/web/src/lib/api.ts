@@ -282,6 +282,8 @@ export const ordersApi = {
     delivery_type: 'DELIVERY' | 'SELF_PICKUP';
     delivery_address_id?: string;
     payment_method: string;
+    company_name?: string;
+    company_inn?: string;
     notes?: string;
   }) {
     return api.post<IOrder>('/orders', data);
