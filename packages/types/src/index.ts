@@ -22,9 +22,8 @@ export enum DeliveryType {
 export enum PaymentMethod {
   CASH = 'CASH',
   ONLINE = 'ONLINE',
-  PAYME = 'PAYME',
-  CLICK = 'CLICK',
   UZUM = 'UZUM',
+  RAHMAT = 'RAHMAT',
 }
 
 export enum PaymentStatus {

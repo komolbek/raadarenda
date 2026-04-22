@@ -194,6 +194,7 @@ const uz: Record<TranslationKey, string> = {
   'checkout.select_address': 'Yetkazib berish manzilini tanlang',
   'checkout.order_success': 'Buyurtma muvaffaqiyatli rasmiylashtirildi!',
   'checkout.order_error': 'Buyurtma berib bo\'lmadi. Keyinroq urinib ko\'ring.',
+  'checkout.payment_redirect_error': 'To\'lov sahifasini ochib bo\'lmadi. Buyurtma yaratildi — buyurtma sahifasidan to\'lashga urinib ko\'ring.',
   'checkout.new_address': 'Yangi manzil',
 
   // Profile Page
@@ -435,7 +436,7 @@ const uz: Record<TranslationKey, string> = {
   'faq.q4': 'Zaklad kerakmi?',
   'faq.a4': 'Ha, mahsulotni olishda zaklad qabul qilinadi va jihozlar to\'g\'ri holatda qaytarilgach qaytariladi. Zaklad miqdori ijaraga olinadigan jihozning qiymatiga bog\'liq.',
   'faq.q5': 'Qanday to\'lov usullari mavjud?',
-  'faq.a5': 'Biz Payme, Click, Uzum Bank orqali, shuningdek yetkazib berishda naqd pul bilan to\'lovlarni qabul qilamiz.',
+  'faq.a5': 'Biz Rahmat orqali va yetkazib berishda naqd pul bilan to\'lovlarni qabul qilamiz.',
   'faq.q6': 'Jihoz shikastlangan bo\'lsa nima qilish kerak?',
   'faq.a6': 'Shikastlangan taqdirda, iltimos, darhol biz bilan bog\'laning. Ta\'mirlash yoki almashtirish qiymati zakladdan ushlab qolinadi.',
   'faq.q7': 'Ijara muddatini uzaytirish mumkinmi?',
@@ -449,8 +450,7 @@ const uz: Record<TranslationKey, string> = {
   // Payment Page
   'payment.title': 'To\'lov',
   'payment.subtitle': 'Siz uchun qulay to\'lov usullari',
-  'payment.payme_desc': 'Payme ilovasi orqali to\'lov',
-  'payment.click_desc': 'Click ilovasi orqali to\'lov',
+  'payment.rahmat_desc': 'Rahmat (Multicard) orqali bank kartasi bilan to\'lov',
   'payment.uzum_desc': 'Uzum Bank orqali to\'lov',
   'payment.cash_title': 'Naqd pul',
   'payment.cash_desc': 'Qabul qilishda to\'lov',

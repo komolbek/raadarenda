@@ -17,15 +17,14 @@ import { AddressForm } from '@/components/profile/AddressForm';
 import { AuthGuard } from '@/components/auth-guard';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { userApi, ordersApi, settingsApi } from '@/lib/api';
+import { userApi, ordersApi, paymentsApi, settingsApi } from '@/lib/api';
 import { formatPrice, formatDateForAPI, cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { DeliveryType, PaymentMethod } from '@/types';
 
 const paymentMethods: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'PAYME', label: 'Payme', icon: '💳' },
-  { value: 'CLICK', label: 'Click', icon: '📱' },
-  { value: 'UZUM', label: 'Uzum', icon: '💰' },
+  { value: 'RAHMAT', label: 'Rahmat', icon: '💳' },
+  { value: 'CASH', label: 'Cash', icon: '💵' },
 ];
 
 function CheckoutPageContent() {
@@ -37,7 +36,7 @@ function CheckoutPageContent() {
 
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('DELIVERY');
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PAYME');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('RAHMAT');
   const [notes, setNotes] = useState('');
   const [showAddressModal, setShowAddressModal] = useState(false);
 
@@ -84,9 +83,22 @@ function CheckoutPageContent() {
   // Create order mutation
   const createOrderMutation = useMutation({
     mutationFn: ordersApi.create,
-    onSuccess: (order) => {
+    onSuccess: async (order) => {
       clearCart();
       toast.success(t('checkout.order_success'));
+
+      if (order.paymentMethod === 'RAHMAT') {
+        try {
+          const { checkout_url } = await paymentsApi.multicardCheckout(order.id);
+          window.location.href = checkout_url;
+          return;
+        } catch {
+          toast.error(t('checkout.payment_redirect_error'));
+          router.push(`/orders/${order.id}`);
+          return;
+        }
+      }
+
       router.push(`/orders/${order.id}`);
     },
     onError: () => {
