@@ -167,7 +167,7 @@ export default function StaffPage() {
         // Create new staff
         const { data } = await adminStaffApi.create({
           name: formName.trim(),
-          phone: `+998${digits}`,
+          phoneNumber: `+998${digits}`,
           role: formRole,
         })
 
