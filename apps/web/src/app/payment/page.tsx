@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Banknote, Shield, HelpCircle, Wallet } from 'lucide-react';
+import { Banknote, CreditCard, Shield, HelpCircle, Wallet } from 'lucide-react';
 import Image from 'next/image';
 import { Card } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n/useTranslation';
@@ -19,22 +19,10 @@ export default function PaymentPage() {
 
   const paymentMethods: PaymentMethod[] = [
     {
-      id: 'payme',
-      title: 'Payme',
-      description: t('payment.payme_desc'),
-      logo: '/images/payments/payme.svg',
-    },
-    {
-      id: 'click',
-      title: 'Click',
-      description: t('payment.click_desc'),
-      logo: '/images/payments/click.svg',
-    },
-    {
-      id: 'uzum',
-      title: 'Uzum',
-      description: t('payment.uzum_desc'),
-      logo: '/images/payments/uzum.svg',
+      id: 'rahmat',
+      title: 'Rahmat',
+      description: t('payment.rahmat_desc'),
+      icon: <CreditCard className="h-10 w-10 text-primary-500" />,
     },
     {
       id: 'cash',

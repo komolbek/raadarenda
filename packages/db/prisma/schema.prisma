@@ -240,6 +240,7 @@ enum PaymentMethod {
   PAYME
   CLICK
   UZUM
+  RAHMAT
 }
 
 enum PaymentStatus {
@@ -263,6 +264,9 @@ model Order {
   rentalEndDate   DateTime      @map("rental_end_date")
   paymentMethod   PaymentMethod @map("payment_method")
   paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  multicardInvoiceUuid String?   @map("multicard_invoice_uuid")
+  multicardCheckoutUrl String?   @map("multicard_checkout_url")
+  multicardWebhookAt   DateTime? @map("multicard_webhook_at")
   notes           String?
   adminNotes      String?       @map("admin_notes")
   updatedBy       String?       @map("updated_by")

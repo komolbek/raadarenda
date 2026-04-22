@@ -101,8 +101,8 @@ export function getOrderStatusColor(status: string): string {
 // Get payment method label
 export function getPaymentMethodLabel(method: string): string {
   const labels: Record<string, string> = {
-    PAYME: 'Payme',
-    CLICK: 'Click',
+    RAHMAT: 'Rahmat',
+    CASH: 'Cash',
     UZUM: 'Uzum',
   };
   return labels[method] || method;

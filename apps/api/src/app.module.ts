@@ -11,6 +11,7 @@ import { ReturnsModule } from './returns/returns.module';
 import { ExtensionsModule } from './extensions/extensions.module';
 import { UsersModule } from './users/users.module';
 import { BusinessSettingsModule } from './business-settings/business-settings.module';
+import { PaymentsModule } from './payments/payments.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -28,6 +29,7 @@ import { AppController } from './app.controller';
     ExtensionsModule,
     UsersModule,
     BusinessSettingsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

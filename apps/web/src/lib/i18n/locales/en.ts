@@ -194,6 +194,7 @@ const en: Record<TranslationKey, string> = {
   'checkout.select_address': 'Select a delivery address',
   'checkout.order_success': 'Order placed successfully!',
   'checkout.order_error': 'Failed to place order. Try again later.',
+  'checkout.payment_redirect_error': 'Could not open payment page. Order is created — try paying from the order page.',
   'checkout.new_address': 'New address',
 
   // Profile Page
@@ -435,7 +436,7 @@ const en: Record<TranslationKey, string> = {
   'faq.q4': 'Is a deposit required?',
   'faq.a4': 'Yes, a deposit is paid when receiving the items and is returned once the equipment is returned in proper condition. The deposit amount depends on the cost of the rented equipment.',
   'faq.q5': 'What payment methods are available?',
-  'faq.a5': 'We accept payments via Payme, Click, Uzum Bank, as well as cash on delivery.',
+  'faq.a5': 'We accept payments via Rahmat and cash on delivery.',
   'faq.q6': 'What if the equipment is damaged?',
   'faq.a6': 'In case of damage, please contact us immediately. The repair or replacement cost will be withheld from the deposit.',
   'faq.q7': 'Can I extend the rental period?',
@@ -449,8 +450,7 @@ const en: Record<TranslationKey, string> = {
   // Payment Page
   'payment.title': 'Payment',
   'payment.subtitle': 'Convenient payment methods for your comfort',
-  'payment.payme_desc': 'Payment via the Payme app',
-  'payment.click_desc': 'Payment via the Click app',
+  'payment.rahmat_desc': 'Card payment via Rahmat (Multicard)',
   'payment.uzum_desc': 'Payment via Uzum Bank',
   'payment.cash_title': 'Cash',
   'payment.cash_desc': 'Pay on delivery',
