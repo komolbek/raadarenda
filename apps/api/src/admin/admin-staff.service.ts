@@ -47,8 +47,36 @@ export class AdminStaffService {
       where: { phoneNumber: data.phoneNumber },
     });
 
-    if (existing) {
+    if (existing && existing.isActive && !existing.deletedAt) {
       throw new ConflictException('Staff member with this phone number already exists');
+    }
+
+    const staffSelect = {
+      id: true,
+      phoneNumber: true,
+      name: true,
+      role: true,
+      isActive: true,
+      mustChangePassword: true,
+      createdAt: true,
+    } as const;
+
+    if (existing) {
+      // Reactivate a soft-deleted or deactivated staff record. Wipe the
+      // password so the returning user must re-verify via forgot-password OTP.
+      const staff = await this.prisma.staff.update({
+        where: { id: existing.id },
+        data: {
+          name: data.name,
+          role: data.role as any,
+          isActive: true,
+          deletedAt: null,
+          passwordHash: null,
+          mustChangePassword: true,
+        },
+        select: staffSelect,
+      });
+      return { staff };
     }
 
     const passwordHash = data.password
@@ -63,15 +91,7 @@ export class AdminStaffService {
         passwordHash,
         mustChangePassword: !data.password,
       },
-      select: {
-        id: true,
-        phoneNumber: true,
-        name: true,
-        role: true,
-        isActive: true,
-        mustChangePassword: true,
-        createdAt: true,
-      },
+      select: staffSelect,
     });
 
     return { staff };
