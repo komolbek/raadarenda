@@ -62,7 +62,7 @@ export class AdminAuthService {
 
     if (!staff.passwordHash) {
       throw new UnauthorizedException(
-        'Password not set. Contact administrator.',
+        'Password not set. Use "Forgot password" to receive an SMS code and set one.',
       );
     }
 
