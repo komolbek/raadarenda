@@ -178,8 +178,14 @@ export default function StaffPage() {
           setFormError(data.message)
         }
       }
-    } catch {
-      setFormError('Ошибка подключения к серверу')
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string | string[] } }; message?: string }
+      const serverMsg = axiosErr?.response?.data?.message
+      setFormError(
+        Array.isArray(serverMsg)
+          ? serverMsg.join(', ')
+          : serverMsg || axiosErr?.message || 'Ошибка подключения к серверу',
+      )
     } finally {
       setSubmitting(false)
     }
