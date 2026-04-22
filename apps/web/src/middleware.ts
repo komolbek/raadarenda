@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { ACCESS_COOKIE, verifyAccessToken } from '@/lib/gate';
 
-/**
- * Protected routes that require authentication.
- * The middleware checks for an auth token in cookies.
- * Client-side AuthGuard provides a secondary check via localStorage/zustand.
- */
 const PROTECTED_ROUTES = [
   '/checkout',
   '/profile',
@@ -13,8 +9,36 @@ const PROTECTED_ROUTES = [
   '/orders',
 ];
 
-export function middleware(request: NextRequest) {
+function isGateEnabled(): boolean {
+  const flag = process.env.SITE_GATE_ENABLED;
+  return flag === 'true' || flag === '1';
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isGateEnabled()) {
+    const isExempt =
+      pathname === '/coming-soon' ||
+      pathname.startsWith('/api/access') ||
+      pathname.startsWith('/_next/') ||
+      pathname === '/favicon.ico' ||
+      pathname === '/robots.txt' ||
+      pathname === '/sitemap.xml';
+
+    if (!isExempt) {
+      const secret = process.env.SITE_ACCESS_SECRET;
+      const token = request.cookies.get(ACCESS_COOKIE)?.value;
+      const valid = secret ? await verifyAccessToken(token, secret) : false;
+
+      if (!valid) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/coming-soon';
+        url.search = `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
+        return NextResponse.rewrite(url);
+      }
+    }
+  }
 
   const isProtected = PROTECTED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + '/'),
@@ -24,7 +48,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for auth token in cookie (set by client after login)
   const token = request.cookies.get('auth-token')?.value;
 
   if (!token) {
@@ -38,9 +61,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/checkout/:path*',
-    '/profile/:path*',
-    '/favorites/:path*',
-    '/orders/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],
 };
