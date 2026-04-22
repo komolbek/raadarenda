@@ -14,24 +14,34 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminAuthStore } from "@/stores/admin-auth-store";
+import { useAdminLanguageStore, type AdminLocale } from "@/stores/language-store";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 import { adminAuthApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 const navItems = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/categories", label: "Categories", icon: FolderTree },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/customers", label: "Customers", icon: Users },
-  { href: "/admin/staff", label: "Staff", icon: UserCog, ownerOnly: true },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/admin/products", labelKey: "nav.products", icon: Package },
+  { href: "/admin/categories", labelKey: "nav.categories", icon: FolderTree },
+  { href: "/admin/orders", labelKey: "nav.orders", icon: ShoppingCart },
+  { href: "/admin/customers", labelKey: "nav.customers", icon: Users },
+  { href: "/admin/staff", labelKey: "nav.staff", icon: UserCog, ownerOnly: true },
+  { href: "/admin/settings", labelKey: "nav.settings", icon: Settings },
+];
+
+const LANGS: { code: AdminLocale; label: string; full: string }[] = [
+  { code: 'ru', label: 'RU', full: 'Русский' },
+  { code: 'uz', label: 'UZ', full: "O\u2018zbekcha" },
+  { code: 'en', label: 'EN', full: 'English' },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { staff, clearAuth } = useAdminAuthStore();
+  const { t } = useTranslation();
+  const { locale, setLocale } = useAdminLanguageStore();
 
   const handleLogout = async () => {
     try {
@@ -41,7 +51,7 @@ export function AdminSidebar() {
     }
     clearAuth();
     router.push("/admin/login");
-    toast.success("Logged out");
+    toast.success(t('nav.logout'));
   };
 
   const visibleItems = navItems.filter(
@@ -69,15 +79,44 @@ export function AdminSidebar() {
               )}
             >
               <item.icon className="h-5 w-5" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-4 space-y-3">
+        <div
+          role="radiogroup"
+          aria-label={t('common.language')}
+          className="inline-flex w-full items-center justify-between rounded-full border border-gray-200 bg-gray-50 p-1"
+        >
+          {LANGS.map((lang) => {
+            const active = lang.code === locale;
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                aria-label={lang.full}
+                title={lang.full}
+                onClick={() => setLocale(lang.code)}
+                className={cn(
+                  'flex-1 rounded-full px-2 py-1 text-xs font-semibold transition-colors',
+                  active
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700',
+                )}
+              >
+                {lang.label}
+              </button>
+            );
+          })}
+        </div>
+
         {staff && (
-          <div className="mb-3 text-sm text-gray-500">
+          <div className="text-sm text-gray-500">
             <p className="font-medium text-gray-700">{staff.name}</p>
             <p>{staff.role}</p>
           </div>
@@ -87,7 +126,7 @@ export function AdminSidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
         >
           <LogOut className="h-5 w-5" />
-          Log out
+          {t('nav.logout')}
         </button>
       </div>
     </aside>

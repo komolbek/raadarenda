@@ -13,6 +13,7 @@ import {
   Crown,
 } from 'lucide-react'
 import { adminStaffApi } from '@/lib/api'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 
 interface StaffMember {
   id: string
@@ -23,12 +24,6 @@ interface StaffMember {
   mustChangePassword: boolean
   lastLoginAt: string | null
   createdAt: string
-}
-
-const roleLabels: Record<string, string> = {
-  OWNER: 'Владелец',
-  ADMIN: 'Администратор',
-  MANAGER: 'Менеджер',
 }
 
 const roleIcons: Record<string, typeof Crown> = {
@@ -61,9 +56,11 @@ function formatPhoneInput(value: string): string {
   return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`
 }
 
-function formatDate(dateString: string | null): string {
+function formatDate(dateString: string | null, locale: string = 'ru-RU'): string {
   if (!dateString) return '—'
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+  const localeMap: Record<string, string> = { ru: 'ru-RU', uz: 'uz-UZ', en: 'en-US' }
+  const resolved = localeMap[locale] || locale
+  return new Date(dateString).toLocaleDateString(resolved, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -73,6 +70,12 @@ function formatDate(dateString: string | null): string {
 }
 
 export default function StaffPage() {
+  const { t, locale } = useTranslation()
+  const roleLabels: Record<string, string> = {
+    OWNER: t('staff.role_owner'),
+    ADMIN: t('staff.role_admin'),
+    MANAGER: t('staff.role_manager'),
+  }
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -135,13 +138,13 @@ export default function StaffPage() {
     setFormError('')
 
     if (!formName.trim()) {
-      setFormError('Введите имя сотрудника')
+      setFormError(t('staff.err_name_required'))
       return
     }
 
     const digits = formPhone.replace(/\s/g, '')
     if (digits.length !== 9) {
-      setFormError('Введите корректный номер телефона')
+      setFormError(t('staff.err_phone_invalid'))
       return
     }
 
@@ -184,7 +187,7 @@ export default function StaffPage() {
       setFormError(
         Array.isArray(serverMsg)
           ? serverMsg.join(', ')
-          : serverMsg || axiosErr?.message || 'Ошибка подключения к серверу',
+          : serverMsg || axiosErr?.message || t('common.network_error'),
       )
     } finally {
       setSubmitting(false)
@@ -220,21 +223,19 @@ export default function StaffPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-6">Сотрудники</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('staff.title')}</h1>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-sm text-gray-500">
-            Управление сотрудниками и их правами доступа
-          </p>
+          <p className="text-sm text-gray-500">{t('staff.subtitle')}</p>
         </div>
         <button
           onClick={openAddModal}
           className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 text-white text-sm font-medium rounded-xl hover:bg-primary-600 transition-colors shadow-lg shadow-primary-500/25"
         >
           <UserPlus className="h-4 w-4" />
-          Добавить сотрудника
+          {t('staff.add_button')}
         </button>
       </div>
 
@@ -246,12 +247,12 @@ export default function StaffPage() {
       ) : staff.length === 0 ? (
         <div className="text-center py-20">
           <UserPlus className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 mb-4">Нет добавленных сотрудников</p>
+          <p className="text-gray-500 mb-4">{t('staff.empty_title')}</p>
           <button
             onClick={openAddModal}
             className="text-primary-500 font-medium hover:text-primary-600"
           >
-            Добавить первого сотрудника
+            {t('staff.empty_cta')}
           </button>
         </div>
       ) : (
@@ -261,22 +262,22 @@ export default function StaffPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Сотрудник
+                    {t('staff.col_employee')}
                   </th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Телефон
+                    {t('staff.col_phone')}
                   </th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Роль
+                    {t('staff.col_role')}
                   </th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Статус
+                    {t('staff.col_status')}
                   </th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Последний вход
+                    {t('staff.col_last_login')}
                   </th>
                   <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Действия
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -301,7 +302,7 @@ export default function StaffPage() {
                             </p>
                             {member.mustChangePassword && (
                               <p className="text-xs text-amber-600">
-                                Ожидает установку пароля
+                                {t('staff.awaiting_password')}
                               </p>
                             )}
                           </div>
@@ -330,18 +331,18 @@ export default function StaffPage() {
                               : 'bg-red-100 text-red-700 hover:bg-red-200'
                           }`}
                         >
-                          {member.isActive ? 'Активен' : 'Неактивен'}
+                          {member.isActive ? t('staff.status_active') : t('staff.status_inactive')}
                         </button>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {formatDate(member.lastLoginAt)}
+                        {formatDate(member.lastLoginAt, locale)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => openEditModal(member)}
                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Редактировать"
+                            title={t('staff.edit_tooltip')}
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
@@ -351,20 +352,20 @@ export default function StaffPage() {
                                 onClick={() => handleDelete(member.id)}
                                 className="px-2 py-1 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600"
                               >
-                                Да
+                                {t('common.yes')}
                               </button>
                               <button
                                 onClick={() => setDeleteConfirm(null)}
                                 className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                               >
-                                Нет
+                                {t('common.no')}
                               </button>
                             </div>
                           ) : (
                             <button
                               onClick={() => setDeleteConfirm(member.id)}
                               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Удалить"
+                              title={t('staff.delete_tooltip')}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -391,8 +392,8 @@ export default function StaffPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">
                 {editingStaff
-                  ? 'Редактировать сотрудника'
-                  : 'Добавить сотрудника'}
+                  ? t('staff.modal_title_edit')
+                  : t('staff.modal_title_add')}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -406,13 +407,13 @@ export default function StaffPage() {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Имя сотрудника
+                  {t('staff.form_name')}
                 </label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Введите имя"
+                  placeholder={t('staff.form_name_placeholder')}
                   className="w-full h-11 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all"
                   autoFocus
                 />
@@ -422,7 +423,7 @@ export default function StaffPage() {
               {!editingStaff && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Номер телефона
+                    {t('staff.form_phone')}
                   </label>
                   <div className="relative">
                     <div className="absolute left-0 top-0 bottom-0 flex items-center pl-4 pointer-events-none">
@@ -435,7 +436,7 @@ export default function StaffPage() {
                       type="tel"
                       value={formPhone}
                       onChange={handlePhoneChange}
-                      placeholder="## ### ## ##"
+                      placeholder={t('staff.form_phone_placeholder')}
                       className="w-full h-11 rounded-xl border-2 border-gray-200 bg-gray-50 pl-[7.5rem] pr-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all"
                     />
                   </div>
@@ -445,7 +446,7 @@ export default function StaffPage() {
               {/* Role */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Роль
+                  {t('staff.form_role')}
                 </label>
                 <select
                   value={formRole}
@@ -456,14 +457,14 @@ export default function StaffPage() {
                   }
                   className="w-full h-11 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-900 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all"
                 >
-                  <option value="MANAGER">Менеджер</option>
-                  <option value="ADMIN">Администратор</option>
-                  <option value="OWNER">Владелец</option>
+                  <option value="MANAGER">{t('staff.role_manager')}</option>
+                  <option value="ADMIN">{t('staff.role_admin')}</option>
+                  <option value="OWNER">{t('staff.role_owner')}</option>
                 </select>
                 <p className="mt-1.5 text-xs text-gray-500">
-                  {formRole === 'OWNER' && 'Полный доступ + управление сотрудниками'}
-                  {formRole === 'ADMIN' && 'Полный доступ к панели'}
-                  {formRole === 'MANAGER' && 'Ограниченный доступ'}
+                  {formRole === 'OWNER' && t('staff.role_desc_owner')}
+                  {formRole === 'ADMIN' && t('staff.role_desc_admin')}
+                  {formRole === 'MANAGER' && t('staff.role_desc_manager')}
                 </p>
               </div>
 
@@ -479,7 +480,7 @@ export default function StaffPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 h-11 rounded-xl border-2 border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
                 >
-                  Отмена
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -489,9 +490,9 @@ export default function StaffPage() {
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : editingStaff ? (
-                    'Сохранить'
+                    t('staff.submit_save')
                   ) : (
-                    'Добавить'
+                    t('staff.submit_add')
                   )}
                 </button>
               </div>
