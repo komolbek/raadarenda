@@ -1,6 +1,20 @@
 import type { TranslationKey } from './ru';
 
 const uz: Record<TranslationKey, string> = {
+  // Coming Soon Gate
+  'coming_soon.brand': 'Rent Event',
+  'coming_soon.title': 'Tez orada',
+  'coming_soon.description': 'Biz alohida nimadir tayyorlayapmiz. Agar sizda erta kirish kodi bo\'lsa, uni quyida kiriting.',
+  'coming_soon.code_label': 'Kirish kodi',
+  'coming_soon.code_placeholder': 'Kodni kiriting',
+  'coming_soon.submit': 'Kirish',
+  'coming_soon.submitting': 'Tekshirilmoqda…',
+  'coming_soon.error_empty': 'Kirish kodini kiriting',
+  'coming_soon.error_invalid': 'Noto\'g\'ri kod',
+  'coming_soon.error_generic': 'Kirishda xatolik. Keyinroq urinib ko\'ring.',
+  'coming_soon.error_network': 'Ulanish xatosi',
+  'coming_soon.language': 'Til',
+
   // Navigation
   'nav.home': 'Bosh sahifa',
   'nav.catalog': 'Katalog',
