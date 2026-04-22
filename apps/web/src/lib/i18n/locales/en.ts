@@ -1,6 +1,20 @@
 import type { TranslationKey } from './ru';
 
 const en: Record<TranslationKey, string> = {
+  // Coming Soon Gate
+  'coming_soon.brand': 'Rent Event',
+  'coming_soon.title': 'Coming soon',
+  'coming_soon.description': 'We\'re preparing something special. If you have an early-access code, enter it below.',
+  'coming_soon.code_label': 'Access code',
+  'coming_soon.code_placeholder': 'Enter code',
+  'coming_soon.submit': 'Enter',
+  'coming_soon.submitting': 'Checking…',
+  'coming_soon.error_empty': 'Please enter an access code',
+  'coming_soon.error_invalid': 'Invalid code',
+  'coming_soon.error_generic': 'Access error. Please try again later.',
+  'coming_soon.error_network': 'Connection error',
+  'coming_soon.language': 'Language',
+
   // Navigation
   'nav.home': 'Home',
   'nav.catalog': 'Catalog',

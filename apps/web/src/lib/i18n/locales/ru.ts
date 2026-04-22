@@ -1,4 +1,18 @@
 const ru = {
+  // Coming Soon Gate
+  'coming_soon.brand': 'Rent Event',
+  'coming_soon.title': 'Скоро запуск',
+  'coming_soon.description': 'Мы готовим что-то особенное. Если у вас есть код раннего доступа — введите его ниже.',
+  'coming_soon.code_label': 'Код доступа',
+  'coming_soon.code_placeholder': 'Введите код',
+  'coming_soon.submit': 'Войти',
+  'coming_soon.submitting': 'Проверка…',
+  'coming_soon.error_empty': 'Введите код доступа',
+  'coming_soon.error_invalid': 'Неверный код',
+  'coming_soon.error_generic': 'Ошибка доступа. Попробуйте позже.',
+  'coming_soon.error_network': 'Ошибка подключения',
+  'coming_soon.language': 'Язык',
+
   // Navigation
   'nav.home': 'Главная',
   'nav.catalog': 'Каталог',
