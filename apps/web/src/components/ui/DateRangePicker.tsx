@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
+import 'react-day-picker/style.css';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Calendar, ChevronLeft, ChevronRight, X, CalendarDays, ArrowRight } from 'lucide-react';
@@ -188,36 +189,28 @@ export function DateRangePicker({
                   classNames={{
                     months: 'flex gap-6',
                     month: 'space-y-4',
-                    caption: 'flex justify-center pt-1 relative items-center mb-4',
+                    month_caption: 'flex justify-center pt-1 relative items-center mb-4',
                     caption_label: 'text-sm font-semibold',
-                    nav: 'space-x-1 flex items-center',
-                    nav_button:
+                    nav: 'absolute inset-x-0 top-0 flex items-center justify-between px-1',
+                    button_previous:
                       'h-8 w-8 bg-transparent p-0 hover:bg-muted rounded-lg flex items-center justify-center transition-colors',
-                    nav_button_previous: 'absolute left-1',
-                    nav_button_next: 'absolute right-1',
-                    table: 'w-full border-collapse',
-                    head_row: 'flex mb-2',
-                    head_cell:
-                      'text-muted-foreground rounded-md w-10 font-medium text-xs uppercase',
-                    row: 'flex w-full mt-1',
-                    cell: cn(
-                      'relative p-0 text-center text-sm focus-within:relative focus-within:z-20'
-                    ),
-                    day: cn(
-                      'h-10 w-10 p-0 font-medium',
-                      'hover:bg-primary/10 rounded-lg transition-all duration-200',
+                    button_next:
+                      'h-8 w-8 bg-transparent p-0 hover:bg-muted rounded-lg flex items-center justify-center transition-colors',
+                    weekday: 'text-muted-foreground w-10 font-medium text-xs uppercase',
+                    day: 'text-center text-sm p-0',
+                    day_button: cn(
+                      'h-10 w-10 p-0 font-medium rounded-lg transition-all duration-200',
+                      'hover:bg-primary/10',
                       'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2'
                     ),
-                    day_range_start: 'bg-primary text-primary-foreground hover:bg-primary',
-                    day_range_end: 'bg-primary text-primary-foreground hover:bg-primary',
-                    day_selected:
-                      'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
-                    day_today: 'bg-accent/50 text-accent-foreground font-bold',
-                    day_outside: 'text-muted-foreground/30 opacity-30',
-                    day_disabled: 'text-muted-foreground/20 opacity-30 cursor-not-allowed line-through',
-                    day_range_middle:
-                      'aria-selected:bg-primary/20 aria-selected:text-foreground rounded-none',
-                    day_hidden: 'invisible',
+                    selected: 'bg-primary text-primary-foreground hover:bg-primary',
+                    range_start: 'bg-primary text-primary-foreground rounded-l-lg',
+                    range_end: 'bg-primary text-primary-foreground rounded-r-lg',
+                    range_middle: 'bg-primary/20 text-foreground rounded-none',
+                    today: 'font-bold text-primary',
+                    outside: 'text-muted-foreground/30 opacity-30',
+                    disabled: 'text-muted-foreground/20 opacity-30 cursor-not-allowed line-through',
+                    hidden: 'invisible',
                   }}
                   components={{
                     Chevron: ({ orientation }) =>
