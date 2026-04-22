@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   UnauthorizedException,
   BadRequestException,
   HttpException,
@@ -22,6 +23,7 @@ interface ResetTokenEntry {
 
 @Injectable()
 export class AdminAuthService {
+  private readonly logger = new Logger(AdminAuthService.name);
   private resetTokens = new Map<string, ResetTokenEntry>();
 
   constructor(
@@ -150,17 +152,28 @@ export class AdminAuthService {
   }
 
   async forgotPasswordSendOtp(phone: string): Promise<void> {
+    this.logger.log(`[forgot-password] send-otp requested for ${phone}`);
+
     const staff = await this.prisma.staff.findUnique({
       where: { phoneNumber: phone },
     });
 
-    if (!staff || !staff.isActive || staff.deletedAt) {
-      // Silent return to avoid phone enumeration
+    if (!staff) {
+      this.logger.warn(`[forgot-password] no staff record for ${phone}; silently returning`);
+      return;
+    }
+    if (!staff.isActive || staff.deletedAt) {
+      this.logger.warn(
+        `[forgot-password] staff ${staff.id} is inactive or soft-deleted (isActive=${staff.isActive}, deletedAt=${staff.deletedAt?.toISOString() ?? 'null'}); silently returning`,
+      );
       return;
     }
 
     const code = await this.otpService.generate(phone);
-    await this.smsService.sendAdminOTP(phone, code);
+    const result = await this.smsService.sendAdminOTP(phone, code);
+    this.logger.log(
+      `[forgot-password] OTP dispatched to ${phone} via ${process.env.SMS_PROVIDER || 'mock'} (success=${result.success}${result.error ? `, error=${result.error}` : ''})`,
+    );
   }
 
   async forgotPasswordVerifyOtp(
