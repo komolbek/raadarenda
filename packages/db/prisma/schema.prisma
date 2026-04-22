@@ -241,12 +241,20 @@ enum PaymentMethod {
   CLICK
   UZUM
   RAHMAT
+  BANK_TRANSFER
 }
 
 enum PaymentStatus {
   PENDING
   PAID
   REFUNDED
+}
+
+enum CorporateInvoiceStatus {
+  PENDING
+  OFFER_SENT
+  PAID
+  CANCELLED
 }
 
 model Order {
@@ -267,6 +275,10 @@ model Order {
   multicardInvoiceUuid String?   @map("multicard_invoice_uuid")
   multicardCheckoutUrl String?   @map("multicard_checkout_url")
   multicardWebhookAt   DateTime? @map("multicard_webhook_at")
+  companyName            String?                 @map("company_name")
+  companyInn             String?                 @map("company_inn")
+  corporateInvoiceStatus CorporateInvoiceStatus? @map("corporate_invoice_status")
+  corporateInvoiceNote   String?                 @map("corporate_invoice_note")
   notes           String?
   adminNotes      String?       @map("admin_notes")
   updatedBy       String?       @map("updated_by")

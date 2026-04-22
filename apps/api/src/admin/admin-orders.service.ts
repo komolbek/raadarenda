@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
-import { Prisma, OrderStatus } from '@4event/db';
+import { Prisma, OrderStatus, CorporateInvoiceStatus } from '@4event/db';
 
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   CONFIRMED: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
@@ -120,6 +120,38 @@ export class AdminOrdersService {
       });
 
       return updated;
+    });
+  }
+
+  async updateCorporateInvoiceStatus(
+    orderId: string,
+    status: CorporateInvoiceStatus,
+    staffId: string,
+    note?: string,
+  ) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, deletedAt: null },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.paymentMethod !== 'BANK_TRANSFER') {
+      throw new BadRequestException(
+        'Corporate invoice status applies only to BANK_TRANSFER orders',
+      );
+    }
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        corporateInvoiceStatus: status,
+        corporateInvoiceNote: note ?? order.corporateInvoiceNote,
+        paymentStatus:
+          status === 'PAID'
+            ? 'PAID'
+            : status === 'CANCELLED'
+              ? order.paymentStatus
+              : order.paymentStatus,
+        updatedBy: staffId,
+      },
     });
   }
 }

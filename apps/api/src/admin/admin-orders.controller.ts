@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Patch,
   Post,
   Param,
   Body,
@@ -13,7 +14,7 @@ import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AdminAuthGuard } from '../common/guards/admin-auth.guard';
 import { StaffId } from '../common/decorators';
 import { AdminOrdersService } from './admin-orders.service';
-import { OrderStatus } from '@4event/db';
+import { OrderStatus, CorporateInvoiceStatus } from '@4event/db';
 
 @ApiTags('Admin')
 @UseGuards(AdminAuthGuard)
@@ -44,5 +45,20 @@ export class AdminOrdersController {
     @Body() body: { status: OrderStatus; notes?: string },
   ) {
     return this.adminOrdersService.updateStatus(id, body.status, staffId, body.notes);
+  }
+
+  @Patch(':id/corporate-status')
+  @ApiOperation({ summary: 'Update corporate invoice status (BANK_TRANSFER orders)' })
+  async updateCorporateStatus(
+    @Param('id') id: string,
+    @StaffId() staffId: string,
+    @Body() body: { status: CorporateInvoiceStatus; note?: string },
+  ) {
+    return this.adminOrdersService.updateCorporateInvoiceStatus(
+      id,
+      body.status,
+      staffId,
+      body.note,
+    );
   }
 }

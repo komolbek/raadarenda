@@ -79,6 +79,10 @@ export const adminOrdersApi = {
   get: (id: string) => api.get(`/admin/orders/${id}`),
   updateStatus: (id: string, data: { status: string }) =>
     api.patch(`/admin/orders/${id}/status`, data),
+  updateCorporateStatus: (
+    id: string,
+    data: { status: 'PENDING' | 'OFFER_SENT' | 'PAID' | 'CANCELLED'; note?: string },
+  ) => api.patch(`/admin/orders/${id}/corporate-status`, data),
 };
 
 // ─── Returns ─────────────────────────────────────────────────────────────────

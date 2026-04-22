@@ -32,7 +32,12 @@ interface Order {
   rental_start_date: string
   rental_end_date: string
   payment_method: string
+  paymentMethod?: string
   payment_status: string
+  companyName?: string | null
+  companyInn?: string | null
+  corporateInvoiceStatus?: 'PENDING' | 'OFFER_SENT' | 'PAID' | 'CANCELLED' | null
+  corporateInvoiceNote?: string | null
   created_at: string
 }
 
@@ -88,6 +93,56 @@ export default function Orders() {
 
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [statusError, setStatusError] = useState('')
+  const [corporateNote, setCorporateNote] = useState('')
+  const [updatingCorporate, setUpdatingCorporate] = useState(false)
+  const [corporateError, setCorporateError] = useState('')
+
+  const updateCorporateStatus = async (
+    orderId: string,
+    status: 'PENDING' | 'OFFER_SENT' | 'PAID' | 'CANCELLED',
+  ) => {
+    setUpdatingCorporate(true)
+    setCorporateError('')
+    try {
+      const { data } = await adminOrdersApi.updateCorporateStatus(orderId, {
+        status,
+        note: corporateNote || undefined,
+      })
+      if (data.success) {
+        const updated = data.data
+        setSelectedOrder((prev) =>
+          prev
+            ? {
+                ...prev,
+                corporateInvoiceStatus: updated.corporateInvoiceStatus,
+                corporateInvoiceNote: updated.corporateInvoiceNote,
+                payment_status: updated.paymentStatus,
+              }
+            : null,
+        )
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === orderId
+              ? {
+                  ...o,
+                  corporateInvoiceStatus: updated.corporateInvoiceStatus,
+                  corporateInvoiceNote: updated.corporateInvoiceNote,
+                  payment_status: updated.paymentStatus,
+                }
+              : o,
+          ),
+        )
+        setCorporateNote('')
+      } else {
+        setCorporateError(data.message || 'Ошибка обновления статуса счёта')
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } }
+      setCorporateError(axiosErr?.response?.data?.message || 'Ошибка сети')
+    } finally {
+      setUpdatingCorporate(false)
+    }
+  }
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdatingStatus(true)
@@ -386,6 +441,88 @@ export default function Orders() {
                 )}
               </div>
             </div>
+
+            {(selectedOrder.payment_method === 'BANK_TRANSFER' ||
+              selectedOrder.paymentMethod === 'BANK_TRANSFER') && (
+              <div className="mb-6 rounded-lg border-2 border-indigo-100 bg-indigo-50/50 p-4">
+                <h4 className="text-sm font-semibold text-indigo-900 mb-3">
+                  Оплата по реквизитам
+                </h4>
+                <div className="space-y-1.5 text-sm mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Компания:</span>
+                    <span className="font-medium">
+                      {selectedOrder.companyName || '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">ИНН:</span>
+                    <span className="font-medium font-mono">
+                      {selectedOrder.companyInn || '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Статус счёта:</span>
+                    <span className="font-medium">
+                      {
+                        (
+                          {
+                            PENDING: 'Ожидает выставления',
+                            OFFER_SENT: 'Оферта отправлена',
+                            PAID: 'Оплачено',
+                            CANCELLED: 'Аннулировано',
+                          } as Record<string, string>
+                        )[selectedOrder.corporateInvoiceStatus || 'PENDING']
+                      }
+                    </span>
+                  </div>
+                </div>
+                {selectedOrder.corporateInvoiceNote && (
+                  <div className="mb-3 text-xs text-gray-600 whitespace-pre-wrap p-2 rounded bg-white border border-gray-200">
+                    {selectedOrder.corporateInvoiceNote}
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Заметка (Didox-ссылка, номер и т.д.)
+                  </label>
+                  <input
+                    type="text"
+                    value={corporateNote}
+                    onChange={(e) => setCorporateNote(e.target.value)}
+                    placeholder="https://didox.uz/... или номер"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg mb-2"
+                    disabled={updatingCorporate}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => updateCorporateStatus(selectedOrder.id, 'OFFER_SENT')}
+                    disabled={updatingCorporate}
+                    className="flex-1 min-w-[120px] px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    Оферта отправлена
+                  </button>
+                  <button
+                    onClick={() => updateCorporateStatus(selectedOrder.id, 'PAID')}
+                    disabled={updatingCorporate}
+                    className="flex-1 min-w-[90px] px-3 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                  >
+                    Оплачено
+                  </button>
+                  <button
+                    onClick={() => updateCorporateStatus(selectedOrder.id, 'CANCELLED')}
+                    disabled={updatingCorporate}
+                    className="flex-1 min-w-[110px] px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Аннулировать
+                  </button>
+                </div>
+                {corporateError && (
+                  <p className="text-sm text-red-600 mt-2">{corporateError}</p>
+                )}
+              </div>
+            )}
 
             <div className="flex gap-4">
               <button

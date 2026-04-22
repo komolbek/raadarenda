@@ -338,6 +338,51 @@ function OrderDetailPageContent() {
               </div>
             </div>
 
+            {order.paymentMethod === 'BANK_TRANSFER' && (
+              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 mb-4 space-y-3">
+                <h3 className="text-sm font-semibold">{t('order.corporate.title')}</h3>
+                {order.companyName && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">{t('order.corporate.company_label')}: </span>
+                    <span className="font-medium">{order.companyName}</span>
+                  </div>
+                )}
+                {order.companyInn && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">{t('order.corporate.inn_label')}: </span>
+                    <span className="font-medium">{order.companyInn}</span>
+                  </div>
+                )}
+                <div className="text-sm">
+                  {order.corporateInvoiceStatus === 'PAID' && (
+                    <span className="inline-flex items-center rounded-full bg-green-500/10 px-3 py-1 font-medium text-green-700 dark:text-green-400">
+                      {t('order.corporate.status_paid')}
+                    </span>
+                  )}
+                  {order.corporateInvoiceStatus === 'OFFER_SENT' && (
+                    <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 font-medium text-blue-700 dark:text-blue-400">
+                      {t('order.corporate.status_offer_sent')}
+                    </span>
+                  )}
+                  {(!order.corporateInvoiceStatus || order.corporateInvoiceStatus === 'PENDING') && (
+                    <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 font-medium text-amber-700 dark:text-amber-400">
+                      {t('order.corporate.status_pending')}
+                    </span>
+                  )}
+                  {order.corporateInvoiceStatus === 'CANCELLED' && (
+                    <span className="inline-flex items-center rounded-full bg-destructive/10 px-3 py-1 font-medium text-destructive">
+                      {t('order.corporate.status_cancelled')}
+                    </span>
+                  )}
+                </div>
+                {order.corporateInvoiceNote && (
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+                    {order.corporateInvoiceNote}
+                  </p>
+                )}
+              </div>
+            )}
+
             <Link href="/catalog">
               <Button variant="outline" className="w-full">
                 {t('order_detail.continue_shopping')}

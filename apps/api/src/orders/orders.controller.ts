@@ -31,6 +31,8 @@ export class OrdersController {
       delivery_type: 'DELIVERY' | 'SELF_PICKUP';
       delivery_address_id?: string;
       payment_method: string;
+      company_name?: string;
+      company_inn?: string;
       notes?: string;
     },
   ) {

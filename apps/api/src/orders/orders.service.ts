@@ -14,6 +14,8 @@ interface CreateOrderDto {
   delivery_type: 'DELIVERY' | 'SELF_PICKUP';
   delivery_address_id?: string;
   payment_method: string;
+  company_name?: string;
+  company_inn?: string;
   notes?: string;
 }
 
@@ -57,6 +59,20 @@ export class OrdersService {
       throw new BadRequestException(
         'Delivery address is required for delivery orders',
       );
+    }
+
+    const isBankTransfer = dto.payment_method === 'BANK_TRANSFER';
+    const companyName = isBankTransfer ? dto.company_name?.trim() : undefined;
+    const companyInn = isBankTransfer ? dto.company_inn?.trim() : undefined;
+    if (isBankTransfer) {
+      if (!companyName) {
+        throw new BadRequestException(
+          'Company name is required for bank transfer payment',
+        );
+      }
+      if (!companyInn || !/^\d{9}$/.test(companyInn)) {
+        throw new BadRequestException('INN must be 9 digits');
+      }
     }
 
     const rentalDays = Math.ceil(
@@ -228,6 +244,9 @@ export class OrdersService {
             rentalStartDate: startDate,
             rentalEndDate: endDate,
             paymentMethod: dto.payment_method as any,
+            companyName: companyName || null,
+            companyInn: companyInn || null,
+            corporateInvoiceStatus: isBankTransfer ? 'PENDING' : null,
             notes: dto.notes || null,
             items: {
               create: orderItemsData,

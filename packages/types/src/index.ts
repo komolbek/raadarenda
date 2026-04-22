@@ -24,12 +24,20 @@ export enum PaymentMethod {
   ONLINE = 'ONLINE',
   UZUM = 'UZUM',
   RAHMAT = 'RAHMAT',
+  BANK_TRANSFER = 'BANK_TRANSFER',
 }
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
   REFUNDED = 'REFUNDED',
+}
+
+export enum CorporateInvoiceStatus {
+  PENDING = 'PENDING',
+  OFFER_SENT = 'OFFER_SENT',
+  PAID = 'PAID',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum ReturnStatus {
@@ -198,6 +206,10 @@ export interface IOrder {
   rentalEndDate: string;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  companyName: string | null;
+  companyInn: string | null;
+  corporateInvoiceStatus: CorporateInvoiceStatus | null;
+  corporateInvoiceNote: string | null;
   notes: string | null;
   adminNotes: string | null;
   items: IOrderItem[];
