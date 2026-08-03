@@ -64,6 +64,8 @@ const ru = {
   'home.feature_quality_desc': 'Все товары проходят проверку',
   'home.feature_flexible': 'Гибкие сроки',
   'home.feature_flexible_desc': 'Аренда от 1 дня до месяца',
+  'home.why_eyebrow': 'Почему мы',
+  'home.why_title': 'Всё для мероприятия в одном месте',
   'home.cta_title': 'Готовы организовать мероприятие?',
   'home.cta_description': 'Выберите всё необходимое из нашего каталога или свяжитесь с нами для индивидуального подбора.',
   'home.go_to_catalog': 'Перейти в каталог',

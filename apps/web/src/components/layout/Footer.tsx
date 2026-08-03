@@ -30,8 +30,18 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-card border-t border-border mt-auto" role="contentinfo">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="relative mt-24 border-t border-border bg-card" role="contentinfo">
+      {/* Editorial closing band */}
+      <div className="container mx-auto px-4 pt-14 pb-2">
+        <p className="eyebrow text-primary mb-4">{t('footer.company')}</p>
+        <p className="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] max-w-3xl text-foreground">
+          {t('footer.description')}
+        </p>
+      </div>
+      <div className="container mx-auto px-4">
+        <hr className="u-rule my-12" />
+      </div>
+      <div className="container mx-auto px-4 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
@@ -39,9 +49,7 @@ export function Footer() {
               <Logo className="h-10 w-auto block dark:hidden" />
               <Logo inverted className="h-10 w-auto hidden dark:block" />
             </Link>
-            <p className="text-muted-foreground text-sm">
-              {t('footer.description')}
-            </p>
+            <p className="eyebrow text-muted-foreground">{t('footer.support')}</p>
             <div className="flex gap-3">
               <motion.a
                 whileHover={{ scale: 1.1 }}
@@ -49,7 +57,7 @@ export function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+                className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
@@ -60,7 +68,7 @@ export function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+                className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="h-5 w-5" />
@@ -71,7 +79,7 @@ export function Footer() {
                 href="https://t.me"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+                className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-colors"
                 aria-label="Telegram"
               >
                 <Send className="h-5 w-5" />
@@ -81,7 +89,7 @@ export function Footer() {
 
           {/* Catalog Links */}
           <nav aria-label={t('footer.catalog')}>
-            <h3 className="font-semibold mb-4">{t('footer.catalog')}</h3>
+            <h3 className="eyebrow text-muted-foreground mb-4">{t('footer.catalog')}</h3>
             <ul className="space-y-2">
               {footerLinks.catalog.map((link) => (
                 <li key={link.href}>
@@ -98,7 +106,7 @@ export function Footer() {
 
           {/* Company Links */}
           <nav aria-label={t('footer.company')}>
-            <h3 className="font-semibold mb-4">{t('footer.company')}</h3>
+            <h3 className="eyebrow text-muted-foreground mb-4">{t('footer.company')}</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -115,7 +123,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-semibold mb-4">{t('footer.contacts')}</h3>
+            <h3 className="eyebrow text-muted-foreground mb-4">{t('footer.contacts')}</h3>
             <ul className="space-y-3">
               <li>
                 <a

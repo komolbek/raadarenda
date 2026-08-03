@@ -12,18 +12,18 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', hover = false, animate = false, children, ...props }, ref) => {
-    const baseStyles = 'rounded-2xl transition-all duration-300';
+    const baseStyles = 'rounded-2xl';
 
     const variants = {
       default: 'bg-card border border-border',
-      glass: 'glass-card',
-      elevated: 'bg-card shadow-xl shadow-black/5 dark:shadow-black/20',
-      outline: 'border-2 border-border bg-transparent',
+      glass: 'glass-card rounded-2xl',
+      elevated: 'bg-card border border-border/60 elev-2',
+      outline: 'border border-border bg-transparent',
     };
 
     const hoverStyles = hover
-      ? 'hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-black/30 hover:-translate-y-1 cursor-pointer'
-      : '';
+      ? 'hover-lift hover:elev-2 hover:border-primary/30 cursor-pointer'
+      : 'transition-colors duration-300';
 
     if (animate) {
       return (

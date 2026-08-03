@@ -38,6 +38,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
@@ -57,6 +58,15 @@ export function Header() {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Condense the header once the page scrolls, so it reads as a deliberate
+  // floating bar rather than a static strip.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
@@ -95,9 +105,16 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-xl"
+      className={cn(
+        'sticky top-0 z-40 w-full backdrop-blur-xl transition-[background-color,box-shadow,border-color] duration-300',
+        scrolled
+          ? 'border-b border-border bg-background/85 shadow-[0_10px_30px_-24px_rgba(23,23,23,0.5)]'
+          : 'border-b border-transparent bg-background/60'
+      )}
       role="banner"
     >
+      {/* Hairline fire accent along the very top edge */}
+      <div className="h-0.5 w-full bg-[linear-gradient(90deg,transparent,var(--color-primary),var(--color-accent-500),transparent)] opacity-70" />
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Wordmark — inlined SVG so it doesn't depend on public/ at runtime */}
@@ -108,23 +125,31 @@ export function Header() {
             </motion.span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — animated indicator slides between items */}
           <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                  pathname === link.href
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                )}
-                aria-current={pathname === link.href ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'relative px-4 py-2 text-sm font-medium transition-colors',
+                    active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {link.label}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-indicator"
+                      className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary"
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Search Bar */}
@@ -137,7 +162,7 @@ export function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('nav.search_placeholder')}
                 aria-label={t('header.search')}
-                className="w-full h-10 rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full h-10 rounded-full border border-border bg-muted/40 pl-10 pr-4 text-sm placeholder:text-muted-foreground/70 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
               />
             </div>
           </form>

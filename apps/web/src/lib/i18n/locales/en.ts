@@ -66,6 +66,8 @@ const en: Record<TranslationKey, string> = {
   'home.feature_quality_desc': 'All products are inspected',
   'home.feature_flexible': 'Flexible terms',
   'home.feature_flexible_desc': 'Rent from 1 day to a month',
+  'home.why_eyebrow': 'Why us',
+  'home.why_title': 'Everything an event needs, in one place',
   'home.cta_title': 'Ready to organize an event?',
   'home.cta_description': 'Choose everything you need from our catalog or contact us for a personalized selection.',
   'home.go_to_catalog': 'Go to catalog',

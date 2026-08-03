@@ -66,6 +66,8 @@ const uz: Record<TranslationKey, string> = {
   'home.feature_quality_desc': 'Barcha mahsulotlar tekshiriladi',
   'home.feature_flexible': 'Moslashuvchan muddatlar',
   'home.feature_flexible_desc': '1 kundan 1 oygacha ijara',
+  'home.why_eyebrow': 'Nega biz',
+  'home.why_title': 'Tadbir uchun kerakli hamma narsa bir joyda',
   'home.cta_title': 'Tadbir tashkilashga tayyormisiz?',
   'home.cta_description': 'Katalogimizdan kerakli narsalarni tanlang yoki individual tanlov uchun biz bilan bog\'laning.',
   'home.go_to_catalog': 'Katalogga o\'tish',

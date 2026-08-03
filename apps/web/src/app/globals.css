@@ -5,67 +5,267 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Fonts — --font-body (Lora) and --font-display (Playfair Display) injected
-     on <html> by next/font. The display font is reserved for promo / hero
-     sections via the `font-display` utility — see the rule below. */
+  /* ---------------------------------------------------------------------
+     Type — Lora (body) + Playfair Display (display), injected on <html> by
+     next/font. The display face is reserved for editorial headings via the
+     `font-display` utility. Mono is used for eyebrows / metadata.
+  --------------------------------------------------------------------- */
   --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-display), var(--font-body), Georgia, serif;
+  --font-mono: "SFMono-Regular", ui-monospace, "JetBrains Mono", "Menlo", monospace;
 
-  /* Brand palette — Graphite Black #171717, Fire Orange #F25629 */
+  /* ---------------------------------------------------------------------
+     Brand — Graphite Black #171717, Fire Orange #F25629. The accent ramp is
+     a warm amber so gradients read as "fire", never off-brand purple.
+  --------------------------------------------------------------------- */
   --color-brand-graphite: #171717;
   --color-brand-orange: #F25629;
+  --color-brand-ember: #C2431D;
+  --color-brand-amber: #F59E0B;
   --color-brand-light-gray: #D0D0D0;
   --color-brand-dark-gray: #404040;
 
   --color-primary: #F25629;
-  --color-primary-50: #fff7ed;
-  --color-primary-100: #ffedd5;
-  --color-primary-200: #fed7aa;
-  --color-primary-300: #fdba74;
-  --color-primary-400: #fb923c;
+  --color-primary-50: #fff6f2;
+  --color-primary-100: #ffe9e0;
+  --color-primary-200: #fecab7;
+  --color-primary-300: #fba883;
+  --color-primary-400: #f77d4f;
   --color-primary-500: #F25629;
   --color-primary-600: #d94a24;
-  --color-primary-700: #c2431d;
-  --color-primary-800: #9a3412;
-  --color-primary-900: #7c2d12;
+  --color-primary-700: #b83c1c;
+  --color-primary-800: #932f16;
+  --color-primary-900: #6f2411;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
-  --color-destructive: #ef4444;
+
+  /* Warm amber accent (fire gradient partner, replaces the old purple) */
+  --color-accent: #F59E0B;
+  --color-accent-100: #fef3d7;
+  --color-accent-500: #F59E0B;
+  --color-accent-600: #d97706;
+  --color-accent-foreground: #171717;
+
+  --color-secondary: #f3f0ea;
+  --color-secondary-foreground: #171717;
+  --color-destructive: #e5484d;
   --color-destructive-foreground: #ffffff;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-accent: #8b5cf6;
-  --color-accent-500: #8b5cf6;
-  --color-accent-600: #7c3aed;
-  --color-accent-foreground: #0f172a;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
+  --color-muted: #f3f0ea;
+  --color-muted-foreground: #6b6862;
+  --color-border: #ebe7e0;
+  --color-input: #ebe7e0;
+  --color-background: #fbfaf7;
+  --color-foreground: #171717;
   --color-card: #ffffff;
+
+  /* Editorial radius scale — slightly tighter than stock so corners look
+     deliberate rather than default-rounded. */
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.75rem;
+
+  /* Signature easing + motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-slow: marquee 70s linear infinite;
 }
 
-/* Dark theme overrides — applied when <html> has class="dark" */
+/* Dark theme overrides — applied when <html> has class="dark". A warm-tinted
+   graphite, not flat black, so the brand orange still sits naturally on it. */
 .dark {
-  --color-background: #0b0b0f;
-  --color-foreground: #f8fafc;
-  --color-card: #16161c;
-  --color-border: #27272f;
-  --color-input: #27272f;
-  --color-muted: #1c1c24;
-  --color-muted-foreground: #94a3b8;
-  --color-secondary: #1c1c24;
-  --color-secondary-foreground: #f8fafc;
-  --color-accent-foreground: #f8fafc;
+  --color-background: #0e0e11;
+  --color-foreground: #f6f4f0;
+  --color-card: #17171a;
+  --color-border: #2a2a2f;
+  --color-input: #2a2a2f;
+  --color-muted: #1c1c20;
+  --color-muted-foreground: #9c988f;
+  --color-secondary: #1c1c20;
+  --color-secondary-foreground: #f6f4f0;
+  --color-accent-foreground: #f6f4f0;
   --color-primary-foreground: #ffffff;
 }
 
-/* Display serif — applied only via the `font-display` utility (e.g. on hero /
-   promo headings). Headings without the utility keep the body sans/serif. */
+/* =======================================================================
+   Base layer
+======================================================================= */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern", "liga", "calt";
+  }
+
+  /* Editorial heading defaults — tighter tracking, balanced wrapping. */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-primary) 90%, transparent);
+    color: #fff;
+  }
+
+  /* Consistent, on-brand focus ring across the whole app. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Warm, slim scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-muted-foreground) 40%, transparent) transparent;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-muted-foreground) 35%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-muted-foreground) 55%, transparent);
+    background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* =======================================================================
+   Editorial utilities — the vocabulary the redesign builds on
+======================================================================= */
+
+/* Display serif — reserved for hero / promo headings via `font-display`. */
 .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+.font-display-italic {
+  font-family: var(--font-display);
   font-style: italic;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
+/* Eyebrow — the small tracked mono label that anchors every section. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Fire text — the signature orange→amber gradient on a headline word. */
+.text-fire {
+  background: linear-gradient(100deg, var(--color-primary) 0%, var(--color-accent-500) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Fine subpixel grain — lifts flat graphite panels so they feel printed. */
+.u-grain {
+  position: relative;
+}
+.u-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* Hairline rule with a fading edge — used to divide editorial sections. */
+.u-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--color-border) 12%, var(--color-border) 88%, transparent);
+}
+
+/* Animated link underline — grows from the left on hover. */
+.link-underline {
+  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1.5px;
+  transition: background-size 0.4s var(--ease-out-expo);
+  padding-bottom: 2px;
+}
+.link-underline:hover {
+  background-size: 100% 1.5px;
+}
+
+/* Soft, layered elevation — warmer and calmer than stock shadow-xl. */
+.elev-1 {
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.04), 0 2px 8px rgba(23, 23, 23, 0.04);
+}
+.elev-2 {
+  box-shadow: 0 2px 4px rgba(23, 23, 23, 0.04), 0 12px 28px -8px rgba(23, 23, 23, 0.14);
+}
+.dark .elev-1 { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3); }
+.dark .elev-2 { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 36px -8px rgba(0, 0, 0, 0.6); }
+
+.hover-lift {
+  transition: transform 0.45s var(--ease-out-expo), box-shadow 0.45s var(--ease-out-expo), border-color 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Translucent glass — used by Card variant="glass". */
+.glass-card {
+  background: color-mix(in srgb, var(--color-card) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+}
+
+/* Subtle dotted grid canvas for hero + section backdrops. */
+.bg-dotgrid {
+  background-image: radial-gradient(color-mix(in srgb, currentColor 14%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Marquee track */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: var(--animate-marquee); }
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Reveal-on-load helper for non-framer bits */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.7s var(--ease-out-expo) both; }

@@ -28,21 +28,27 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    // Pill silhouette echoes the "rent event." wordmark logo — a deliberate
+    // brand rhyme rather than a stock rounded-xl button.
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-xl';
+      'group relative inline-flex items-center justify-center rounded-full font-medium tracking-tight whitespace-nowrap transition-[background-color,color,box-shadow,border-color,filter] duration-300 disabled:pointer-events-none disabled:opacity-50 select-none';
 
     const variants = {
+      // Fire orange — the primary call to action.
       primary:
-        'bg-primary text-primary-foreground hover:bg-primary-600 focus-visible:ring-primary-500 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30',
+        'bg-primary text-primary-foreground shadow-[0_6px_20px_-6px_rgba(242,86,41,0.55)] hover:bg-primary-600 hover:shadow-[0_10px_28px_-8px_rgba(242,86,41,0.6)]',
+      // Graphite ink — the quiet, editorial companion action.
       secondary:
-        'bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary',
+        'bg-foreground text-background hover:bg-foreground/90 shadow-[0_4px_16px_-6px_rgba(23,23,23,0.5)]',
       outline:
-        'border-2 border-border bg-transparent hover:bg-secondary focus-visible:ring-primary-500',
-      ghost: 'hover:bg-secondary focus-visible:ring-primary-500',
+        'border border-foreground/15 bg-transparent text-foreground hover:border-foreground/40 hover:bg-foreground/[0.035]',
+      ghost:
+        'bg-transparent text-foreground hover:bg-foreground/[0.06]',
       destructive:
-        'bg-destructive text-destructive-foreground hover:bg-red-600 focus-visible:ring-red-500 shadow-lg shadow-red-500/25',
+        'bg-destructive text-destructive-foreground hover:brightness-95 shadow-[0_6px_20px_-6px_rgba(229,72,77,0.5)]',
+      // Fire gradient — orange → amber, on-brand replacement for the old purple.
       gradient:
-        'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600 focus-visible:ring-primary-500 shadow-lg shadow-primary-500/25 hover:shadow-xl',
+        'bg-[linear-gradient(100deg,var(--color-primary),var(--color-accent-500))] text-white shadow-[0_8px_24px_-8px_rgba(242,86,41,0.55)] hover:brightness-[1.04] hover:shadow-[0_12px_30px_-8px_rgba(242,86,41,0.6)]',
     };
 
     const sizes = {
@@ -57,17 +63,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
+        whileTap={{ scale: disabled || isLoading ? 1 : 0.97 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         {...(props as HTMLMotionProps<'button'>)}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <>
-            {leftIcon && <span className="shrink-0">{leftIcon}</span>}
+            {leftIcon && (
+              <span className="shrink-0 transition-transform duration-300 group-hover:-translate-x-0.5">
+                {leftIcon}
+              </span>
+            )}
             {children}
-            {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+            {rightIcon && (
+              <span className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5">
+                {rightIcon}
+              </span>
+            )}
           </>
         )}
       </motion.button>

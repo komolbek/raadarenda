@@ -189,26 +189,27 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
 
           {/* Content */}
           <div className="p-4">
-            <h3 className="font-medium line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+            <h3 className="font-medium leading-snug line-clamp-2 mb-3 min-h-[2.6em] group-hover:text-primary transition-colors">
               {product.name}
             </h3>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-lg font-bold text-primary">
-                  {formatPrice(product.dailyPrice)} UZS
+            <div className="flex items-end justify-between gap-2">
+              <div className="min-w-0">
+                <p className="eyebrow text-muted-foreground mb-1.5">{t('product_card.per_day')}</p>
+                <p className="text-lg font-semibold text-foreground truncate">
+                  {formatPrice(product.dailyPrice)}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">UZS</span>
                 </p>
-                <p className="text-xs text-muted-foreground">{t('product_card.per_day')}</p>
               </div>
 
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors"
+                className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors"
                 role="img"
                 aria-label={t('product_card.add_to_cart')}
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-[18px] w-[18px]" />
               </motion.div>
             </div>
           </div>
