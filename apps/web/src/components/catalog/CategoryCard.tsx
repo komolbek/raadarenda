@@ -7,68 +7,95 @@ import type { Category } from '@/types';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
-import { resolveCategoryIcon } from '@/lib/categoryIcon';
 
 interface CategoryCardProps {
   category: Category;
   className?: string;
 }
 
+/**
+ * Editorial category tile. No icon/letter badges — the category name is the
+ * subject, set in the display serif. When a real photo exists the tile becomes
+ * a full-bleed image card; otherwise it's a clean typographic card. Both share
+ * the same footprint so a mixed grid still reads as one system.
+ */
 export function CategoryCard({ category, className }: CategoryCardProps) {
   const { t } = useTranslation();
-  const LucideIcon = resolveCategoryIcon(category.icon);
-  // A raw icon *name* (e.g. "monitor") that isn't in the map must never render
-  // as text — only render category.icon directly when it's an actual emoji.
-  const isEmoji = !!category.icon && !LucideIcon && !/^[\x00-\x7F]+$/.test(category.icon);
+  const count =
+    category._count?.products !== undefined
+      ? t('category.products_count', { count: category._count.products })
+      : null;
+
+  const hasPhoto = !!category.image;
+
   return (
     <Link href={`/catalog?category=${category.id}`} className="block h-full">
-      <motion.div whileTap={{ scale: 0.98 }} className="h-full">
+      <motion.div whileTap={{ scale: 0.985 }} className="h-full">
         <Card
           hover
           className={cn(
-            'group relative flex h-full flex-col justify-between gap-6 overflow-hidden p-5',
+            'group relative flex h-full min-h-[9rem] flex-col justify-between overflow-hidden sm:min-h-[10.5rem]',
+            hasPhoto ? 'bg-brand-graphite p-0' : 'p-5',
             className
           )}
         >
-          {/* Corner action affordance */}
-          <span className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground transition-all duration-300 group-hover:bg-primary group-hover:text-white">
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
-
-          {category.image ? (
-            <div className="h-14 w-14 overflow-hidden rounded-2xl bg-muted ring-1 ring-border">
+          {hasPhoto ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={category.image}
+                src={category.image as string}
                 alt={category.name}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+                loading="lazy"
               />
-            </div>
-          ) : LucideIcon ? (
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary/15">
-              <LucideIcon className="h-6 w-6" />
-            </div>
-          ) : isEmoji ? (
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl transition-colors duration-300 group-hover:bg-primary/15">
-              {category.icon}
-            </div>
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(23,23,23,0.05) 0%, rgba(23,23,23,0.15) 45%, rgba(23,23,23,0.82) 100%)',
+                }}
+              />
+              <div className="relative flex h-full flex-col justify-between p-5">
+                <div className="flex justify-end">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors duration-300 group-hover:bg-primary">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-display text-xl leading-tight text-white line-clamp-2 sm:text-2xl">
+                    {category.name}
+                  </h3>
+                  {count && <p className="eyebrow mt-2 text-white/70">{count}</p>}
+                </div>
+              </div>
+            </>
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-100),var(--color-accent-100))] dark:bg-[linear-gradient(135deg,rgba(242,86,41,0.18),rgba(245,158,11,0.14))]">
-              <span className="font-display text-2xl font-semibold text-primary">
-                {category.name.charAt(0)}
-              </span>
-            </div>
-          )}
+            <>
+              {/* faint fire wash that grows on hover — texture, not a badge */}
+              <div
+                className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+                style={{ background: 'radial-gradient(circle, rgba(242,86,41,0.18), transparent 70%)' }}
+                aria-hidden="true"
+              />
+              <div className="relative flex items-start justify-between">
+                {count ? (
+                  <span className="eyebrow text-muted-foreground">{count}</span>
+                ) : (
+                  <span />
+                )}
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
+              </div>
 
-          <div>
-            <h3 className="font-medium leading-snug transition-colors group-hover:text-primary">
-              {category.name}
-            </h3>
-            {category._count?.products !== undefined && (
-              <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                {t('category.products_count', { count: category._count.products })}
-              </p>
-            )}
-          </div>
+              <div className="relative">
+                <h3 className="font-display text-xl leading-tight transition-colors duration-300 line-clamp-2 group-hover:text-primary sm:text-2xl">
+                  {category.name}
+                </h3>
+                <span className="mt-3 block h-0.5 w-8 rounded-full bg-primary/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-16 group-hover:bg-primary" />
+              </div>
+            </>
+          )}
         </Card>
       </motion.div>
     </Link>
