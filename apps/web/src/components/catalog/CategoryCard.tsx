@@ -7,6 +7,7 @@ import type { Category } from '@/types';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { resolveCategoryIcon } from '@/lib/categoryIcon';
 
 interface CategoryCardProps {
   category: Category;
@@ -15,6 +16,10 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category, className }: CategoryCardProps) {
   const { t } = useTranslation();
+  const LucideIcon = resolveCategoryIcon(category.icon);
+  // A raw icon *name* (e.g. "monitor") that isn't in the map must never render
+  // as text — only render category.icon directly when it's an actual emoji.
+  const isEmoji = !!category.icon && !LucideIcon && !/^[\x00-\x7F]+$/.test(category.icon);
   return (
     <Link href={`/catalog?category=${category.id}`} className="block h-full">
       <motion.div whileTap={{ scale: 0.98 }} className="h-full">
@@ -38,8 +43,12 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
-          ) : category.icon ? (
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl text-primary transition-colors duration-300 group-hover:bg-primary/15">
+          ) : LucideIcon ? (
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary/15">
+              <LucideIcon className="h-6 w-6" />
+            </div>
+          ) : isEmoji ? (
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl transition-colors duration-300 group-hover:bg-primary/15">
               {category.icon}
             </div>
           ) : (

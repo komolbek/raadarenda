@@ -5,32 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Search,
-  X,
-  ChevronDown,
-  Grid3X3,
-  LayoutList,
-  Monitor,
-  Tv,
-  Flower2,
-  Armchair,
-  Sofa,
-  Lamp,
-  Music,
-  UtensilsCrossed,
-  PartyPopper,
-  Tent,
-  Camera,
-  Wine,
-  ChefHat,
-  Table,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react';
+import { Search, X, ChevronDown, Grid3X3, LayoutList } from 'lucide-react';
 import { categoriesApi, productsApi } from '@/lib/api';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/ui';
 import { ProductCard } from '@/components/catalog/ProductCard';
+import { CategoryIcon } from '@/lib/categoryIcon';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
@@ -41,52 +20,6 @@ function getSortOptions(t: (key: string) => string) {
     { value: 'price_asc', label: t('catalog.sort_price_asc') },
     { value: 'price_desc', label: t('catalog.sort_price_desc') },
   ];
-}
-
-// Map of category iconName → lucide icon component.
-// Keeps icon names stored as strings in the DB but renders them as real icons.
-const iconMap: Record<string, LucideIcon> = {
-  monitor: Monitor,
-  tv: Tv,
-  television: Tv,
-  flower: Flower2,
-  flower2: Flower2,
-  sprout: Flower2,
-  armchair: Armchair,
-  chair: Armchair,
-  sofa: Sofa,
-  couch: Sofa,
-  lamp: Lamp,
-  light: Lamp,
-  music: Music,
-  audio: Music,
-  sound: Music,
-  utensils: UtensilsCrossed,
-  food: UtensilsCrossed,
-  catering: UtensilsCrossed,
-  party: PartyPopper,
-  celebration: PartyPopper,
-  tent: Tent,
-  outdoor: Tent,
-  camera: Camera,
-  photo: Camera,
-  wine: Wine,
-  drinks: Wine,
-  bar: Wine,
-  chef: ChefHat,
-  kitchen: ChefHat,
-  table: Table,
-  furniture: Table,
-  sparkles: Sparkles,
-  decor: Sparkles,
-  decoration: Sparkles,
-};
-
-function CategoryIcon({ name, className }: { name: string | null | undefined; className?: string }) {
-  if (!name) return null;
-  const Icon = iconMap[name.toLowerCase()];
-  if (!Icon) return null;
-  return <Icon className={className || 'h-4 w-4'} />;
 }
 
 function getCategoryName(name: string, t: (key: string) => string): string {
