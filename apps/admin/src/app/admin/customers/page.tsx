@@ -64,8 +64,12 @@ export default function Customers() {
 
       const { data } = await adminCustomersApi.list(params)
       if (data.success) {
-        setCustomers(data.data.items)
-        setTotalPages(data.data.meta?.totalPages || 1)
+        // API returns { data: { customers: [...], pagination: {...} } }
+        const d = data.data || {}
+        setCustomers(d.customers || d.items || [])
+        setTotalPages(
+          d.pagination?.totalPages ?? d.meta?.totalPages ?? d.pagination?.total_pages ?? 1,
+        )
       }
     } catch (err) {
       console.error('Failed to fetch customers:', err)
@@ -337,7 +341,7 @@ export default function Customers() {
                 </div>
 
                 {/* Addresses */}
-                {selectedCustomer.addresses.length > 0 && (
+                {(selectedCustomer.addresses?.length ?? 0) > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">Адреса</h4>
                     <div className="space-y-2">
@@ -362,7 +366,7 @@ export default function Customers() {
                 )}
 
                 {/* Orders */}
-                {selectedCustomer.orders.length > 0 && (
+                {(selectedCustomer.orders?.length ?? 0) > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">История заказов</h4>
                     <div className="overflow-x-auto">
