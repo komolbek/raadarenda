@@ -38,9 +38,10 @@ import { useCartStore } from '@/stores/cart-store';
 import { useFavoritesStore } from '@/stores/favorites-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { localizedName, localizedDescription } from '@/lib/i18n/product';
 
 export default function ProductDetailPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -145,6 +146,9 @@ export default function ProductDetailPage() {
     );
   }
 
+  const name = localizedName(product, locale);
+  const description = localizedDescription(product, locale);
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
@@ -168,7 +172,7 @@ export default function ProductDetailPage() {
             <span>/</span>
           </>
         )}
-        <span className="text-foreground truncate">{product.name}</span>
+        <span className="text-foreground truncate">{name}</span>
       </motion.nav>
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
@@ -184,7 +188,7 @@ export default function ProductDetailPage() {
               <motion.img
                 key={selectedImageIndex}
                 src={product.photos[selectedImageIndex] || '/placeholder.png'}
-                alt={product.name}
+                alt={name}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -245,7 +249,7 @@ export default function ProductDetailPage() {
                 >
                   <img
                     src={photo}
-                    alt={`${product.name} ${index + 1}`}
+                    alt={`${name} ${index + 1}`}
                     className="h-full w-full object-cover"
                   />
                 </button>
@@ -263,7 +267,7 @@ export default function ProductDetailPage() {
           {/* Title & Actions */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2">{product.name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2">{name}</h1>
               {product.category && (
                 <Link
                   href={`/catalog?category=${product.categoryId}`}

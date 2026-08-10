@@ -150,7 +150,11 @@ export interface IQuantityPricing {
 export interface IProduct {
   id: string;
   name: string;
+  nameUz?: string | null;
+  nameEn?: string | null;
   description: string | null;
+  descriptionUz?: string | null;
+  descriptionEn?: string | null;
   categoryId: string;
   category?: ICategory;
   photos: string[];

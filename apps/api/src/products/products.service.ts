@@ -58,6 +58,11 @@ export class ProductsService {
         select: {
           id: true,
           name: true,
+          nameUz: true,
+          nameEn: true,
+          description: true,
+          descriptionUz: true,
+          descriptionEn: true,
           photos: true,
           dailyPrice: true,
           totalStock: true,

@@ -78,6 +78,11 @@ interface Specification {
 interface Product {
   id: string
   name: string
+  name_uz?: string | null
+  name_en?: string | null
+  description?: string | null
+  description_uz?: string | null
+  description_en?: string | null
   category_id: string
   category_name: string
   photos: string[]
@@ -128,6 +133,11 @@ export default function Products() {
   // Form state - use strings for numeric inputs to allow proper editing
   const [form, setForm] = useState({
     name: '',
+    name_uz: '',
+    name_en: '',
+    description: '',
+    description_uz: '',
+    description_en: '',
     category_id: '',
     daily_price: '',
     total_stock: '',
@@ -188,6 +198,11 @@ export default function Products() {
     setEditingProduct(null)
     setForm({
       name: '',
+      name_uz: '',
+      name_en: '',
+      description: '',
+      description_uz: '',
+      description_en: '',
       category_id: categories[0]?.id || '',
       daily_price: '',
       total_stock: '1',
@@ -214,6 +229,11 @@ export default function Products() {
 
     setForm({
       name: product.name,
+      name_uz: product.name_uz || '',
+      name_en: product.name_en || '',
+      description: product.description || '',
+      description_uz: product.description_uz || '',
+      description_en: product.description_en || '',
       category_id: product.category_id,
       daily_price: product.daily_price != null ? product.daily_price.toString() : '',
       total_stock: product.total_stock != null ? product.total_stock.toString() : '',
@@ -351,6 +371,11 @@ export default function Products() {
     try {
       const body = {
         name: form.name,
+        name_uz: form.name_uz || null,
+        name_en: form.name_en || null,
+        description: form.description || null,
+        description_uz: form.description_uz || null,
+        description_en: form.description_en || null,
         category_id: form.category_id,
         photos: photos,
         daily_price: dailyPrice,
@@ -633,19 +658,74 @@ export default function Products() {
       >
             <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm text-gray-600 mb-1">
-                    Название *
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  />
+                <div className="col-span-2 space-y-3 rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Название (RU) *
+                    </label>
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      required
+                      placeholder="Название на русском"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Название (UZ)</label>
+                      <input
+                        type="text"
+                        value={form.name_uz}
+                        onChange={(e) => setForm({ ...form, name_uz: e.target.value })}
+                        placeholder="O‘zbekcha nomi"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Название (EN)</label>
+                      <input
+                        type="text"
+                        value={form.name_en}
+                        onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+                        placeholder="English name"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Описание (RU)</label>
+                    <textarea
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      rows={2}
+                      placeholder="Описание на русском"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Описание (UZ)</label>
+                      <textarea
+                        value={form.description_uz}
+                        onChange={(e) => setForm({ ...form, description_uz: e.target.value })}
+                        rows={2}
+                        placeholder="O‘zbekcha tavsif"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Описание (EN)</label>
+                      <textarea
+                        value={form.description_en}
+                        onChange={(e) => setForm({ ...form, description_en: e.target.value })}
+                        rows={2}
+                        placeholder="English description"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Photos Upload */}

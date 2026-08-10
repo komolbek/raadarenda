@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  Put,
+  Patch,
   Delete,
   Param,
   Body,
@@ -15,6 +15,34 @@ import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AdminAuthGuard } from '../common/guards/admin-auth.guard';
 import { AdminProductsService } from './admin-products.service';
 
+// Snake_case shape sent by the admin panel.
+interface ProductBody {
+  name?: string;
+  name_uz?: string | null;
+  name_en?: string | null;
+  description?: string | null;
+  description_uz?: string | null;
+  description_en?: string | null;
+  category_id?: string;
+  photos?: string[];
+  daily_price?: number;
+  total_stock?: number;
+  is_active?: boolean;
+  specifications?: {
+    width?: string | null;
+    height?: string | null;
+    depth?: string | null;
+    weight?: string | null;
+    color?: string | null;
+    material?: string | null;
+  };
+  min_rental_days?: number;
+  max_rental_days?: number;
+  deposit_amount?: number;
+  pricingTiers?: { days: number; totalPrice: number }[];
+  quantityPricing?: { quantity: number; totalPrice: number }[];
+}
+
 @ApiTags('Admin')
 @UseGuards(AdminAuthGuard)
 @Controller('admin/products')
@@ -22,7 +50,7 @@ export class AdminProductsController {
   constructor(private readonly adminProductsService: AdminProductsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all products with pagination, search, category filter' })
+  @ApiOperation({ summary: 'List products (pagination, search, category filter)' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -37,30 +65,8 @@ export class AdminProductsController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create product with specs, pricing tiers, quantity pricing' })
-  async create(
-    @Body()
-    body: {
-      name: string;
-      description?: string;
-      categoryId: string;
-      photos?: string[];
-      dailyPrice: number;
-      totalStock?: number;
-      isActive?: boolean;
-      specWidth?: string;
-      specHeight?: string;
-      specDepth?: string;
-      specWeight?: string;
-      specColor?: string;
-      specMaterial?: string;
-      minRentalDays?: number;
-      maxRentalDays?: number;
-      depositAmount?: number;
-      pricingTiers?: { days: number; totalPrice: number }[];
-      quantityPricing?: { quantity: number; totalPrice: number }[];
-    },
-  ) {
+  @ApiOperation({ summary: 'Create product' })
+  async create(@Body() body: ProductBody) {
     return this.adminProductsService.create(body);
   }
 
@@ -70,37 +76,14 @@ export class AdminProductsController {
     return this.adminProductsService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Update product' })
-  async update(
-    @Param('id') id: string,
-    @Body()
-    body: {
-      name?: string;
-      description?: string;
-      categoryId?: string;
-      photos?: string[];
-      dailyPrice?: number;
-      totalStock?: number;
-      isActive?: boolean;
-      specWidth?: string;
-      specHeight?: string;
-      specDepth?: string;
-      specWeight?: string;
-      specColor?: string;
-      specMaterial?: string;
-      minRentalDays?: number;
-      maxRentalDays?: number;
-      depositAmount?: number;
-      pricingTiers?: { days: number; totalPrice: number }[];
-      quantityPricing?: { quantity: number; totalPrice: number }[];
-    },
-  ) {
+  async update(@Param('id') id: string, @Body() body: ProductBody) {
     return this.adminProductsService.update(id, body);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete product (soft if has orders, hard if no orders)' })
+  @ApiOperation({ summary: 'Delete product (soft if it has orders, hard otherwise)' })
   async delete(@Param('id') id: string) {
     return this.adminProductsService.delete(id);
   }

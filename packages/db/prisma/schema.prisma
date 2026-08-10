@@ -151,7 +151,11 @@ model Category {
 model Product {
   id           String   @id @default(cuid())
   name         String
+  nameUz       String?  @map("name_uz")
+  nameEn       String?  @map("name_en")
   description  String?
+  descriptionUz String? @map("description_uz")
+  descriptionEn String? @map("description_en")
   categoryId   String   @map("category_id")
   photos       String[] @default([])
   dailyPrice   Int      @map("daily_price")

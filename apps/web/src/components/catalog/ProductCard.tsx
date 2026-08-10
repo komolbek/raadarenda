@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { localizedName } from '@/lib/i18n/product';
 
 interface ProductCardProps {
   product: Product;
@@ -23,7 +24,8 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { isFavorite, addFavorite, removeFavorite } = useFavoritesStore();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const name = localizedName(product, locale);
 
   const isFav = isFavorite(product.id);
   const hasDiscount = (product.pricingTiers?.length ?? 0) > 0 || (product.quantityPricing?.length ?? 0) > 0;
@@ -56,10 +58,10 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
           <div className="flex gap-4 p-3">
             <div className="relative h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
               {product.photos[0] ? (
-                <img src={product.photos[0]} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+                <img src={product.photos[0]} alt={name} className="h-full w-full object-cover" loading="lazy" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                  <span className="text-xl font-bold text-muted-foreground/30">{product.name.charAt(0)}</span>
+                  <span className="text-xl font-bold text-muted-foreground/30">{name.charAt(0)}</span>
                 </div>
               )}
               {product.totalStock === 0 && (
@@ -70,7 +72,7 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               <div>
-                <h3 className="font-medium line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                <h3 className="font-medium line-clamp-1 group-hover:text-primary transition-colors">{name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   {hasDiscount && <Badge variant="success" size="sm">{t('product_card.discount')}</Badge>}
                   {product.totalStock <= 3 && product.totalStock > 0 && (
@@ -101,7 +103,7 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
   return (
     <Link
       href={`/product/${product.id}`}
-      aria-label={`${product.name} - ${formatPrice(product.dailyPrice)} UZS ${t('product_card.per_day')}`}
+      aria-label={`${name} - ${formatPrice(product.dailyPrice)} UZS ${t('product_card.per_day')}`}
     >
       <motion.div
         whileHover={{ y: -5 }}
@@ -115,7 +117,7 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
             {product.photos[0] ? (
               <motion.img
                 src={product.photos[0]}
-                alt={product.name}
+                alt={name}
                 className="h-full w-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -123,9 +125,9 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
                 transition={{ duration: 0.3 }}
               />
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50" role="img" aria-label={product.name}>
+              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50" role="img" aria-label={name}>
                 <span className="text-4xl font-bold text-muted-foreground/30">
-                  {product.name.charAt(0)}
+                  {name.charAt(0)}
                 </span>
               </div>
             )}
@@ -190,7 +192,7 @@ export const ProductCard = memo(function ProductCard({ product, className, varia
           {/* Content */}
           <div className="p-4">
             <h3 className="font-medium leading-snug line-clamp-2 mb-3 min-h-[2.6em] group-hover:text-primary transition-colors">
-              {product.name}
+              {name}
             </h3>
 
             <div className="flex items-end justify-between gap-2">
