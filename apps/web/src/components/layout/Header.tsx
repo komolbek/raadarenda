@@ -17,7 +17,6 @@ import {
   LogOut,
   Globe,
   Phone,
-  Mail,
   ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
@@ -34,14 +33,13 @@ const LOCALE_LABELS: Record<Locale, string> = { ru: 'RU', en: 'EN', uz: 'UZ' };
 
 const CONTACT_PHONE_HREF = 'tel:+998901234567';
 const CONTACT_PHONE_LABEL = '+998 90 123 45 67';
-const CONTACT_EMAIL_HREF = 'mailto:info@4event.uz';
-const CONTACT_EMAIL_LABEL = 'info@4event.uz';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
@@ -273,15 +271,26 @@ export function Header() {
                 </button>
               </div>
 
-              {/* Contact cluster (desktop) */}
-              <div className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-wide text-foreground/70 lg:flex">
-                <a href={CONTACT_PHONE_HREF} className="inline-flex items-center gap-1.5 transition-colors hover:text-primary" aria-label={`Phone: ${CONTACT_PHONE_LABEL}`}>
-                  <Phone className="h-3.5 w-3.5" /> {t('header.phone')} <ChevronRight className="h-3 w-3" />
-                </a>
-                <span className="text-border">|</span>
-                <a href={CONTACT_EMAIL_HREF} className="inline-flex items-center gap-1.5 transition-colors hover:text-primary" aria-label={`Email: ${CONTACT_EMAIL_LABEL}`}>
-                  <Mail className="h-3.5 w-3.5" /> {t('header.email')} <ChevronRight className="h-3 w-3" />
-                </a>
+              {/* Contact — tap to reveal the phone number (desktop) */}
+              <div className="hidden items-center text-xs font-semibold uppercase tracking-wide text-foreground/70 lg:flex">
+                {showPhone ? (
+                  <a
+                    href={CONTACT_PHONE_HREF}
+                    className="inline-flex items-center gap-1.5 text-primary"
+                    aria-label={`Phone: ${CONTACT_PHONE_LABEL}`}
+                  >
+                    <Phone className="h-3.5 w-3.5" /> {CONTACT_PHONE_LABEL}
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowPhone(true)}
+                    className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
+                    aria-label={t('header.phone')}
+                  >
+                    <Phone className="h-3.5 w-3.5" /> {t('header.phone')} <ChevronRight className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
