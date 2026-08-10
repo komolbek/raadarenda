@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { Search, ChevronLeft, ChevronRight, Eye, Phone, X } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, Eye, Phone } from 'lucide-react'
+import { Modal } from '@/components/Modal'
 import { adminCustomersApi } from '@/lib/api'
 
 interface Customer {
@@ -278,19 +279,15 @@ export default function Customers() {
         )}
       </div>
 
-      {/* Customer Detail Modal */}
-      {selectedCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 my-8 p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Информация о клиенте</h3>
-              <button
-                onClick={() => setSelectedCustomer(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+      {/* Customer detail modal */}
+      <Modal
+        open={!!selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        title="Информация о клиенте"
+        size="xl"
+      >
+        {selectedCustomer && (
+          <>
 
             {loadingDetail ? (
               <div className="flex justify-center py-8">
@@ -408,9 +405,9 @@ export default function Customers() {
                 )}
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </>
   )
 }

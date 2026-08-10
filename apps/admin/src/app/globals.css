@@ -12,3 +12,19 @@
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
 }
+
+/* Modal enter animations (used by <Modal>) */
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes modal-backdrop-in { from { opacity: 1; } to { opacity: 1; } }
+  @keyframes modal-panel-in { from { opacity: 1; transform: none; } to { opacity: 1; transform: none; } }
+}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, GripVertical, Upload, X, Grid3X3, AlertTriangle } from 'lucide-react'
 import IconPicker, { IconByName, iconCatalog } from '@/components/IconPicker'
+import { Modal, btn } from '@/components/Modal'
 import { adminCategoriesApi, adminUploadApi } from '@/lib/api'
 
 interface Category {
@@ -322,16 +323,22 @@ export default function Categories() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <button
+                        type="button"
                         onClick={() => openEditModal(category)}
-                        className="text-blue-600 hover:text-blue-800"
+                        aria-label="Редактировать"
+                        title="Редактировать"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeleteClick(category)}
-                        className="text-red-600 hover:text-red-800"
+                        aria-label="Удалить"
+                        title="Удалить"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -345,15 +352,34 @@ export default function Categories() {
         )}
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingCategory ? 'Редактировать категорию' : 'Новая категория'}
-            </h3>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Create / Edit modal */}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingCategory ? 'Редактировать категорию' : 'Новая категория'}
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              disabled={saving}
+              className={btn.secondary}
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              form="category-form"
+              disabled={saving}
+              className={btn.primary}
+            >
+              {saving ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </>
+        }
+      >
+            <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Название *
@@ -473,27 +499,8 @@ export default function Categories() {
                 </div>
               )}
 
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  disabled={saving}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {saving ? 'Сохранение...' : 'Сохранить'}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Icon Picker Modal */}
       {showIconPicker && (
@@ -504,82 +511,77 @@ export default function Categories() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-            {deleteConfirm.requiresForce ? (
-              <>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-red-600">
-                      Внимание!
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Категория содержит товары
-                    </p>
-                  </div>
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title={
+          deleteConfirm?.requiresForce ? (
+            <span className="text-red-600">Внимание!</span>
+          ) : (
+            'Удалить категорию?'
+          )
+        }
+        size="sm"
+        footer={
+          deleteConfirm && (
+            <>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+                className={btn.secondary}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={() => handleConfirmDelete(deleteConfirm.requiresForce)}
+                disabled={isDeleting}
+                className={btn.danger}
+              >
+                {isDeleting
+                  ? 'Удаление...'
+                  : deleteConfirm.requiresForce
+                    ? 'Удалить всё'
+                    : 'Удалить'}
+              </button>
+            </>
+          )
+        }
+      >
+        {deleteConfirm &&
+          (deleteConfirm.requiresForce ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <div className="mb-6">
-                  <p className="text-gray-700 mb-3">
-                    Вы собираетесь удалить категорию <strong>&quot;{deleteConfirm.category.name}&quot;</strong>, которая содержит{' '}
-                    <strong className="text-red-600">{deleteConfirm.productsCount} товар(ов)</strong>.
-                  </p>
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-700">
-                      <strong>Все товары в этой категории будут удалены!</strong>
-                      <br />
-                      Товары с историей заказов будут деактивированы вместо удаления.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setDeleteConfirm(null)}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Отмена
-                  </button>
-                  <button
-                    onClick={() => handleConfirmDelete(true)}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? 'Удаление...' : 'Удалить всё'}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold mb-4">Удалить категорию?</h3>
-                <p className="text-gray-600 mb-6">
-                  Вы уверены, что хотите удалить категорию <strong>&quot;{deleteConfirm.category.name}&quot;</strong>?
+                <p className="pt-2 text-sm text-gray-500">Категория содержит товары</p>
+              </div>
+              <p className="text-gray-700">
+                Вы собираетесь удалить категорию{' '}
+                <strong>&quot;{deleteConfirm.category.name}&quot;</strong>, которая содержит{' '}
+                <strong className="text-red-600">
+                  {deleteConfirm.productsCount} товар(ов)
+                </strong>
+                .
+              </p>
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                <p className="text-sm text-red-700">
+                  <strong>Все товары в этой категории будут удалены!</strong>
+                  <br />
+                  Товары с историей заказов будут деактивированы вместо удаления.
                 </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setDeleteConfirm(null)}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Отмена
-                  </button>
-                  <button
-                    onClick={() => handleConfirmDelete(false)}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? 'Удаление...' : 'Удалить'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-600">
+              Вы уверены, что хотите удалить категорию{' '}
+              <strong>&quot;{deleteConfirm.category.name}&quot;</strong>?
+            </p>
+          ))}
+      </Modal>
     </>
   )
 }

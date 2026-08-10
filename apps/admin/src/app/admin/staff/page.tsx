@@ -7,11 +7,11 @@ import {
   Edit2,
   Trash2,
   Loader2,
-  X,
   Shield,
   ShieldCheck,
   Crown,
 } from 'lucide-react'
+import { Modal } from '@/components/Modal'
 import { adminStaffApi } from '@/lib/api'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 
@@ -381,29 +381,39 @@ export default function StaffPage() {
         </div>
       )}
 
-      {/* Add/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowModal(false)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {editingStaff
-                  ? t('staff.modal_title_edit')
-                  : t('staff.modal_title_add')}
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Add / Edit modal */}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingStaff ? t('staff.modal_title_edit') : t('staff.modal_title_add')}
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="h-11 rounded-xl border-2 border-gray-200 px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              form="staff-form"
+              disabled={submitting}
+              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-500 px-5 text-sm font-semibold text-white shadow-lg shadow-primary-500/25 transition-all hover:bg-primary-600 disabled:opacity-50"
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingStaff ? (
+                t('staff.submit_save')
+              ) : (
+                t('staff.submit_add')
+              )}
+            </button>
+          </>
+        }
+      >
+            <form id="staff-form" onSubmit={handleSubmit} className="space-y-4">
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -474,32 +484,8 @@ export default function StaffPage() {
                 </div>
               )}
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 h-11 rounded-xl border-2 border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 h-11 rounded-xl bg-primary-500 text-white font-semibold text-sm hover:bg-primary-600 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/25"
-                >
-                  {submitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : editingStaff ? (
-                    t('staff.submit_save')
-                  ) : (
-                    t('staff.submit_add')
-                  )}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   )
 }

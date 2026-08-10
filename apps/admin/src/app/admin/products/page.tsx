@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Upload, X, AlertTriangle, Star, GripVertical } from 'lucide-react'
+import { Modal, btn } from '@/components/Modal'
 import { adminProductsApi, adminCategoriesApi, adminUploadApi } from '@/lib/api'
 
 // Special value for custom input
@@ -542,17 +543,21 @@ export default function Products() {
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex gap-2">
+                        <div className="flex gap-1">
                           <button
+                            type="button"
                             onClick={() => openEditModal(product)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                            aria-label="Редактировать"
                             title="Редактировать"
                           >
                             <Edit className="h-5 w-5" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => setDeleteConfirm(product.id)}
-                            className="text-red-600 hover:text-red-800"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                            aria-label="Удалить"
                             title="Удалить"
                           >
                             <Trash2 className="h-5 w-5" />
@@ -592,15 +597,40 @@ export default function Products() {
         )}
       </div>
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 my-8 p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingProduct ? 'Редактировать товар' : 'Добавить товар'}
-            </h3>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Create / Edit modal */}
+      <Modal
+        open={showModal}
+        onClose={() => {
+          setShowModal(false)
+          setEditingProduct(null)
+        }}
+        title={editingProduct ? 'Редактировать товар' : 'Добавить товар'}
+        size="lg"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setShowModal(false)
+                setEditingProduct(null)
+              }}
+              className={btn.secondary}
+              disabled={isSubmitting}
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              form="product-form"
+              disabled={isSubmitting}
+              className={btn.primary}
+            >
+              {isSubmitting ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </>
+        }
+      >
+            <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm text-gray-600 mb-1">
@@ -973,76 +1003,59 @@ export default function Products() {
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false)
-                    setEditingProduct(null)
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  disabled={isSubmitting}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Сохранение...' : 'Сохранить'}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (() => {
-        const product = products.find((p) => p.id === deleteConfirm)
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Удалить товар?</h3>
-                  {product && (
-                    <p className="text-sm text-gray-500">{product.name}</p>
-                  )}
-                </div>
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title="Удалить товар?"
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(null)}
+              className={btn.secondary}
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
+              className={btn.danger}
+            >
+              Удалить
+            </button>
+          </>
+        }
+      >
+        {deleteConfirm && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-              <div className="mb-6">
-                <p className="text-gray-600 mb-3">
-                  Вы уверены, что хотите удалить этот товар?
-                </p>
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-sm text-amber-700">
-                    <strong>Примечание:</strong> Если у товара есть история заказов, он будет деактивирован вместо полного удаления.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Отмена
-                </button>
-                <button
-                  onClick={() => handleDelete(deleteConfirm)}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  Удалить
-                </button>
+              <div className="pt-1">
+                <p className="text-gray-700">Вы уверены, что хотите удалить этот товар?</p>
+                {(() => {
+                  const product = products.find((p) => p.id === deleteConfirm)
+                  return product ? (
+                    <p className="mt-0.5 text-sm text-gray-500">{product.name}</p>
+                  ) : null
+                })()}
               </div>
             </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-sm text-amber-700">
+                <strong>Примечание:</strong> Если у товара есть история заказов, он будет
+                деактивирован вместо полного удаления.
+              </p>
+            </div>
           </div>
-        )
-      })()}
+        )}
+      </Modal>
     </>
   )
 }

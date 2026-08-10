@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Modal, btn } from '@/components/Modal'
 import { adminOrdersApi } from '@/lib/api'
 
 interface OrderItem {
@@ -349,13 +350,24 @@ export default function Orders() {
         )}
       </div>
 
-      {/* Order Modal */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              Заказ #{selectedOrder.order_number}
-            </h3>
+      {/* Order detail modal */}
+      <Modal
+        open={!!selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        title={selectedOrder ? `Заказ #${selectedOrder.order_number}` : ''}
+        size="md"
+        footer={
+          <button
+            type="button"
+            onClick={() => setSelectedOrder(null)}
+            className={btn.secondary}
+          >
+            Закрыть
+          </button>
+        }
+      >
+        {selectedOrder && (
+          <>
 
             {/* Order Items with Images */}
             <div className="mb-4">
@@ -524,17 +536,9 @@ export default function Orders() {
               </div>
             )}
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Закрыть
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </>
   )
 }
