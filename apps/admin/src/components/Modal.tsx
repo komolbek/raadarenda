@@ -46,6 +46,14 @@ export function Modal({
   const panelRef = useRef<HTMLDivElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
 
+  // Keep the latest onClose in a ref so the open/close effect below can depend
+  // ONLY on `open`. If `onClose` (usually a fresh inline arrow) were in the
+  // deps, the effect would re-run on every parent re-render — i.e. every
+  // keystroke — and re-focus the panel, stealing focus from the field being
+  // typed into.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!open) return;
 
@@ -54,7 +62,7 @@ export function Modal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
       }
     };
     document.addEventListener('keydown', onKey);
@@ -62,7 +70,7 @@ export function Modal({
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    // Move focus into the dialog for keyboard users.
+    // Move focus into the dialog once, when it opens (accessibility).
     panelRef.current?.focus();
 
     return () => {
@@ -70,7 +78,7 @@ export function Modal({
       document.body.style.overflow = prevOverflow;
       lastFocused.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open || typeof document === 'undefined') return null;
 
