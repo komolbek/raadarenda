@@ -28,6 +28,8 @@ const ru = {
   'header.toggle_theme': 'Переключить тему',
   'header.open_menu': 'Открыть меню',
   'header.close_menu': 'Закрыть меню',
+  'header.phone': 'Телефон',
+  'header.email': 'Почта',
   'header.cart': 'Корзина',
   'header.search': 'Поиск',
   'header.user_menu': 'Меню пользователя',

@@ -30,6 +30,8 @@ const en: Record<TranslationKey, string> = {
   'header.toggle_theme': 'Toggle theme',
   'header.open_menu': 'Open menu',
   'header.close_menu': 'Close menu',
+  'header.phone': 'Phone',
+  'header.email': 'Email',
   'header.cart': 'Cart',
   'header.search': 'Search',
   'header.user_menu': 'User menu',

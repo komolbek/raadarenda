@@ -30,6 +30,8 @@ const uz: Record<TranslationKey, string> = {
   'header.toggle_theme': 'Mavzuni almashtirish',
   'header.open_menu': 'Menyuni ochish',
   'header.close_menu': 'Menyuni yopish',
+  'header.phone': 'Telefon',
+  'header.email': 'Pochta',
   'header.cart': 'Savatcha',
   'header.search': 'Qidirish',
   'header.user_menu': 'Foydalanuvchi menyusi',
