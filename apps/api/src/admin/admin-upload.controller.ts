@@ -16,7 +16,7 @@ import { AdminUploadService } from './admin-upload.service';
 export class AdminUploadController {
   constructor(private adminUploadService: AdminUploadService) {}
 
-  @Post()
+  @Post('image')
   @ApiOperation({ summary: 'Upload image' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
