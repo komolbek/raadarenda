@@ -215,8 +215,8 @@ export default function Products() {
     setForm({
       name: product.name,
       category_id: product.category_id,
-      daily_price: product.daily_price.toString(),
-      total_stock: product.total_stock.toString(),
+      daily_price: product.daily_price != null ? product.daily_price.toString() : '',
+      total_stock: product.total_stock != null ? product.total_stock.toString() : '',
       is_active: product.is_active,
       spec_width: product.specifications?.width || '',
       spec_height: product.specifications?.height || '',
@@ -413,6 +413,7 @@ export default function Products() {
   }
 
   const formatPrice = (price: number) => {
+    if (price == null || Number.isNaN(Number(price))) return '—'
     return new Intl.NumberFormat('ru-RU').format(price) + ' сум'
   }
 
@@ -528,7 +529,7 @@ export default function Products() {
                         {formatPrice(product.daily_price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {product.total_stock} шт
+                        {product.total_stock != null ? `${product.total_stock} шт` : '—'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
