@@ -154,32 +154,14 @@ export default function Categories() {
     }
   }
 
-  const handleDeleteClick = async (category: Category) => {
-    // First, try to delete without force to check if there are products
-    try {
-      const { data } = await adminCategoriesApi.delete(category.id)
-
-      if (data.success) {
-        // Deleted successfully (no products)
-        fetchCategories()
-      } else if (data.requires_confirmation) {
-        // Has products, show confirmation modal
-        setDeleteConfirm({
-          category,
-          requiresForce: true,
-          productsCount: data.products_count,
-        })
-      } else {
-        // Show simple confirmation for categories without products
-        setDeleteConfirm({
-          category,
-          requiresForce: false,
-          productsCount: 0,
-        })
-      }
-    } catch (err) {
-      console.error('Failed to check category:', err)
-    }
+  const handleDeleteClick = (category: Category) => {
+    // Open the confirmation modal; the actual delete happens on confirm. The
+    // product count already comes with the list, so no probe request is needed.
+    setDeleteConfirm({
+      category,
+      requiresForce: category.products_count > 0,
+      productsCount: category.products_count,
+    })
   }
 
   const handleConfirmDelete = async (force: boolean) => {
@@ -187,11 +169,7 @@ export default function Categories() {
 
     setIsDeleting(true)
     try {
-      const params = force
-        ? { id: deleteConfirm.category.id, force: 'true' }
-        : { id: deleteConfirm.category.id }
-
-      const { data } = await adminCategoriesApi.delete(deleteConfirm.category.id)
+      const { data } = await adminCategoriesApi.delete(deleteConfirm.category.id, force)
 
       if (data.success) {
         setDeleteConfirm(null)

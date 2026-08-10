@@ -2,14 +2,25 @@ import {
   Controller,
   Get,
   Post,
-  Put,
+  Patch,
   Delete,
   Body,
+  Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AdminAuthGuard } from '../common/guards/admin-auth.guard';
 import { AdminCategoriesService } from './admin-categories.service';
+
+interface CategoryBody {
+  name?: string;
+  image_url?: string | null;
+  icon_name?: string | null;
+  parent_category_id?: string | null;
+  display_order?: number;
+  is_active?: boolean;
+}
 
 @ApiTags('Admin')
 @UseGuards(AdminAuthGuard)
@@ -18,7 +29,7 @@ export class AdminCategoriesController {
   constructor(private readonly adminCategoriesService: AdminCategoriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all categories (including inactive) with children and product counts' })
+  @ApiOperation({ summary: 'List all categories with parent + product/child counts' })
   async findAll() {
     return this.adminCategoriesService.findAll();
   }
@@ -31,40 +42,19 @@ export class AdminCategoriesController {
 
   @Post()
   @ApiOperation({ summary: 'Create category' })
-  async create(
-    @Body()
-    body: {
-      name: string;
-      imageUrl?: string;
-      iconName?: string;
-      parentCategoryId?: string;
-      displayOrder?: number;
-      isActive?: boolean;
-    },
-  ) {
+  async create(@Body() body: CategoryBody & { name: string }) {
     return this.adminCategoriesService.create(body);
   }
 
-  @Put()
-  @ApiOperation({ summary: 'Update category (id in body)' })
-  async update(
-    @Body()
-    body: {
-      id: string;
-      name?: string;
-      imageUrl?: string;
-      iconName?: string;
-      parentCategoryId?: string;
-      displayOrder?: number;
-      isActive?: boolean;
-    },
-  ) {
-    return this.adminCategoriesService.update(body);
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update category' })
+  async update(@Param('id') id: string, @Body() body: CategoryBody) {
+    return this.adminCategoriesService.update(id, body);
   }
 
-  @Delete()
-  @ApiOperation({ summary: 'Delete category (id in body), prevent if has products' })
-  async delete(@Body() body: { id: string }) {
-    return this.adminCategoriesService.delete(body);
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete category (returns requires_confirmation if it has products)' })
+  async delete(@Param('id') id: string, @Query('force') force?: string) {
+    return this.adminCategoriesService.delete(id, force === 'true');
   }
 }

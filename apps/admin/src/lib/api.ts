@@ -66,7 +66,8 @@ export const adminCategoriesApi = {
     api.post("/admin/categories", data),
   update: (id: string, data: Record<string, unknown>) =>
     api.patch(`/admin/categories/${id}`, data),
-  delete: (id: string) => api.delete(`/admin/categories/${id}`),
+  delete: (id: string, force?: boolean) =>
+    api.delete(`/admin/categories/${id}`, force ? { params: { force: 'true' } } : undefined),
   reorder: (data: { orderedIds: string[] }) =>
     api.post("/admin/categories/reorder", data),
 };
