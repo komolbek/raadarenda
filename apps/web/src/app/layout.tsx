@@ -1,27 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Lora, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
 import { Header, Footer } from '@/components/layout';
 import './globals.css';
-
-// Body serif — refined, readable, full Cyrillic support
-const bodySerif = Lora({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-  variable: '--font-body',
-});
-
-// Display serif — high-contrast, serious, with a strong italic cut used on headings
-const displaySerif = Playfair_Display({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['500', '600', '700', '800', '900'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-  variable: '--font-display',
-});
-
 
 export const metadata: Metadata = {
   title: '4Event - Event Equipment Rental',
@@ -41,11 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="ru"
-      suppressHydrationWarning
-      className={`${bodySerif.variable} ${displaySerif.variable}`}
-    >
+    <html lang="ru" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
