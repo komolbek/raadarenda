@@ -23,6 +23,12 @@ export class AdminCategoriesController {
     return this.adminCategoriesService.findAll();
   }
 
+  @Post('reorder')
+  @ApiOperation({ summary: 'Persist a new category display order' })
+  async reorder(@Body() body: { orderedIds: string[] }) {
+    return this.adminCategoriesService.reorder(body.orderedIds);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create category' })
   async create(

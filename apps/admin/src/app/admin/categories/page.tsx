@@ -35,6 +35,8 @@ export default function Categories() {
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmation | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [form, setForm] = useState({
     name: '',
     image_url: '',
@@ -202,6 +204,25 @@ export default function Categories() {
     }
   }
 
+  const handleReorderDrop = async (targetIndex: number) => {
+    const from = dragIndex
+    setDragIndex(null)
+    setDragOverIndex(null)
+    if (from === null || from === targetIndex) return
+
+    const reordered = [...categories]
+    const [moved] = reordered.splice(from, 1)
+    reordered.splice(targetIndex, 0, moved)
+    setCategories(reordered) // optimistic
+
+    try {
+      await adminCategoriesApi.reorder({ orderedIds: reordered.map((c) => c.id) })
+    } catch (err) {
+      console.error('Failed to reorder categories:', err)
+      fetchCategories() // revert to server order on failure
+    }
+  }
+
   // Check if category is complete (has image or icon)
   const isCategoryComplete = (category: Category) => {
     return !!(category.icon_name || category.image_url)
@@ -279,12 +300,32 @@ export default function Categories() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {categories.map((category) => {
+              {categories.map((category, index) => {
                 const incomplete = !isCategoryComplete(category)
                 return (
-                <tr key={category.id} className={`hover:bg-gray-50 ${incomplete ? 'bg-amber-50' : ''}`}>
+                <tr
+                  key={category.id}
+                  draggable
+                  onDragStart={() => setDragIndex(index)}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    if (dragOverIndex !== index) setDragOverIndex(index)
+                  }}
+                  onDrop={() => handleReorderDrop(index)}
+                  onDragEnd={() => {
+                    setDragIndex(null)
+                    setDragOverIndex(null)
+                  }}
+                  className={`hover:bg-gray-50 ${incomplete ? 'bg-amber-50' : ''} ${
+                    dragIndex === index ? 'opacity-40' : ''
+                  } ${
+                    dragOverIndex === index && dragIndex !== null && dragIndex !== index
+                      ? 'border-t-2 border-blue-500'
+                      : ''
+                  }`}
+                >
                   <td className="px-2">
-                    <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
+                    <GripVertical className="h-5 w-5 text-gray-400 cursor-grab active:cursor-grabbing" />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center" style={{ paddingLeft: category.parent_category_id ? 24 : 0 }}>

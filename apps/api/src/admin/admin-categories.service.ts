@@ -26,6 +26,24 @@ export class AdminCategoriesService {
     return { items: categories };
   }
 
+  async reorder(orderedIds: string[]) {
+    if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+      throw new BadRequestException('orderedIds must be a non-empty array');
+    }
+
+    // Assign displayOrder = position in the provided list, atomically.
+    await this.prisma.$transaction(
+      orderedIds.map((id, index) =>
+        this.prisma.category.update({
+          where: { id },
+          data: { displayOrder: index },
+        }),
+      ),
+    );
+
+    return { reordered: true };
+  }
+
   async create(data: {
     name: string;
     imageUrl?: string;
