@@ -5,6 +5,7 @@ const en: Record<AdminTranslationKey, string> = {
   'nav.dashboard': 'Dashboard',
   'nav.products': 'Products',
   'nav.categories': 'Categories',
+  'nav.events': 'Events',
   'nav.orders': 'Orders',
   'nav.customers': 'Customers',
   'nav.staff': 'Staff',

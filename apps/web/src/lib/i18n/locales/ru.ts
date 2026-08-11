@@ -16,6 +16,12 @@ const ru = {
   // Navigation
   'nav.home': 'Главная',
   'nav.catalog': 'Каталог',
+  'events.eyebrow': 'Календарь',
+  'events.title': 'Мероприятия и выставки',
+  'events.subtitle': 'Выберите событие, для которого арендуете оборудование — мы подготовим всё под площадку.',
+  'events.empty': 'Пока нет мероприятий.',
+  'events.learn_more': 'Подробнее',
+  'nav.events': 'Мероприятия',
   'nav.search_placeholder': 'Поиск товаров...',
 
   // Header / User Menu

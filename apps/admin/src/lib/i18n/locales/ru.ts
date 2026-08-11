@@ -3,6 +3,7 @@ const ru = {
   'nav.dashboard': 'Дашборд',
   'nav.products': 'Товары',
   'nav.categories': 'Категории',
+  'nav.events': 'Мероприятия',
   'nav.orders': 'Заказы',
   'nav.customers': 'Клиенты',
   'nav.staff': 'Сотрудники',

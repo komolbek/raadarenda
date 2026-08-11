@@ -18,6 +18,12 @@ const uz: Record<TranslationKey, string> = {
   // Navigation
   'nav.home': 'Bosh sahifa',
   'nav.catalog': 'Katalog',
+  'events.eyebrow': 'Taqvim',
+  'events.title': 'Tadbirlar va koʻrgazmalar',
+  'events.subtitle': 'Jihoz ijaraga olayotgan tadbiringizni tanlang — biz hammasini maydonga tayyorlaymiz.',
+  'events.empty': 'Hozircha tadbirlar yoʻq.',
+  'events.learn_more': 'Batafsil',
+  'nav.events': 'Tadbirlar',
   'nav.search_placeholder': 'Mahsulotlarni qidirish...',
 
   // Header / User Menu

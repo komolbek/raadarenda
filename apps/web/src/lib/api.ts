@@ -173,6 +173,32 @@ export const productsApi = {
   },
 };
 
+export interface EventItem {
+  id: string;
+  title: string;
+  title_uz: string | null;
+  title_en: string | null;
+  description: string | null;
+  description_uz: string | null;
+  description_en: string | null;
+  image_url: string | null;
+  venue: string | null;
+  city: string | null;
+  start_date: string;
+  end_date: string | null;
+  website_url: string | null;
+  is_active: boolean;
+}
+
+export const eventsApi = {
+  getAll() {
+    return api.get<{ items: EventItem[] }>('/events');
+  },
+  getById(id: string) {
+    return api.get<EventItem>(`/events/${id}`);
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Reviews API
 // ---------------------------------------------------------------------------

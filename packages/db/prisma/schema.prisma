@@ -186,6 +186,30 @@ model Product {
   @@map("products")
 }
 
+model Event {
+  id            String    @id @default(cuid())
+  title         String
+  titleUz       String?   @map("title_uz")
+  titleEn       String?   @map("title_en")
+  description   String?
+  descriptionUz String?   @map("description_uz")
+  descriptionEn String?   @map("description_en")
+  imageUrl      String?   @map("image_url")
+  venue         String?
+  city          String?
+  startDate     DateTime  @map("start_date")
+  endDate       DateTime? @map("end_date")
+  websiteUrl    String?   @map("website_url")
+  isActive      Boolean   @default(true) @map("is_active")
+  displayOrder  Int       @default(0) @map("display_order")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([startDate])
+  @@index([isActive])
+  @@map("events")
+}
+
 model PricingTier {
   id         String @id @default(cuid())
   productId  String @map("product_id")

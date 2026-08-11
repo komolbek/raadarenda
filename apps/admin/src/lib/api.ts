@@ -165,6 +165,16 @@ export const adminSmsTemplatesApi = {
 
 // ─── Upload ──────────────────────────────────────────────────────────────────
 
+export const adminEventsApi = {
+  list: () => api.get("/admin/events"),
+  create: (data: Record<string, unknown>) => api.post("/admin/events", data),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/admin/events/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/events/${id}`),
+  reorder: (data: { orderedIds: string[] }) =>
+    api.post("/admin/events/reorder", data),
+};
+
 export const adminUploadApi = {
   uploadImage: (file: File) => {
     const formData = new FormData();
