@@ -24,6 +24,14 @@ const en: Record<TranslationKey, string> = {
   'events.empty': 'No events yet.',
   'events.learn_more': 'Learn more',
   'nav.events': 'Events',
+  'nav.sets': 'Sets',
+  'sets.eyebrow': 'Bundles',
+  'sets.title': 'Ready-made sets',
+  'sets.subtitle': 'Curated equipment bundles for events — for example, a table with chairs.',
+  'sets.empty': 'No sets yet.',
+  'sets.add': 'Add to cart',
+  'sets.added_to_cart': 'Set added to cart',
+  'sets.items_count': '{count} items',
   'nav.search_placeholder': 'Search products...',
 
   // Header / User Menu

@@ -199,6 +199,45 @@ export const eventsApi = {
   },
 };
 
+export interface SetItemPublic {
+  id: string;
+  product_id: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    name_uz: string | null;
+    name_en: string | null;
+    daily_price: number;
+    photos: string[];
+    total_stock: number;
+    category_name: string | null;
+  } | null;
+}
+
+export interface SetPublic {
+  id: string;
+  name: string;
+  name_uz: string | null;
+  name_en: string | null;
+  description: string | null;
+  description_uz: string | null;
+  description_en: string | null;
+  photos: string[];
+  daily_price: number;
+  items_count: number;
+  items: SetItemPublic[];
+}
+
+export const setsApi = {
+  getAll() {
+    return api.get<{ items: SetPublic[] }>('/sets');
+  },
+  getById(id: string) {
+    return api.get<SetPublic>(`/sets/${id}`);
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Reviews API
 // ---------------------------------------------------------------------------

@@ -22,6 +22,14 @@ const ru = {
   'events.empty': 'Пока нет мероприятий.',
   'events.learn_more': 'Подробнее',
   'nav.events': 'Мероприятия',
+  'nav.sets': 'Сеты',
+  'sets.eyebrow': 'Комплекты',
+  'sets.title': 'Готовые сеты',
+  'sets.subtitle': 'Комплекты товаров для мероприятий — например, стол вместе со стульями.',
+  'sets.empty': 'Пока нет сетов.',
+  'sets.add': 'В корзину',
+  'sets.added_to_cart': 'Сет добавлен в корзину',
+  'sets.items_count': '{count} товаров',
   'nav.search_placeholder': 'Поиск товаров...',
 
   // Header / User Menu

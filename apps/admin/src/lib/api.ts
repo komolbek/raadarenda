@@ -175,6 +175,16 @@ export const adminEventsApi = {
     api.post("/admin/events/reorder", data),
 };
 
+export const adminSetsApi = {
+  list: () => api.get("/admin/sets"),
+  create: (data: Record<string, unknown>) => api.post("/admin/sets", data),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/admin/sets/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/sets/${id}`),
+  reorder: (data: { orderedIds: string[] }) =>
+    api.post("/admin/sets/reorder", data),
+};
+
 export const adminUploadApi = {
   uploadImage: (file: File) => {
     const formData = new FormData();

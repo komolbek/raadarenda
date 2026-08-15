@@ -11,6 +11,7 @@ import {
   UserCog,
   Settings,
   CalendarDays,
+  Layers,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/admin/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { href: "/admin/products", labelKey: "nav.products", icon: Package },
   { href: "/admin/categories", labelKey: "nav.categories", icon: FolderTree },
+  { href: "/admin/sets", labelKey: "nav.sets", icon: Layers },
   { href: "/admin/events", labelKey: "nav.events", icon: CalendarDays },
   { href: "/admin/orders", labelKey: "nav.orders", icon: ShoppingCart },
   { href: "/admin/customers", labelKey: "nav.customers", icon: Users },

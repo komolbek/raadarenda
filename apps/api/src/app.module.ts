@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { BusinessSettingsModule } from './business-settings/business-settings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EventsModule } from './events/events.module';
+import { SetsModule } from './sets/sets.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -32,6 +33,7 @@ import { AppController } from './app.controller';
     BusinessSettingsModule,
     PaymentsModule,
     EventsModule,
+    SetsModule,
   ],
 })
 export class AppModule {}

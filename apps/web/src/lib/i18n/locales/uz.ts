@@ -24,6 +24,14 @@ const uz: Record<TranslationKey, string> = {
   'events.empty': 'Hozircha tadbirlar yoʻq.',
   'events.learn_more': 'Batafsil',
   'nav.events': 'Tadbirlar',
+  'nav.sets': 'Toʻplamlar',
+  'sets.eyebrow': 'Toʻplamlar',
+  'sets.title': 'Tayyor toʻplamlar',
+  'sets.subtitle': 'Tadbirlar uchun jihoz toʻplamlari — masalan, stol va stullar birga.',
+  'sets.empty': 'Hozircha toʻplamlar yoʻq.',
+  'sets.add': 'Savatga',
+  'sets.added_to_cart': 'Toʻplam savatga qoʻshildi',
+  'sets.items_count': '{count} ta mahsulot',
   'nav.search_placeholder': 'Mahsulotlarni qidirish...',
 
   // Header / User Menu

@@ -5,6 +5,7 @@ const uz: Record<AdminTranslationKey, string> = {
   'nav.dashboard': 'Boshqaruv paneli',
   'nav.products': 'Mahsulotlar',
   'nav.categories': 'Kategoriyalar',
+  'nav.sets': 'Toʻplamlar',
   'nav.events': 'Tadbirlar',
   'nav.orders': 'Buyurtmalar',
   'nav.customers': 'Mijozlar',

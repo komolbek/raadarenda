@@ -98,6 +98,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t('nav.home') },
     { href: '/catalog', label: t('nav.catalog') },
+    { href: '/sets', label: t('nav.sets') },
     { href: '/events', label: t('nav.events') },
     { href: '/favorites', label: t('header.favorites') },
   ];
