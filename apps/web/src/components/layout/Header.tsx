@@ -114,19 +114,21 @@ export function Header() {
       )}
       role="banner"
     >
-      {/* Tier 1 — utility strip */}
-      <div className="bg-brand-graphite text-white">
+      {/* Tier 1 — utility strip. Tokenised warm neutral rather than graphite, so
+          it sits with the light hero instead of reading as a leftover black bar
+          (and still inverts correctly under the dark theme). */}
+      <div className="border-b border-border bg-muted text-muted-foreground">
         <div className="container mx-auto flex h-9 items-center justify-end gap-3 px-4 text-xs">
           <button
             onClick={toggleTheme}
-            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-white/70 transition-colors hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 transition-colors hover:text-foreground"
             aria-label={t('header.toggle_theme')}
           >
             {resolvedTheme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={cycleLocale}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-medium text-white transition-colors hover:bg-white/20"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
             aria-label={`Language: ${LOCALE_LABELS[locale]}`}
           >
             <Globe className="h-3.5 w-3.5" />
