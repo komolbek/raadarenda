@@ -32,7 +32,6 @@ const en: Record<TranslationKey, string> = {
   'sets.add': 'Add to cart',
   'sets.added_to_cart': 'Set added to cart',
   'sets.items_count': '{count} items',
-  'nav.search_placeholder': 'Search products...',
 
   // Header / User Menu
   'header.login': 'Sign in',
@@ -47,7 +46,6 @@ const en: Record<TranslationKey, string> = {
   'header.phone': 'Phone',
   'header.email': 'Email',
   'header.cart': 'Cart',
-  'header.search': 'Search',
   'header.user_menu': 'User menu',
   'header.skip_to_content': 'Skip to content',
 
@@ -72,7 +70,6 @@ const en: Record<TranslationKey, string> = {
   // Home Page
   'home.hero_badge': 'Event rental',
   'home.hero_title': 'Everything for your perfect event',
-  'home.hero_description': 'Furniture, decor, lighting and sound — rented across Tashkent, from one day.',
   'home.view_catalog': 'View catalog',
   'home.call': 'Call',
 
@@ -83,10 +80,6 @@ const en: Record<TranslationKey, string> = {
   'home.search_category_all': 'All categories',
   'home.search_submit': 'Search',
 
-  // Home — hero stats
-  'home.stat_items': '{count} items in the catalog',
-  'home.stat_term': 'Rent from 1 day',
-  'home.stat_delivery': 'Delivery across Tashkent',
   'home.collage_price': '{price} UZS/day',
 
   // Home — popular products

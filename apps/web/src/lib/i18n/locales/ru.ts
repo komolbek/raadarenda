@@ -30,7 +30,6 @@ const ru = {
   'sets.add': 'В корзину',
   'sets.added_to_cart': 'Сет добавлен в корзину',
   'sets.items_count': '{count} товаров',
-  'nav.search_placeholder': 'Поиск товаров...',
 
   // Header / User Menu
   'header.login': 'Войти',
@@ -45,7 +44,6 @@ const ru = {
   'header.phone': 'Телефон',
   'header.email': 'Почта',
   'header.cart': 'Корзина',
-  'header.search': 'Поиск',
   'header.user_menu': 'Меню пользователя',
   'header.skip_to_content': 'Перейти к содержимому',
 
@@ -70,7 +68,6 @@ const ru = {
   // Home Page
   'home.hero_badge': 'Аренда для мероприятий',
   'home.hero_title': 'Всё для вашего идеального мероприятия',
-  'home.hero_description': 'Мебель, декор, свет и звук — в аренду по Ташкенту, от одного дня.',
   'home.view_catalog': 'Смотреть каталог',
   'home.call': 'Позвонить',
 
@@ -81,10 +78,6 @@ const ru = {
   'home.search_category_all': 'Все категории',
   'home.search_submit': 'Найти',
 
-  // Home — hero stats
-  'home.stat_items': '{count} позиций в каталоге',
-  'home.stat_term': 'Аренда от 1 дня',
-  'home.stat_delivery': 'Доставка по Ташкенту',
   'home.collage_price': '{price} сум/сутки',
 
   // Home — popular products

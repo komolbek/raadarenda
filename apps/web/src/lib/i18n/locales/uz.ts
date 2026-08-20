@@ -32,7 +32,6 @@ const uz: Record<TranslationKey, string> = {
   'sets.add': 'Savatga',
   'sets.added_to_cart': 'Toʻplam savatga qoʻshildi',
   'sets.items_count': '{count} ta mahsulot',
-  'nav.search_placeholder': 'Mahsulotlarni qidirish...',
 
   // Header / User Menu
   'header.login': 'Kirish',
@@ -47,7 +46,6 @@ const uz: Record<TranslationKey, string> = {
   'header.phone': 'Telefon',
   'header.email': 'Pochta',
   'header.cart': 'Savatcha',
-  'header.search': 'Qidirish',
   'header.user_menu': 'Foydalanuvchi menyusi',
   'header.skip_to_content': 'Kontentga o\'tish',
 
@@ -72,7 +70,6 @@ const uz: Record<TranslationKey, string> = {
   // Home Page
   'home.hero_badge': 'Tadbirlar uchun ijara',
   'home.hero_title': 'Mukammal tadbiringiz uchun hamma narsa',
-  'home.hero_description': 'Mebel, dekor, yorug\'lik va ovoz — Toshkent bo\'ylab, bir kundan ijaraga.',
   'home.view_catalog': 'Katalogni ko\'rish',
   'home.call': 'Qo\'ng\'iroq qilish',
 
@@ -83,10 +80,6 @@ const uz: Record<TranslationKey, string> = {
   'home.search_category_all': 'Barcha kategoriyalar',
   'home.search_submit': 'Qidirish',
 
-  // Home — hero stats
-  'home.stat_items': 'Katalogda {count} ta mahsulot',
-  'home.stat_term': 'Ijara 1 kundan',
-  'home.stat_delivery': 'Toshkent bo\'ylab yetkazib berish',
   'home.collage_price': '{price} so\'m/kun',
 
   // Home — popular products

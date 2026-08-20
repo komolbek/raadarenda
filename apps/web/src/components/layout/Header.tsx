@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search,
   ShoppingCart,
   User,
   Menu,
@@ -37,7 +36,6 @@ const CONTACT_PHONE_LABEL = '+998 90 123 45 67';
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const router = useRouter();
@@ -66,18 +64,6 @@ export function Header() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (searchQuery.trim()) {
-        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        setSearchQuery('');
-        setIsMenuOpen(false);
-      }
-    },
-    [searchQuery, router],
-  );
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -149,8 +135,8 @@ export function Header() {
               </motion.span>
             </Link>
 
-            {/* Center column — nav over search (desktop) */}
-            <div className="hidden flex-1 flex-col items-stretch gap-2 lg:flex">
+            {/* Center column — nav (desktop) */}
+            <div className="hidden flex-1 items-center justify-center lg:flex">
               <nav className="flex items-center justify-center gap-9" aria-label="Main navigation">
                 {navLinks.map((link) => {
                   const active = pathname === link.href;
@@ -176,23 +162,6 @@ export function Header() {
                   );
                 })}
               </nav>
-              <form onSubmit={handleSearch} className="relative" role="search">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.search_placeholder')}
-                  aria-label={t('header.search')}
-                  className="w-full border-0 border-b-2 border-border bg-transparent pb-1.5 pr-8 text-sm placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label={t('header.search')}
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </form>
             </div>
 
             {/* Right column — icon cluster over contact (desktop) */}
@@ -266,10 +235,7 @@ export function Header() {
                   )}
                 </Link>
 
-                {/* Mobile search + menu */}
-                <Link href="/search" className={cn(iconBtn, 'lg:hidden')} aria-label={t('header.search')}>
-                  <Search className="h-5 w-5" />
-                </Link>
+                {/* Mobile menu */}
                 <button onClick={() => setIsMenuOpen((v) => !v)} className={cn(iconBtn, 'lg:hidden')} aria-expanded={isMenuOpen} aria-label={isMenuOpen ? t('header.close_menu') : t('header.open_menu')}>
                   {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -311,16 +277,6 @@ export function Header() {
             className="overflow-hidden border-b border-border lg:hidden"
           >
             <div className="container mx-auto space-y-3 px-4 py-4">
-              <form onSubmit={handleSearch} className="relative" role="search">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.search_placeholder')}
-                  className="h-11 w-full rounded-full border border-border bg-muted/40 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
-                />
-              </form>
               <nav className="space-y-1" aria-label="Mobile navigation">
                 {navLinks.map((link) => (
                   <Link

@@ -135,28 +135,6 @@ export default function HomePage() {
                 {t('home.hero_title')}
               </h1>
 
-              <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {t('home.hero_description')}
-              </p>
-
-              <ul className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
-                {[
-                  productTotal !== undefined
-                    ? t('home.stat_items', { count: productTotal })
-                    : null,
-                  t('home.stat_term'),
-                  t('home.stat_delivery'),
-                ]
-                  .filter(Boolean)
-                  .map((stat, index) => (
-                    <li key={stat} className="flex items-center gap-3">
-                      {index > 0 && (
-                        <span className="h-1 w-1 rounded-full bg-primary/50" aria-hidden="true" />
-                      )}
-                      {stat}
-                    </li>
-                  ))}
-              </ul>
             </div>
 
             {/* Product collage — desktop only, and only once real photos load. */}
