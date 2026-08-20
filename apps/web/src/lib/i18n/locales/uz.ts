@@ -75,7 +75,7 @@ const uz: Record<TranslationKey, string> = {
 
   // Home — hero search
   'home.search_what_label': 'Nima ijaraga olasiz',
-  'home.search_what_placeholder': 'Nima kerak? Masalan, stullar',
+  'home.search_what_placeholder': 'Nima kerak?',
   'home.search_category_label': 'Kategoriya',
   'home.search_category_all': 'Barcha kategoriyalar',
   'home.search_submit': 'Qidirish',

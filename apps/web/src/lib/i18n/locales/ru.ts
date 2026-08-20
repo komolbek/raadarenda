@@ -73,7 +73,7 @@ const ru = {
 
   // Home — hero search
   'home.search_what_label': 'Что арендовать',
-  'home.search_what_placeholder': 'Что арендовать? Например, стулья',
+  'home.search_what_placeholder': 'Что арендовать?',
   'home.search_category_label': 'Категория',
   'home.search_category_all': 'Все категории',
   'home.search_submit': 'Найти',

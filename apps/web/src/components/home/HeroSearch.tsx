@@ -81,9 +81,11 @@ export function HeroSearch({ categories }: HeroSearchProps) {
 
       {divider}
 
-      {/* Category + period share a row on phones, sit inline from lg up */}
-      <div className="grid grid-cols-2 gap-1 lg:flex lg:items-center lg:gap-0">
-        <div className="relative flex items-center lg:w-48">
+      {/* Below `sm` these get a row each — side by side they are too narrow for
+          "Все категории" and a full date range. They pair up from `sm`, and
+          join the single row from `lg`. */}
+      <div className="flex flex-col gap-1 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:gap-0">
+        <div className="relative flex items-center lg:w-44">
           <label className="sr-only" htmlFor="hero-category">
             {t('home.search_category_label')}
           </label>
@@ -112,7 +114,7 @@ export function HeroSearch({ categories }: HeroSearchProps) {
           variant="bare"
           value={range}
           onChange={handleRangeChange}
-          className="lg:w-56"
+          className="lg:w-72"
         />
       </div>
 

@@ -62,7 +62,16 @@ export function DateRangePicker({
   const formatDisplayDate = () => {
     if (!value?.from) return t('date_picker.select_dates');
     if (!value.to) return format(value.from, 'd MMM yyyy', { locale: ru });
-    return `${format(value.from, 'd MMM', { locale: ru })} - ${format(value.to, 'd MMM yyyy', { locale: ru })}`;
+    // Most rentals start and end in the same month, so naming it twice just
+    // makes the label wide enough to clip. "23 – 26 авг. 2026", not
+    // "23 авг. - 26 авг. 2026". The popover header still shows both in full.
+    const sameMonth =
+      value.from.getFullYear() === value.to.getFullYear() &&
+      value.from.getMonth() === value.to.getMonth();
+    const start = sameMonth
+      ? format(value.from, 'd', { locale: ru })
+      : format(value.from, 'd MMM', { locale: ru });
+    return `${start} – ${format(value.to, 'd MMM yyyy', { locale: ru })}`;
   };
 
   const handleClearDates = (e: React.MouseEvent) => {
@@ -93,15 +102,15 @@ export function DateRangePicker({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'group flex w-full items-center gap-3 text-left transition-all duration-200',
+          'group flex w-full items-center text-left transition-all duration-200',
           variant === 'default'
             ? [
-                'rounded-xl border-2 border-input bg-card px-4 py-3',
+                'gap-3 rounded-xl border-2 border-input bg-card px-4 py-3',
                 'hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10',
                 error && 'border-destructive focus:border-destructive focus:ring-destructive/10',
                 isOpen && 'border-primary ring-4 ring-primary/10',
               ]
-            : 'rounded-xl px-3 py-2.5 hover:bg-muted/60 focus:outline-none'
+            : 'gap-2 rounded-xl px-2.5 py-2.5 hover:bg-muted/60 focus:outline-none'
         )}
       >
         <Calendar className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -115,7 +124,11 @@ export function DateRangePicker({
             </span>
           )}
         </div>
-        {value?.from && (
+        {/* Hover-revealed, so it never appears on touch — and in the compact
+            `bare` trigger it was still reserving 36px that the date label
+            needed. Keep it only where there is room; the popover's "clear"
+            action covers both variants. */}
+        {variant === 'default' && value?.from && (
           <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}

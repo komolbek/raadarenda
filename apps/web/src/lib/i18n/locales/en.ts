@@ -75,7 +75,7 @@ const en: Record<TranslationKey, string> = {
 
   // Home — hero search
   'home.search_what_label': 'What to rent',
-  'home.search_what_placeholder': 'What do you need? Chairs, for example',
+  'home.search_what_placeholder': 'What do you need?',
   'home.search_category_label': 'Category',
   'home.search_category_all': 'All categories',
   'home.search_submit': 'Search',
