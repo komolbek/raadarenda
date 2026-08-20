@@ -72,22 +72,43 @@ const en: Record<TranslationKey, string> = {
   // Home Page
   'home.hero_badge': 'Event rental',
   'home.hero_title': 'Everything for your perfect event',
-  'home.hero_description': 'Furniture, decor, lighting, sound and more. Rent everything you need for a wedding, corporate event or private party.',
+  'home.hero_description': 'Furniture, decor, lighting and sound — rented across Tashkent, from one day.',
   'home.view_catalog': 'View catalog',
-  'home.feature_wide_selection': 'Wide selection',
-  'home.feature_wide_selection_desc': 'Over 500 products for any event',
-  'home.feature_fast_delivery': 'Fast delivery',
-  'home.feature_fast_delivery_desc': 'Same-day delivery in Tashkent',
-  'home.feature_quality': 'Quality guarantee',
-  'home.feature_quality_desc': 'All products are inspected',
-  'home.feature_flexible': 'Flexible terms',
-  'home.feature_flexible_desc': 'Rent from 1 day to a month',
-  'home.why_eyebrow': 'Why us',
-  'home.why_title': 'Everything an event needs, in one place',
-  'home.cta_title': 'Ready to organize an event?',
-  'home.cta_description': 'Choose everything you need from our catalog or contact us for a personalized selection.',
-  'home.go_to_catalog': 'Go to catalog',
   'home.call': 'Call',
+
+  // Home — hero search
+  'home.search_what_label': 'What to rent',
+  'home.search_what_placeholder': 'What do you need? Chairs, for example',
+  'home.search_category_label': 'Category',
+  'home.search_category_all': 'All categories',
+  'home.search_submit': 'Search',
+
+  // Home — hero stats
+  'home.stat_items': '{count} items in the catalog',
+  'home.stat_term': 'Rent from 1 day',
+  'home.stat_delivery': 'Delivery across Tashkent',
+  'home.collage_price': '{price} UZS/day',
+
+  // Home — popular products
+  'home.popular_eyebrow': 'Popular',
+  'home.popular_title': 'Most rented',
+
+  // Home — rental terms (concrete numbers, not adjectives)
+  'home.why_eyebrow': 'Terms',
+  'home.why_title': 'Rental terms, spelled out',
+  'home.feature_wide_selection': 'Catalog',
+  'home.feature_wide_selection_desc': '{count} items in stock: furniture, decor, lighting and sound',
+  'home.feature_wide_selection_desc_fallback': 'Furniture, decor, lighting and sound in stock',
+  'home.feature_fast_delivery': 'Delivery',
+  'home.feature_fast_delivery_desc': 'Anywhere in Tashkent, free on orders from 500,000 UZS',
+  'home.feature_flexible': 'Duration',
+  'home.feature_flexible_desc': 'From 1 day; extend by calling 24 hours ahead',
+  'home.feature_quality': 'Cancellation & deposit',
+  'home.feature_quality_desc': 'Free cancellation 48 hours ahead; deposit returned after pickup',
+
+  // Home — closing band
+  'home.closing_title': 'Need a tailored selection?',
+  'home.closing_description': 'Tell us about the event — we will put together a set and price it.',
 
   // Auth Page
   'auth.login_title': 'Sign in',
@@ -114,6 +135,8 @@ const en: Record<TranslationKey, string> = {
   'catalog.products_count': '{count} products',
   'catalog.loading': 'Loading...',
   'catalog.all': 'All',
+  'catalog.period_label': 'Rental period',
+  'catalog.period_clear': 'Clear dates',
   'catalog.sort_newest': 'Newest first',
   'catalog.sort_popular': 'Popular',
   'catalog.sort_price_asc': 'Cheapest first',

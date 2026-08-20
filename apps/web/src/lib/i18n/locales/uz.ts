@@ -72,22 +72,43 @@ const uz: Record<TranslationKey, string> = {
   // Home Page
   'home.hero_badge': 'Tadbirlar uchun ijara',
   'home.hero_title': 'Mukammal tadbiringiz uchun hamma narsa',
-  'home.hero_description': 'Mebel, dekor, yorug\'lik, ovoz va boshqa ko\'p narsa. To\'y, korporativ tadbir yoki shaxsiy ziyofat uchun kerak bo\'lgan hamma narsani ijaraga oling.',
+  'home.hero_description': 'Mebel, dekor, yorug\'lik va ovoz — Toshkent bo\'ylab, bir kundan ijaraga.',
   'home.view_catalog': 'Katalogni ko\'rish',
-  'home.feature_wide_selection': 'Keng tanlov',
-  'home.feature_wide_selection_desc': 'Har qanday tadbir uchun 500 dan ortiq mahsulot',
-  'home.feature_fast_delivery': 'Tez yetkazib berish',
-  'home.feature_fast_delivery_desc': 'Toshkentda buyurtma kunida yetkazib berish',
-  'home.feature_quality': 'Sifat kafolati',
-  'home.feature_quality_desc': 'Barcha mahsulotlar tekshiriladi',
-  'home.feature_flexible': 'Moslashuvchan muddatlar',
-  'home.feature_flexible_desc': '1 kundan 1 oygacha ijara',
-  'home.why_eyebrow': 'Nega biz',
-  'home.why_title': 'Tadbir uchun kerakli hamma narsa bir joyda',
-  'home.cta_title': 'Tadbir tashkilashga tayyormisiz?',
-  'home.cta_description': 'Katalogimizdan kerakli narsalarni tanlang yoki individual tanlov uchun biz bilan bog\'laning.',
-  'home.go_to_catalog': 'Katalogga o\'tish',
   'home.call': 'Qo\'ng\'iroq qilish',
+
+  // Home — hero search
+  'home.search_what_label': 'Nima ijaraga olasiz',
+  'home.search_what_placeholder': 'Nima kerak? Masalan, stullar',
+  'home.search_category_label': 'Kategoriya',
+  'home.search_category_all': 'Barcha kategoriyalar',
+  'home.search_submit': 'Qidirish',
+
+  // Home — hero stats
+  'home.stat_items': 'Katalogda {count} ta mahsulot',
+  'home.stat_term': 'Ijara 1 kundan',
+  'home.stat_delivery': 'Toshkent bo\'ylab yetkazib berish',
+  'home.collage_price': '{price} so\'m/kun',
+
+  // Home — popular products
+  'home.popular_eyebrow': 'Ommabop',
+  'home.popular_title': 'Eng ko\'p ijaraga olinadi',
+
+  // Home — rental terms (concrete numbers, not adjectives)
+  'home.why_eyebrow': 'Shartlar',
+  'home.why_title': 'Tushunarli ijara shartlari',
+  'home.feature_wide_selection': 'Katalog',
+  'home.feature_wide_selection_desc': '{count} ta mahsulot mavjud: mebel, dekor, yorug\'lik va ovoz',
+  'home.feature_wide_selection_desc_fallback': 'Mebel, dekor, yorug\'lik va ovoz mavjud',
+  'home.feature_fast_delivery': 'Yetkazib berish',
+  'home.feature_fast_delivery_desc': 'Butun Toshkent bo\'ylab, 500 000 so\'mdan buyurtmalarga bepul',
+  'home.feature_flexible': 'Muddat',
+  'home.feature_flexible_desc': '1 kundan boshlab; uzaytirish 24 soat oldin qo\'ng\'iroq orqali',
+  'home.feature_quality': 'Bekor qilish va garov',
+  'home.feature_quality_desc': '48 soat oldin bepul bekor qilish; garov qaytarilgandan so\'ng qaytariladi',
+
+  // Home — closing band
+  'home.closing_title': 'Individual tanlov kerakmi?',
+  'home.closing_description': 'Tadbir haqida ayting — to\'plam yig\'amiz va narxini hisoblaymiz.',
 
   // Auth Page
   'auth.login_title': 'Hisobga kirish',
@@ -114,6 +135,8 @@ const uz: Record<TranslationKey, string> = {
   'catalog.products_count': '{count} mahsulot',
   'catalog.loading': 'Yuklanmoqda...',
   'catalog.all': 'Barchasi',
+  'catalog.period_label': 'Ijara muddati',
+  'catalog.period_clear': 'Sanalarni tozalash',
   'catalog.sort_newest': 'Avval yangilari',
   'catalog.sort_popular': 'Ommalashtirilgan',
   'catalog.sort_price_asc': 'Avval arzonlari',

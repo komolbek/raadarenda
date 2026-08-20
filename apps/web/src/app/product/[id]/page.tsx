@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,6 +36,7 @@ import {
 } from '@/lib/utils';
 import { useCartStore } from '@/stores/cart-store';
 import { useFavoritesStore } from '@/stores/favorites-store';
+import { useRentalPeriodStore, getStoredPeriod } from '@/stores/rental-period-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { localizedName, localizedDescription } from '@/lib/i18n/product';
@@ -51,10 +52,25 @@ export default function ProductDetailPage() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const setRentalPeriod = useRentalPeriodStore((s) => s.setPeriod);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: getTomorrow(),
     to: addDays(getTomorrow(), 0),
   });
+
+  // Adopt the period the visitor already chose on the home page so they don't
+  // re-pick dates on every product. Applied after mount, not in the initial
+  // state, because the persisted store is empty during SSR — reading it while
+  // rendering would make the server and client markup disagree.
+  useEffect(() => {
+    const stored = getStoredPeriod();
+    if (stored.from) setDateRange({ from: stored.from, to: stored.to ?? stored.from });
+  }, []);
+
+  const handleDateRangeChange = (next: DateRange | undefined) => {
+    setDateRange(next);
+    setRentalPeriod(next?.from, next?.to);
+  };
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -329,7 +345,7 @@ export default function ProductDetailPage() {
             <label className="block text-sm font-medium mb-2">{t('product.rental_dates')}</label>
             <DateRangePicker
               value={dateRange}
-              onChange={setDateRange}
+              onChange={handleDateRangeChange}
               minDate={getTomorrow()}
             />
           </div>

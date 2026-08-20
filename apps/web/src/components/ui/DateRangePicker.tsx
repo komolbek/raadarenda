@@ -18,6 +18,11 @@ interface DateRangePickerProps {
   label?: string;
   error?: string;
   className?: string;
+  /**
+   * `bare` drops the bordered trigger so the picker can sit inside a composed
+   * control (the home-page search bar) without a box-inside-a-box.
+   */
+  variant?: 'default' | 'bare';
 }
 
 export function DateRangePicker({
@@ -28,9 +33,21 @@ export function DateRangePicker({
   label,
   error,
   className,
+  variant = 'default',
 }: DateRangePickerProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  // Two months side by side is ~600px wide — wider than a phone. Show one
+  // month below `sm` so the popover never overflows the viewport.
+  const [monthsToShow, setMonthsToShow] = useState(2);
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 640px)');
+    const sync = () => setMonthsToShow(query.matches ? 2 : 1);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
   // Calculate rental days
   const rentalDays = value?.from && value?.to
     ? differenceInDays(value.to, value.from) + 1
@@ -76,10 +93,15 @@ export function DateRangePicker({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'group flex w-full items-center gap-3 rounded-xl border-2 border-input bg-card px-4 py-3 text-left transition-all duration-200',
-          'hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10',
-          error && 'border-destructive focus:border-destructive focus:ring-destructive/10',
-          isOpen && 'border-primary ring-4 ring-primary/10'
+          'group flex w-full items-center gap-3 text-left transition-all duration-200',
+          variant === 'default'
+            ? [
+                'rounded-xl border-2 border-input bg-card px-4 py-3',
+                'hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10',
+                error && 'border-destructive focus:border-destructive focus:ring-destructive/10',
+                isOpen && 'border-primary ring-4 ring-primary/10',
+              ]
+            : 'rounded-xl px-3 py-2.5 hover:bg-muted/60 focus:outline-none'
         )}
       >
         <Calendar className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -118,13 +140,19 @@ export function DateRangePicker({
               className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute left-1/2 -translate-x-1/2 top-full z-50 mt-2 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden"
-            >
+            {/* Positioning lives on a plain wrapper: framer writes an inline
+                `transform` on the animated element, which would override any
+                translate-based centring. Below `sm` the popover is centred in
+                the viewport (a phone is narrower than the calendar); from `sm`
+                up it hangs under the trigger. */}
+            <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-3 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:block sm:p-0">
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="pointer-events-auto w-max max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-2xl sm:max-w-[calc(100vw-3rem)]"
+              >
               {/* Header */}
               <div className="px-6 py-4 border-b border-border bg-muted/30">
                 <div className="flex items-center justify-between">
@@ -172,14 +200,14 @@ export function DateRangePicker({
               </div>
 
               {/* Calendar */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <DayPicker
                   mode="range"
                   selected={value}
                   onSelect={handleSelect}
                   locale={ru}
                   disabled={{ before: minDate, after: maxDate }}
-                  numberOfMonths={2}
+                  numberOfMonths={monthsToShow}
                   showOutsideDays
                   classNames={{
                     months: 'flex gap-6',
@@ -238,8 +266,9 @@ export function DateRangePicker({
                 >
                   {t('date_picker.apply')}
                 </button>
-              </div>
-            </motion.div>
+                </div>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>

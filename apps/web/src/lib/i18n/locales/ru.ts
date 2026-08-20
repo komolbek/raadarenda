@@ -70,22 +70,43 @@ const ru = {
   // Home Page
   'home.hero_badge': 'Аренда для мероприятий',
   'home.hero_title': 'Всё для вашего идеального мероприятия',
-  'home.hero_description': 'Мебель, декор, свет, звук и многое другое. Арендуйте всё необходимое для свадьбы, корпоратива или частной вечеринки.',
+  'home.hero_description': 'Мебель, декор, свет и звук — в аренду по Ташкенту, от одного дня.',
   'home.view_catalog': 'Смотреть каталог',
-  'home.feature_wide_selection': 'Широкий выбор',
-  'home.feature_wide_selection_desc': 'Более 500 товаров для любых мероприятий',
-  'home.feature_fast_delivery': 'Быстрая доставка',
-  'home.feature_fast_delivery_desc': 'Доставка по Ташкенту в день заказа',
-  'home.feature_quality': 'Гарантия качества',
-  'home.feature_quality_desc': 'Все товары проходят проверку',
-  'home.feature_flexible': 'Гибкие сроки',
-  'home.feature_flexible_desc': 'Аренда от 1 дня до месяца',
-  'home.why_eyebrow': 'Почему мы',
-  'home.why_title': 'Всё для мероприятия в одном месте',
-  'home.cta_title': 'Готовы организовать мероприятие?',
-  'home.cta_description': 'Выберите всё необходимое из нашего каталога или свяжитесь с нами для индивидуального подбора.',
-  'home.go_to_catalog': 'Перейти в каталог',
   'home.call': 'Позвонить',
+
+  // Home — hero search
+  'home.search_what_label': 'Что арендовать',
+  'home.search_what_placeholder': 'Что арендовать? Например, стулья',
+  'home.search_category_label': 'Категория',
+  'home.search_category_all': 'Все категории',
+  'home.search_submit': 'Найти',
+
+  // Home — hero stats
+  'home.stat_items': '{count} позиций в каталоге',
+  'home.stat_term': 'Аренда от 1 дня',
+  'home.stat_delivery': 'Доставка по Ташкенту',
+  'home.collage_price': '{price} сум/сутки',
+
+  // Home — popular products
+  'home.popular_eyebrow': 'Популярное',
+  'home.popular_title': 'Чаще всего арендуют',
+
+  // Home — rental terms (concrete numbers, not adjectives)
+  'home.why_eyebrow': 'Условия',
+  'home.why_title': 'Понятные условия аренды',
+  'home.feature_wide_selection': 'Каталог',
+  'home.feature_wide_selection_desc': '{count} позиций в наличии: мебель, декор, свет и звук',
+  'home.feature_wide_selection_desc_fallback': 'Мебель, декор, свет и звук в наличии',
+  'home.feature_fast_delivery': 'Доставка',
+  'home.feature_fast_delivery_desc': 'По всему Ташкенту, бесплатно при заказе от 500 000 сум',
+  'home.feature_flexible': 'Сроки',
+  'home.feature_flexible_desc': 'Аренда от 1 дня, продление — по звонку за 24 часа',
+  'home.feature_quality': 'Отмена и залог',
+  'home.feature_quality_desc': 'Бесплатная отмена за 48 часов, залог возвращается после возврата',
+
+  // Home — closing band
+  'home.closing_title': 'Нужен индивидуальный подбор?',
+  'home.closing_description': 'Расскажите о мероприятии — соберём комплект и посчитаем стоимость.',
 
   // Auth Page
   'auth.login_title': 'Вход в аккаунт',
@@ -112,6 +133,8 @@ const ru = {
   'catalog.products_count': '{count} товаров',
   'catalog.loading': 'Загрузка...',
   'catalog.all': 'Все',
+  'catalog.period_label': 'Период аренды',
+  'catalog.period_clear': 'Сбросить даты',
   'catalog.sort_newest': 'Сначала новые',
   'catalog.sort_popular': 'По популярности',
   'catalog.sort_price_asc': 'Сначала дешёвые',

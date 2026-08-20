@@ -1,12 +1,15 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronDown, Grid3X3, LayoutList } from 'lucide-react';
+import { Search, X, ChevronDown, Grid3X3, LayoutList, CalendarDays } from 'lucide-react';
+import { format } from 'date-fns';
+import { ru as ruLocale } from 'date-fns/locale';
 import { categoriesApi, productsApi } from '@/lib/api';
+import { useRentalPeriodStore } from '@/stores/rental-period-store';
 import { Button, ProductCardSkeleton, EmptyState } from '@/components/ui';
 import { ProductCard } from '@/components/catalog/ProductCard';
 import { CategoryIcon } from '@/lib/categoryIcon';
@@ -59,6 +62,25 @@ function CatalogPageContent() {
 
   const selectedCategory = categories?.find((c) => c.id === categoryId);
 
+  const periodFrom = useRentalPeriodStore((s) => s.from);
+  const periodTo = useRentalPeriodStore((s) => s.to);
+  const clearPeriod = useRentalPeriodStore((s) => s.clearPeriod);
+
+  // The persisted store is empty during SSR, so only render the chip once
+  // mounted — otherwise the server and client markup disagree.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const periodLabel = (() => {
+    if (!mounted || !periodFrom) return null;
+    const from = new Date(periodFrom);
+    if (Number.isNaN(from.getTime())) return null;
+    const to = periodTo ? new Date(periodTo) : null;
+    const start = format(from, 'd MMM', { locale: ruLocale });
+    if (!to || Number.isNaN(to.getTime())) return start;
+    return `${start} — ${format(to, 'd MMM yyyy', { locale: ruLocale })}`;
+  })();
+
   const updateParams = (updates: Record<string, string | undefined>) => {
     const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
@@ -96,6 +118,29 @@ function CatalogPageContent() {
             ? t('catalog.products_count', { count: products.meta.total })
             : t('catalog.loading')}
         </motion.p>
+
+        {/* The period picked on the home page. It does not filter the list —
+            the products endpoint has no date parameters — but it carries into
+            every product page, so showing it back keeps that honest. */}
+        {periodLabel && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-sm"
+          >
+            <CalendarDays className="h-4 w-4 text-primary" />
+            <span className="text-muted-foreground">{t('catalog.period_label')}:</span>
+            <span className="font-medium">{periodLabel}</span>
+            <button
+              onClick={clearPeriod}
+              className="ml-1 rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={t('catalog.period_clear')}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Categories Horizontal Scroll */}
