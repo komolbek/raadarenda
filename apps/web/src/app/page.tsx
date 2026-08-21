@@ -131,7 +131,7 @@ export default function HomePage() {
                 {t('home.hero_badge')}
               </p>
 
-              <h1 className="font-display max-w-2xl text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">
+              <h1 className="font-display max-w-2xl text-2xl font-semibold leading-[1.1] sm:text-4xl sm:leading-[1.06] lg:text-5xl">
                 {t('home.hero_title')}
               </h1>
 
