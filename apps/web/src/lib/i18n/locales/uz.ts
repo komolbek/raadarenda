@@ -128,6 +128,7 @@ const uz: Record<TranslationKey, string> = {
   'catalog.products_count': '{count} mahsulot',
   'catalog.loading': 'Yuklanmoqda...',
   'catalog.all': 'Barchasi',
+  'catalog.clear_search': 'Qidiruvni tozalash',
   'catalog.period_label': 'Ijara muddati',
   'catalog.period_clear': 'Sanalarni tozalash',
   'catalog.sort_newest': 'Avval yangilari',
@@ -326,21 +327,6 @@ const uz: Record<TranslationKey, string> = {
   'delivery.delivery': 'Yetkazib berish',
   'delivery.self_pickup': 'O\'zi olib ketish',
 
-  // Search Page
-  'search.placeholder': 'Mahsulotlarni qidirish...',
-  'search.recent': 'So\'nggi qidiruvlar',
-  'search.clear': 'Tozalash',
-  'search.popular': 'Ommabop so\'rovlar',
-  'search.results': 'Qidiruv natijalari: "{query}"',
-  'search.nothing_found': 'Hech narsa topilmadi',
-  'search.nothing_found_desc': '"{query}" bo\'yicha hech narsa topilmadi. So\'rovni o\'zgartiring.',
-  'search.go_to_catalog': 'Katalogga o\'tish',
-  'search.popular_chairs': 'Stullar',
-  'search.popular_tables': 'Stollar',
-  'search.popular_wedding': 'To\'y',
-  'search.popular_dishes': 'Idishlar',
-  'search.popular_decor': 'Dekor',
-  'search.popular_lighting': 'Yoritish',
 
   // Address Form
   'address_form.name_label': 'Nomi *',

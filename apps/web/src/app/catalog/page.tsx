@@ -211,6 +211,16 @@ function CatalogPageContent() {
           </div>
 
           {/* Active Filters */}
+          {search && (
+            <button
+              onClick={() => updateParams({ q: undefined })}
+              aria-label={t('catalog.clear_search')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm"
+            >
+              &laquo;{search}&raquo;
+              <X className="h-3 w-3" />
+            </button>
+          )}
           {selectedCategory && (
             <button
               onClick={() => updateParams({ category: undefined })}

@@ -128,6 +128,7 @@ const en: Record<TranslationKey, string> = {
   'catalog.products_count': '{count} products',
   'catalog.loading': 'Loading...',
   'catalog.all': 'All',
+  'catalog.clear_search': 'Clear search',
   'catalog.period_label': 'Rental period',
   'catalog.period_clear': 'Clear dates',
   'catalog.sort_newest': 'Newest first',
@@ -326,21 +327,6 @@ const en: Record<TranslationKey, string> = {
   'delivery.delivery': 'Delivery',
   'delivery.self_pickup': 'Self pickup',
 
-  // Search Page
-  'search.placeholder': 'Search products...',
-  'search.recent': 'Recent searches',
-  'search.clear': 'Clear',
-  'search.popular': 'Popular searches',
-  'search.results': 'Search results: "{query}"',
-  'search.nothing_found': 'Nothing found',
-  'search.nothing_found_desc': 'No results for "{query}". Try a different search.',
-  'search.go_to_catalog': 'Go to catalog',
-  'search.popular_chairs': 'Chairs',
-  'search.popular_tables': 'Tables',
-  'search.popular_wedding': 'Wedding',
-  'search.popular_dishes': 'Dishes',
-  'search.popular_decor': 'Decor',
-  'search.popular_lighting': 'Lighting',
 
   // Address Form
   'address_form.name_label': 'Name *',

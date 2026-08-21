@@ -126,6 +126,7 @@ const ru = {
   'catalog.products_count': '{count} товаров',
   'catalog.loading': 'Загрузка...',
   'catalog.all': 'Все',
+  'catalog.clear_search': 'Сбросить поиск',
   'catalog.period_label': 'Период аренды',
   'catalog.period_clear': 'Сбросить даты',
   'catalog.sort_newest': 'Сначала новые',
@@ -324,21 +325,6 @@ const ru = {
   'delivery.delivery': 'Доставка',
   'delivery.self_pickup': 'Самовывоз',
 
-  // Search Page
-  'search.placeholder': 'Поиск товаров...',
-  'search.recent': 'Недавние поиски',
-  'search.clear': 'Очистить',
-  'search.popular': 'Популярные запросы',
-  'search.results': 'Результаты поиска: "{query}"',
-  'search.nothing_found': 'Ничего не найдено',
-  'search.nothing_found_desc': 'По запросу "{query}" ничего не найдено. Попробуйте изменить запрос.',
-  'search.go_to_catalog': 'Перейти в каталог',
-  'search.popular_chairs': 'Стулья',
-  'search.popular_tables': 'Столы',
-  'search.popular_wedding': 'Свадьба',
-  'search.popular_dishes': 'Посуда',
-  'search.popular_decor': 'Декор',
-  'search.popular_lighting': 'Освещение',
 
   // Address Form
   'address_form.name_label': 'Название *',
