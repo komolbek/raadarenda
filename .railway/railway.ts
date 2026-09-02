@@ -10,9 +10,10 @@ export default defineRailway(() => {
   const postgresVolume = volume("postgres-volume", { alerts: { usage: { "100": {}, "80": {}, "95": {} } }, allowOnlineResize: true, region: "us-west2", sizeMB: 5000 });
   const RentEventAdmin = service("RentEvent Admin", {
     source: raadarenda,
-    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/admin/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile", "railway.json"] },
+    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/admin/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile"] },
     healthcheck: "/admin",
     healthcheckTimeout: 300,
+    deploy: { restartPolicyType: "ON_FAILURE", restartPolicyMaxRetries: 10 },
     replicas: { "us-west2": 1 },
     domains: ["admin.rentevent.uz"],
     networking: { privateNetworkEndpoint: "raadarenda-c22e" },
@@ -20,9 +21,10 @@ export default defineRailway(() => {
   });
   const RentEventAPI = service("RentEvent API", {
     source: raadarenda,
-    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/api/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile", "railway.json"] },
+    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/api/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile"] },
     healthcheck: "/api",
     healthcheckTimeout: 300,
+    deploy: { restartPolicyType: "ON_FAILURE", restartPolicyMaxRetries: 10 },
     replicas: { "us-west2": 1 },
     domains: ["api.rentevent.uz"],
     networking: { privateNetworkEndpoint: "rentevent-api" },
@@ -30,9 +32,10 @@ export default defineRailway(() => {
   });
   const RentEventWeb = service("RentEvent Web", {
     source: raadarenda,
-    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/web/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile", "railway.json"] },
+    build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile", watchPatterns: ["apps/web/**", "packages/**", "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", "turbo.json", "Dockerfile"] },
     healthcheck: "/",
     healthcheckTimeout: 300,
+    deploy: { restartPolicyType: "ON_FAILURE", restartPolicyMaxRetries: 10 },
     replicas: { "us-west2": 1 },
     domains: ["rentevent.uz"],
     networking: { privateNetworkEndpoint: "raadarenda" },
